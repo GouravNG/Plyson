@@ -141,43 +141,43 @@ All errors are collected across steps 1–8 before throwing. The developer sees 
 
 ```typescript
 const AssertionOperatorsSchema = z.enum([
-  "equals",
-  "notEquals",
-  "exists",
-  "notExists",
-  "isNull",
-  "isNotNull",
-  "isGreaterThan",
-  "isLessThan",
-  "isGreaterThanOrEquals",
-  "isLessThanOrEquals",
-  "contains",
-  "notContains",
-  "matches",
-  "notMatches",
-  "hasLength",
-  "hasMinLength",
-  "hasMaxLength",
-  "includes",
-  "notIncludes",
-  "isEmpty",
-  "isNotEmpty",
-  "containsSubset",
-  "notContainsSubset",
-  "isString",
-  "isNumber",
-  "isBoolean",
-  "isArray",
-  "isObject",
+  'equals',
+  'notEquals',
+  'exists',
+  'notExists',
+  'isNull',
+  'isNotNull',
+  'isGreaterThan',
+  'isLessThan',
+  'isGreaterThanOrEquals',
+  'isLessThanOrEquals',
+  'contains',
+  'notContains',
+  'matches',
+  'notMatches',
+  'hasLength',
+  'hasMinLength',
+  'hasMaxLength',
+  'includes',
+  'notIncludes',
+  'isEmpty',
+  'isNotEmpty',
+  'containsSubset',
+  'notContainsSubset',
+  'isString',
+  'isNumber',
+  'isBoolean',
+  'isArray',
+  'isObject',
 ])
 
 const AssertionSchema = z.object({
   title: z.string(),
-  from: z.enum(["body", "header"]),
+  from: z.enum(['body', 'header']),
   path: z.string(),
   operator: AssertionOperatorsSchema,
   value: z.unknown().optional(),
-  validation: z.enum(["warn", "error"]).default("error"),
+  validation: z.enum(['warn', 'error']).default('error'),
 })
 
 const TestSuiteSchema = z.object({
@@ -199,7 +199,7 @@ const TestSuiteSchema = z.object({
 ### Interface
 
 ```typescript
-type Scope = "global" | "environment" | "suite" | "case"
+type Scope = 'global' | 'environment' | 'suite' | 'case'
 
 class VariableStore {
   private layers: Record<Scope, Variables> = {
@@ -291,7 +291,7 @@ Transforms raw JSON into executable data by replacing `{{tokens}}` with store va
 class Resolver {
   constructor(
     private store: VariableStore,
-    private stepTitle = "",
+    private stepTitle = ''
   ) {}
 
   resolve<T>(input: T): T
@@ -352,11 +352,11 @@ resolveString(input: string): VariableValue {
 // utils/is-gen-object.ts
 function isGenObject(value: unknown): value is GeneratorObject {
   return (
-    typeof value === "object" &&
+    typeof value === 'object' &&
     value !== null &&
     !Array.isArray(value) &&
-    "$gen" in value &&
-    typeof (value as Record<string, unknown>)["$gen"] === "string"
+    '$gen' in value &&
+    typeof (value as Record<string, unknown>)['$gen'] === 'string'
   )
 }
 ```
@@ -405,20 +405,14 @@ The inner `number` generator runs first, its result becomes `length`, then `stri
 // Phase 1 — once per test case, variables block only
 // $gen here generates once and stays static for the entire case
 function resolvePhase1(variables: Variables, store: VariableStore): Variables {
-  const resolver = new Resolver(store, "case variables")
-  return Object.fromEntries(
-    Object.entries(variables).map(([k, v]) => [k, resolver.resolve(v)]),
-  )
+  const resolver = new Resolver(store, 'case variables')
+  return Object.fromEntries(Object.entries(variables).map(([k, v]) => [k, resolver.resolve(v)]))
   // result is pushed into store "case" scope
 }
 
 // Phase 2 — once per step, full request object
 // $gen here generates fresh values on every call (including retries)
-function resolvePhase2(
-  request: Req,
-  store: VariableStore,
-  stepTitle: string,
-): Req {
+function resolvePhase2(request: Req, store: VariableStore, stepTitle: string): Req {
   return new Resolver(store, stepTitle).resolve(request)
 }
 ```
@@ -447,9 +441,7 @@ function resolvePhase2(
 ```typescript
 // generators/registry.ts
 
-interface Generator<
-  O extends Record<string, unknown> = Record<string, unknown>,
-> {
+interface Generator<O extends Record<string, unknown> = Record<string, unknown>> {
   run(options: O): VariableValue
 }
 
@@ -473,20 +465,20 @@ class GeneratorRegistry {
 
 // called once at framework startup
 export function registerBuiltins(): void {
-  GeneratorRegistry.register("string", new StringGenerator())
-  GeneratorRegistry.register("number", new NumberGenerator())
-  GeneratorRegistry.register("boolean", new BooleanGenerator())
-  GeneratorRegistry.register("date", new DateGenerator())
-  GeneratorRegistry.register("pastDate", new PastDateGenerator())
-  GeneratorRegistry.register("futureDate", new FutureDateGenerator())
-  GeneratorRegistry.register("uuid", new UuidGenerator())
-  GeneratorRegistry.register("email", new EmailGenerator())
-  GeneratorRegistry.register("fullName", new FullNameGenerator())
-  GeneratorRegistry.register("firstName", new FirstNameGenerator())
-  GeneratorRegistry.register("lastName", new LastNameGenerator())
-  GeneratorRegistry.register("phoneNumber", new PhoneNumberGenerator())
-  GeneratorRegistry.register("url", new UrlGenerator())
-  GeneratorRegistry.register("ipAddress", new IpAddressGenerator())
+  GeneratorRegistry.register('string', new StringGenerator())
+  GeneratorRegistry.register('number', new NumberGenerator())
+  GeneratorRegistry.register('boolean', new BooleanGenerator())
+  GeneratorRegistry.register('date', new DateGenerator())
+  GeneratorRegistry.register('pastDate', new PastDateGenerator())
+  GeneratorRegistry.register('futureDate', new FutureDateGenerator())
+  GeneratorRegistry.register('uuid', new UuidGenerator())
+  GeneratorRegistry.register('email', new EmailGenerator())
+  GeneratorRegistry.register('fullName', new FullNameGenerator())
+  GeneratorRegistry.register('firstName', new FirstNameGenerator())
+  GeneratorRegistry.register('lastName', new LastNameGenerator())
+  GeneratorRegistry.register('phoneNumber', new PhoneNumberGenerator())
+  GeneratorRegistry.register('url', new UrlGenerator())
+  GeneratorRegistry.register('ipAddress', new IpAddressGenerator())
 }
 ```
 
@@ -507,11 +499,8 @@ interface StringOptions {
 
 class StringGenerator implements Generator<StringOptions> {
   run({ length, numeric, upper, lower }: StringOptions): string {
-    if (typeof length !== "number" || length < 1) {
-      throw new GeneratorOptionError(
-        "string",
-        "length must be a positive number",
-      )
+    if (typeof length !== 'number' || length < 1) {
+      throw new GeneratorOptionError('string', 'length must be a positive number')
     }
 
     if (numeric) {
@@ -519,11 +508,7 @@ class StringGenerator implements Generator<StringOptions> {
       return faker.string.numeric({ length, allowLeadingZeros: true })
     }
 
-    const casing: "upper" | "lower" | "mixed" = upper
-      ? "upper"
-      : lower
-        ? "lower"
-        : "mixed"
+    const casing: 'upper' | 'lower' | 'mixed' = upper ? 'upper' : lower ? 'lower' : 'mixed'
 
     return faker.string.alphanumeric({ length, casing })
   }
@@ -558,20 +543,11 @@ interface NumberOptions {
 }
 
 class NumberGenerator implements Generator<NumberOptions> {
-  run({
-    min = 0,
-    max = 1_000_000,
-    float = false,
-    precision = 2,
-  }: NumberOptions): number {
+  run({ min = 0, max = 1_000_000, float = false, precision = 2 }: NumberOptions): number {
     if (min > max) {
-      throw new GeneratorOptionError(
-        "number",
-        `min (${min}) must be <= max (${max})`,
-      )
+      throw new GeneratorOptionError('number', `min (${min}) must be <= max (${max})`)
     }
-    if (float)
-      return faker.number.float({ min, max, fractionDigits: precision })
+    if (float) return faker.number.float({ min, max, fractionDigits: precision })
     return faker.number.int({ min, max })
   }
 }
@@ -601,10 +577,7 @@ interface BooleanOptions {
 class BooleanGenerator implements Generator<BooleanOptions> {
   run({ probability = 0.5 }: BooleanOptions): boolean {
     if (probability < 0 || probability > 1) {
-      throw new GeneratorOptionError(
-        "boolean",
-        "probability must be between 0 and 1",
-      )
+      throw new GeneratorOptionError('boolean', 'probability must be between 0 and 1')
     }
     return faker.datatype.boolean({ probability })
   }
@@ -620,7 +593,7 @@ class BooleanGenerator implements Generator<BooleanOptions> {
 
 interface DateOptions {
   within?: string // e.g. "7d", "3M", "1y" — default "30d"
-  format?: "iso" | "timestamp" | "date"
+  format?: 'iso' | 'timestamp' | 'date'
   //   "iso"       → "2025-04-12T10:30:00.000Z"   (default)
   //   "timestamp" → 1744450200000
   //   "date"      → "2025-04-12"
@@ -634,24 +607,17 @@ function parseWithin(within: string): {
   const match = within.match(/^(\d+)(d|M|y)$/)
   if (!match) {
     throw new GeneratorOptionError(
-      "date",
-      `Invalid "within": "${within}". Use e.g. "7d", "3M", "1y"`,
+      'date',
+      `Invalid "within": "${within}". Use e.g. "7d", "3M", "1y"`
     )
   }
   const n = parseInt(match[1])
-  return match[2] === "d"
-    ? { days: n }
-    : match[2] === "M"
-      ? { months: n }
-      : { years: n }
+  return match[2] === 'd' ? { days: n } : match[2] === 'M' ? { months: n } : { years: n }
 }
 
-function formatDate(
-  date: Date,
-  format: DateOptions["format"] = "iso",
-): string | number {
-  if (format === "timestamp") return date.getTime()
-  if (format === "date") return date.toISOString().split("T")[0]
+function formatDate(date: Date, format: DateOptions['format'] = 'iso'): string | number {
+  if (format === 'timestamp') return date.getTime()
+  if (format === 'date') return date.toISOString().split('T')[0]
   return date.toISOString()
 }
 
@@ -663,20 +629,14 @@ class DateGenerator implements Generator<DateOptions> {
 }
 
 class PastDateGenerator implements Generator<DateOptions> {
-  run({ within = "30d", format }: DateOptions): string | number {
-    return formatDate(
-      faker.date.past({ ...parseWithin(within), refDate: new Date() }),
-      format,
-    )
+  run({ within = '30d', format }: DateOptions): string | number {
+    return formatDate(faker.date.past({ ...parseWithin(within), refDate: new Date() }), format)
   }
 }
 
 class FutureDateGenerator implements Generator<DateOptions> {
-  run({ within = "30d", format }: DateOptions): string | number {
-    return formatDate(
-      faker.date.future({ ...parseWithin(within), refDate: new Date() }),
-      format,
-    )
+  run({ within = '30d', format }: DateOptions): string | number {
+    return formatDate(faker.date.future({ ...parseWithin(within), refDate: new Date() }), format)
   }
 }
 ```
@@ -716,7 +676,7 @@ class EmailGenerator implements Generator<EmailOptions> {
   run({ domain, prefix }: EmailOptions): string {
     const email = faker.internet.email({ provider: domain })
     if (prefix) {
-      const [, host] = email.split("@")
+      const [, host] = email.split('@')
       return `${prefix}_${faker.string.alphanumeric(6)}@${host}`
     }
     return email
@@ -757,7 +717,7 @@ class IpAddressGenerator implements Generator {
 // generators/person.generator.ts
 
 interface PersonOptions {
-  sex?: "male" | "female"
+  sex?: 'male' | 'female'
 }
 
 class FullNameGenerator implements Generator<PersonOptions> {
@@ -789,11 +749,11 @@ class LastNameGenerator implements Generator {
 interface PhoneOptions {
   // style: "international" → "+1-800-555-0199", "national" → "800-555-0199"
   // default: "national"
-  style?: "international" | "national"
+  style?: 'international' | 'national'
 }
 
 class PhoneNumberGenerator implements Generator<PhoneOptions> {
-  run({ style = "national" }: PhoneOptions): string {
+  run({ style = 'national' }: PhoneOptions): string {
     return faker.phone.number({ style })
   }
 }
@@ -807,10 +767,10 @@ Option validation throws before Faker is called:
 
 ```typescript
 class GeneratorOptionError extends PlaysonError {
-  readonly code = "GENERATOR_OPTION_ERROR"
+  readonly code = 'GENERATOR_OPTION_ERROR'
   constructor(
     public generator: string,
-    message: string,
+    message: string
   ) {
     super(`[$gen: ${generator}] ${message}`)
   }
@@ -858,7 +818,7 @@ class HttpExecutor {
   constructor(
     private context: APIRequestContext, // Playwright
     private baseUrl: string,
-    private schemas: Map<string, JSONSchema>,
+    private schemas: Map<string, JSONSchema>
   ) {}
 
   async execute(step: ResolvedStep): Promise<APIResponse>
@@ -870,14 +830,10 @@ class HttpExecutor {
 Applied after Phase 2 resolution, before `baseUrl` is prepended:
 
 ```typescript
-function applyPathParams(
-  endpoint: string,
-  params: Record<string, unknown>,
-): string {
+function applyPathParams(endpoint: string, params: Record<string, unknown>): string {
   return Object.entries(params).reduce(
-    (url, [key, val]) =>
-      url.replace(`:${key}`, encodeURIComponent(String(val))),
-    endpoint,
+    (url, [key, val]) => url.replace(`:${key}`, encodeURIComponent(String(val))),
+    endpoint
   )
 }
 // "/users/:id/orders/:orderId" + { id: 42, orderId: 7 }
@@ -890,17 +846,14 @@ Applied to headers after resolution, before the request is sent:
 
 ```typescript
 const FLAGS = {
-  SKIP_AUTH: "skip_auth", // removes Authorization header
+  SKIP_AUTH: 'skip_auth', // removes Authorization header
 } as const
 
-function applyFlags(
-  flags: string[] = [],
-  headers: Record<string, string>,
-): Record<string, string> {
+function applyFlags(flags: string[] = [], headers: Record<string, string>): Record<string, string> {
   const result = { ...headers }
   if (flags.includes(FLAGS.SKIP_AUTH)) {
-    delete result["Authorization"]
-    delete result["authorization"]
+    delete result['Authorization']
+    delete result['authorization']
   }
   return result
 }
@@ -939,17 +892,14 @@ When `autoFill` is set on a step, the executor generates a baseline request payl
 
 function generateFromSchema(
   schema: JSONSchema,
-  filterConfig: AutoFillFields,
+  filterConfig: AutoFillFields
 ): Record<string, unknown> {
   const properties = schema.properties ?? {}
   const allFields = Object.keys(properties)
   const activeFields = applyFieldFilter(allFields, filterConfig)
 
   return Object.fromEntries(
-    activeFields.map((field) => [
-      field,
-      generateValueForField(properties[field] as JSONSchema),
-    ]),
+    activeFields.map((field) => [field, generateValueForField(properties[field] as JSONSchema)])
   )
 }
 ```
@@ -959,16 +909,13 @@ function generateFromSchema(
 ```typescript
 // autofill/field-filter.ts
 
-function applyFieldFilter(
-  allFields: string[],
-  config: AutoFillFields,
-): string[] {
-  if ("includeFields" in config && config.includeFields.length > 0) {
+function applyFieldFilter(allFields: string[], config: AutoFillFields): string[] {
+  if ('includeFields' in config && config.includeFields.length > 0) {
     // only include specified fields, preserving declaration order
     return config.includeFields.filter((f) => allFields.includes(f))
   }
 
-  if ("excludeFields" in config && config.excludeFields.length > 0) {
+  if ('excludeFields' in config && config.excludeFields.length > 0) {
     return allFields.filter((f) => !config.excludeFields.includes(f))
   }
 
@@ -987,16 +934,16 @@ function generateValueForField(schema: JSONSchema): unknown {
   if (schema.enum?.length) return schema.enum[0]
 
   switch (schema.type) {
-    case "string":
+    case 'string':
       return generateString(schema)
-    case "number":
-    case "integer":
+    case 'number':
+    case 'integer':
       return generateNumber(schema)
-    case "boolean":
+    case 'boolean':
       return false
-    case "array":
+    case 'array':
       return []
-    case "object":
+    case 'object':
       return schema.properties
         ? generateFromSchema(schema, {}) // recurse for nested objects
         : {}
@@ -1006,11 +953,11 @@ function generateValueForField(schema: JSONSchema): unknown {
 }
 
 function generateString(schema: JSONSchema): string {
-  if (schema.format === "email") return faker.internet.email()
-  if (schema.format === "uuid") return faker.string.uuid()
-  if (schema.format === "date") return new Date().toISOString().split("T")[0]
-  if (schema.format === "date-time") return new Date().toISOString()
-  if (schema.format === "uri") return faker.internet.url()
+  if (schema.format === 'email') return faker.internet.email()
+  if (schema.format === 'uuid') return faker.string.uuid()
+  if (schema.format === 'date') return new Date().toISOString().split('T')[0]
+  if (schema.format === 'date-time') return new Date().toISOString()
+  if (schema.format === 'uri') return faker.internet.url()
 
   const length = schema.minLength ?? schema.maxLength ?? 8
   return faker.string.alphanumeric({ length })
@@ -1019,7 +966,7 @@ function generateString(schema: JSONSchema): string {
 function generateNumber(schema: JSONSchema): number {
   const min = schema.minimum ?? 0
   const max = schema.maximum ?? 100
-  return schema.type === "integer"
+  return schema.type === 'integer'
     ? faker.number.int({ min, max })
     : faker.number.float({ min, max, fractionDigits: 2 })
 }
@@ -1053,12 +1000,7 @@ Step 2 — spread merge:
 class PathEngine {
   // from="body"   → JSONPath or JMESPath against parsed body
   // from="header" → plain header key lookup
-  extract(
-    source: unknown,
-    path: string,
-    from: "body" | "header",
-    response?: APIResponse,
-  ): unknown
+  extract(source: unknown, path: string, from: 'body' | 'header', response?: APIResponse): unknown
 }
 ```
 
@@ -1066,16 +1008,14 @@ class PathEngine {
 
 ```typescript
 function extractBody(source: unknown, path: string): unknown {
-  return path.startsWith("$")
-    ? extractJsonPath(source, path)
-    : extractJmesPath(source, path)
+  return path.startsWith('$') ? extractJsonPath(source, path) : extractJmesPath(source, path)
 }
 ```
 
 ### JSONPath (`jsonpath-plus`)
 
 ```typescript
-import { JSONPath } from "jsonpath-plus"
+import { JSONPath } from 'jsonpath-plus'
 
 function extractJsonPath(source: unknown, path: string): unknown {
   const result = JSONPath({ path, json: source, wrap: true })
@@ -1089,14 +1029,14 @@ function extractJsonPath(source: unknown, path: string): unknown {
 }
 
 function isFilterExpression(path: string): boolean {
-  return path.includes("[?(")
+  return path.includes('[?(')
 }
 ```
 
 ### JMESPath (`jmespath`)
 
 ```typescript
-import jmespath from "jmespath"
+import jmespath from 'jmespath'
 
 function extractJmesPath(source: unknown, path: string): unknown {
   const result = jmespath.search(source, path)
@@ -1126,17 +1066,17 @@ async function runAssertion(
   assertion: Assertions,
   body: unknown,
   response: APIResponse,
-  softErrors: SoftError[],
+  softErrors: SoftError[]
 ): Promise<void> {
   const actual =
-    assertion.from === "header"
+    assertion.from === 'header'
       ? extractHeader(response, assertion.path)
       : extractBody(body, assertion.path)
 
   try {
     applyOperator(actual, assertion.operator, assertion.value)
   } catch (err) {
-    if (assertion.validation === "warn") {
+    if (assertion.validation === 'warn') {
       softErrors.push({ title: assertion.title, error: err })
     } else {
       throw new AssertionError(assertion.title, err)
@@ -1148,98 +1088,88 @@ async function runAssertion(
 ### Operator → Playwright mapping
 
 ```typescript
-function applyOperator(
-  actual: unknown,
-  operator: AssertionOperators,
-  value?: unknown,
-): void {
+function applyOperator(actual: unknown, operator: AssertionOperators, value?: unknown): void {
   const e = expect(actual)
 
   switch (operator) {
     // Equality — deep (toEqual not toBe — works correctly for objects and arrays)
-    case "equals":
+    case 'equals':
       return e.toEqual(value)
-    case "notEquals":
+    case 'notEquals':
       return e.not.toEqual(value)
 
     // Existence
-    case "exists":
+    case 'exists':
       return e.toBeDefined()
-    case "notExists":
+    case 'notExists':
       return e.toBeUndefined()
-    case "isNull":
+    case 'isNull':
       return e.toBeNull()
-    case "isNotNull":
+    case 'isNotNull':
       return e.not.toBeNull()
 
     // Numeric
-    case "isGreaterThan":
+    case 'isGreaterThan':
       return e.toBeGreaterThan(value as number)
-    case "isLessThan":
+    case 'isLessThan':
       return e.toBeLessThan(value as number)
-    case "isGreaterThanOrEquals":
+    case 'isGreaterThanOrEquals':
       return e.toBeGreaterThanOrEqual(value as number)
-    case "isLessThanOrEquals":
+    case 'isLessThanOrEquals':
       return e.toBeLessThanOrEqual(value as number)
 
     // String
-    case "contains":
+    case 'contains':
       return e.toContain(value)
-    case "notContains":
+    case 'notContains':
       return e.not.toContain(value)
-    case "matches":
+    case 'matches':
       return e.toMatch(new RegExp(value as string))
-    case "notMatches":
+    case 'notMatches':
       return e.not.toMatch(new RegExp(value as string))
 
     // Array — length
-    case "hasLength":
+    case 'hasLength':
       return e.toHaveLength(value as number)
-    case "hasMinLength":
-      return expect((actual as unknown[]).length).toBeGreaterThanOrEqual(
-        value as number,
-      )
-    case "hasMaxLength":
-      return expect((actual as unknown[]).length).toBeLessThanOrEqual(
-        value as number,
-      )
+    case 'hasMinLength':
+      return expect((actual as unknown[]).length).toBeGreaterThanOrEqual(value as number)
+    case 'hasMaxLength':
+      return expect((actual as unknown[]).length).toBeLessThanOrEqual(value as number)
 
     // Array — membership
-    case "includes":
+    case 'includes':
       return e.toEqual(expect.arrayContaining([value]))
-    case "notIncludes":
+    case 'notIncludes':
       return e.not.toContain(value)
-    case "isEmpty":
+    case 'isEmpty':
       return e.toHaveLength(0)
-    case "isNotEmpty":
+    case 'isNotEmpty':
       return expect((actual as unknown[]).length).toBeGreaterThan(0)
 
     // Object / partial match
-    case "containsSubset":
+    case 'containsSubset':
       return e.toMatchObject(value as object)
-    case "notContainsSubset":
+    case 'notContainsSubset':
       return e.not.toMatchObject(value as object)
 
     // Type checks
-    case "isString":
+    case 'isString':
       return e.toEqual(expect.any(String))
-    case "isNumber":
+    case 'isNumber':
       return e.toEqual(expect.any(Number))
-    case "isBoolean":
+    case 'isBoolean':
       return e.toEqual(expect.any(Boolean))
-    case "isArray":
+    case 'isArray':
       return e.toEqual(expect.any(Array))
-    case "isObject": {
+    case 'isObject': {
       // plain object — must not be null or array
       expect(actual).not.toBeNull()
       expect(Array.isArray(actual)).toBe(false)
-      return expect(typeof actual).toBe("object")
+      return expect(typeof actual).toBe('object')
     }
 
     default:
-      throw new Error(
-        `Unknown operator "${operator}" — this is a framework bug`,
-      )
+      throw new Error(`Unknown operator "${operator}" — this is a framework bug`)
   }
 }
 ```
@@ -1251,8 +1181,8 @@ function checkStatusCode(actual: number, expected: number | number[]): void {
   const acceptable = Array.isArray(expected) ? expected : [expected]
   if (!acceptable.includes(actual)) {
     throw new AssertionError(
-      "status code",
-      `Expected ${acceptable.join(" or ")}, received ${actual}`,
+      'status code',
+      `Expected ${acceptable.join(' or ')}, received ${actual}`
     )
   }
 }
@@ -1261,26 +1191,25 @@ function checkStatusCode(actual: number, expected: number | number[]): void {
 ### Schema validation (AJV)
 
 ```typescript
-import Ajv from "ajv"
-import addFormats from "ajv-formats"
+import Ajv from 'ajv'
+import addFormats from 'ajv-formats'
 
 const ajv = new Ajv({ allErrors: true })
 addFormats(ajv)
 
 async function validateSchema(
   body: unknown,
-  config: { name: string; validation?: boolean | "warn" },
+  config: { name: string; validation?: boolean | 'warn' },
   schemas: Map<string, JSONSchema>,
-  softErrors: SoftError[],
+  softErrors: SoftError[]
 ): Promise<void> {
   const schema = schemas.get(config.name)
-  if (!schema)
-    throw new LoadError(`Schema "${config.name}" not found in schemas/`)
+  if (!schema) throw new LoadError(`Schema "${config.name}" not found in schemas/`)
 
   const valid = ajv.validate(schema, body)
   if (!valid) {
     const errors = ajv.errors ?? []
-    if (config.validation === "warn") {
+    if (config.validation === 'warn') {
       softErrors.push({ title: `schema:${config.name}`, errors })
     } else {
       throw new SchemaValidationError(config.name, errors)
@@ -1298,16 +1227,16 @@ function runExtraction(
   extraction: ExtractedValue,
   body: unknown,
   response: APIResponse,
-  store: VariableStore,
+  store: VariableStore
 ): void {
   const value =
-    extraction.from === "header"
+    extraction.from === 'header'
       ? extractHeader(response, extraction.path)
       : extractBody(body, extraction.path)
 
   if (value === undefined) {
     throw new ExtractionError(
-      `Path "${extraction.path}" returned undefined — cannot extract "${extraction.name}"`,
+      `Path "${extraction.path}" returned undefined — cannot extract "${extraction.name}"`
     )
   }
 
@@ -1346,14 +1275,11 @@ interface HandlerContext {
 async function runHandlers(
   handlerNames: string[],
   ctx: HandlerContext,
-  handlers: Map<string, HandlerModule>,
+  handlers: Map<string, HandlerModule>
 ): Promise<void> {
   for (const name of handlerNames) {
     const mod = handlers.get(name)
-    if (!mod)
-      throw new LoadError(
-        `Handler "${name}" not found — check handlers/ directory`,
-      )
+    if (!mod) throw new LoadError(`Handler "${name}" not found — check handlers/ directory`)
     await mod.run(ctx) // unhandled throw → step fails, remaining handlers skipped
   }
 }
@@ -1366,15 +1292,12 @@ async function runHandlers(
 ### Playwright suite registration
 
 ```typescript
-import { test } from "@playwright/test"
+import { test } from '@playwright/test'
 
-export function registerSuites(
-  graph: ProjectGraph,
-  store: VariableStore,
-): void {
+export function registerSuites(graph: ProjectGraph, store: VariableStore): void {
   test.beforeAll(async ({ request }) => {
-    store.push("global", graph.variables)
-    store.push("environment", graph.environment.variables ?? {})
+    store.push('global', graph.variables)
+    store.push('environment', graph.environment.variables ?? {})
     await runSteps(graph.project.beforeAll ?? [], request, store, graph)
   })
 
@@ -1387,13 +1310,13 @@ export function registerSuites(
 
     describeFn(suite.title, () => {
       test.beforeAll(async ({ request }) => {
-        store.push("suite", suite.variables ?? {})
+        store.push('suite', suite.variables ?? {})
         await runSteps(suite.beforeAll ?? [], request, store, graph)
       })
 
       test.afterAll(async ({ request }) => {
         await runSteps(suite.afterAll ?? [], request, store, graph)
-        store.pop("suite")
+        store.pop('suite')
       })
 
       for (const testCase of suite.testCases) {
@@ -1401,12 +1324,12 @@ export function registerSuites(
 
         testFn(testCase.title, { tag: testCase.tags }, async ({ request }) => {
           // Phase 1 — resolve case variables once before any step runs
-          store.push("case", resolvePhase1(testCase.variables ?? {}, store))
+          store.push('case', resolvePhase1(testCase.variables ?? {}, store))
 
           try {
             await runSteps(testCase.steps, request, store, graph)
           } finally {
-            store.pop("case") // always clear — even if steps threw
+            store.pop('case') // always clear — even if steps threw
           }
         })
       }
@@ -1422,13 +1345,9 @@ async function runSteps(
   steps: TestStep[],
   request: APIRequestContext,
   store: VariableStore,
-  graph: ProjectGraph,
+  graph: ProjectGraph
 ): Promise<void> {
-  const executor = new HttpExecutor(
-    request,
-    graph.environment.baseUrl,
-    graph.schemas,
-  )
+  const executor = new HttpExecutor(request, graph.environment.baseUrl, graph.schemas)
 
   for (const step of steps) {
     if (step.disabled) continue
@@ -1449,12 +1368,7 @@ async function runSteps(
 
     // 2. Response schema (optional)
     if (step.response.schema) {
-      await validateSchema(
-        body,
-        step.response.schema,
-        graph.schemas,
-        softErrors,
-      )
+      await validateSchema(body, step.response.schema, graph.schemas, softErrors)
     }
 
     // 3. Inline assertions — assertion.value resolved here explicitly
@@ -1476,19 +1390,13 @@ async function runSteps(
 
     // 5. Handlers — last, full context available
     if (step.handlers?.length) {
-      const ctx = buildHandlerContext(
-        resolvedRequest,
-        response,
-        body,
-        store,
-        softErrors,
-      )
+      const ctx = buildHandlerContext(resolvedRequest, response, body, store, softErrors)
       await runHandlers(step.handlers, ctx, graph.handlers)
     }
 
     // attach soft errors to Playwright report as annotations
     for (const soft of softErrors) {
-      test.info().annotations.push({ type: "warn", description: soft.title })
+      test.info().annotations.push({ type: 'warn', description: soft.title })
     }
   }
 }
@@ -1503,8 +1411,8 @@ export const sleep = (ms: number): Promise<void> =>
 
 // utils/safe-parse-json.ts
 export async function safeParseJson(response: APIResponse): Promise<unknown> {
-  const ct = response.headers()["content-type"] ?? ""
-  if (!ct.includes("application/json")) return response.text()
+  const ct = response.headers()['content-type'] ?? ''
+  if (!ct.includes('application/json')) return response.text()
   try {
     return await response.json()
   } catch {
@@ -1529,74 +1437,69 @@ abstract class PlaysonError extends Error {
 // all load errors collected and thrown together
 class AggregateLoadError extends Error {
   constructor(public errors: LoadError[]) {
-    super(
-      `${errors.length} load error(s):\n` +
-        errors.map((e) => `  • ${e.message}`).join("\n"),
-    )
+    super(`${errors.length} load error(s):\n` + errors.map((e) => `  • ${e.message}`).join('\n'))
   }
 }
 
 class LoadError extends PlaysonError {
-  readonly code = "LOAD_ERROR"
+  readonly code = 'LOAD_ERROR'
   constructor(
     message: string,
-    public file?: string,
+    public file?: string
   ) {
     super(message)
   }
 }
 
 class ResolutionError extends PlaysonError {
-  readonly code = "RESOLUTION_ERROR"
+  readonly code = 'RESOLUTION_ERROR'
   constructor(
     public token: string,
-    public stepTitle: string,
+    public stepTitle: string
   ) {
     super(`Unresolved variable "{{${token}}}" in step "${stepTitle}"`)
   }
 }
 
 class GeneratorOptionError extends PlaysonError {
-  readonly code = "GENERATOR_OPTION_ERROR"
+  readonly code = 'GENERATOR_OPTION_ERROR'
   constructor(
     public generator: string,
-    message: string,
+    message: string
   ) {
     super(`[$gen: ${generator}] ${message}`)
   }
 }
 
 class UnknownGeneratorError extends PlaysonError {
-  readonly code = "UNKNOWN_GENERATOR"
+  readonly code = 'UNKNOWN_GENERATOR'
   constructor(public name: string) {
-    super(
-      `Unknown generator "$gen: ${name}" — see the generator reference table`,
-    )
+    super(`Unknown generator "$gen: ${name}" — see the generator reference table`)
   }
 }
 
 class AssertionError extends PlaysonError {
-  readonly code = "ASSERTION_ERROR"
+  readonly code = 'ASSERTION_ERROR'
   constructor(
     public assertionTitle: string,
-    public cause: unknown,
+    public cause: unknown
   ) {
     super(`Assertion failed: "${assertionTitle}"`)
   }
 }
 
 class ExtractionError extends PlaysonError {
-  readonly code = "EXTRACTION_ERROR"
+  readonly code = 'EXTRACTION_ERROR'
   constructor(message: string) {
     super(message)
   }
 }
 
 class SchemaValidationError extends PlaysonError {
-  readonly code = "SCHEMA_VALIDATION_ERROR"
+  readonly code = 'SCHEMA_VALIDATION_ERROR'
   constructor(
     public schemaName: string,
-    public validationErrors: unknown[],
+    public validationErrors: unknown[]
   ) {
     super(`Schema validation failed for "${schemaName}"`)
   }
@@ -1615,7 +1518,7 @@ interface SoftError {
 }
 
 // a TestStep with request fully resolved (Phase 2 complete)
-type ResolvedStep = Omit<CommonTestStep, "request"> & {
+type ResolvedStep = Omit<CommonTestStep, 'request'> & {
   request: ResolvedRequest
 }
 ```

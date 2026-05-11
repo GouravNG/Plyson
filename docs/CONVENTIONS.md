@@ -68,13 +68,13 @@ what they need — workers, reporter, etc. The `testMatch` and `globalSetup`
 are handled by the base config and should not be changed.
 
 ```ts
-import { defineConfig } from "@playwright/test"
-import base from "playson/playwright.config.base"
+import { defineConfig } from '@playwright/test'
+import base from 'playson/playwright.config.base'
 
 export default defineConfig({
   ...base,
   workers: 4,
-  reporter: [["html"], ["list"]],
+  reporter: [['html'], ['list']],
 })
 ```
 
@@ -171,7 +171,7 @@ A handler file receives the full response context and the current variable store
 
 ```ts
 // assert-pagination.handler.ts
-import type { HandlerContext } from "playson"
+import type { HandlerContext } from 'playson'
 
 export async function run({ response, body, status, store }: HandlerContext) {
   const { total, page, limit, items } = body
@@ -363,7 +363,6 @@ at the specified `scope`:
 - `"scope": "global"` — available everywhere for the rest of the run
 
 ---
-
 
 ## Quick Reference
 

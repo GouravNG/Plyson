@@ -9,12 +9,15 @@
 Simple placeholders used within strings to inject values from the `VariableStore`.
 
 ### Syntax
+
 - **Basic**: `"{{userId}}"`
 - **Combined**: `"Bearer {{token}}"`
 - **Path/Query**: `"/users/{{userId}}/profile"`
 
 ### Reserved Global Variables
+
 These are always available without being defined in `variables.json`:
+
 - `{{$timestamp}}`: Current Unix timestamp in milliseconds.
 - `{{$isoDate}}`: Current date in ISO-8601 format.
 - `{{$guid}}`: A fresh UUID v4.
@@ -26,6 +29,7 @@ These are always available without being defined in `variables.json`:
 For complex or parameterized data generation, use the Object Pattern. This can be used anywhere a value is expected (Payload, Headers, Variables).
 
 ### Syntax
+
 ```json
 {
   "$gen": "generatorName",
@@ -37,7 +41,9 @@ For complex or parameterized data generation, use the Object Pattern. This can b
 ### Common Generators
 
 #### Alphanumeric String (Fixed Length)
+
 Generates a random string containing letters and numbers.
+
 ```json
 {
   "$gen": "string",
@@ -47,7 +53,9 @@ Generates a random string containing letters and numbers.
 ```
 
 #### Numeric String (Fixed Length)
+
 Generates a string of digits (preserves leading zeros). Useful for OTPs or PINs.
+
 ```json
 {
   "$gen": "string",
@@ -57,7 +65,9 @@ Generates a string of digits (preserves leading zeros). Useful for OTPs or PINs.
 ```
 
 #### Dynamic Length String
+
 You can nest generators to create highly variable data.
+
 ```json
 {
   "$gen": "string",
@@ -66,6 +76,7 @@ You can nest generators to create highly variable data.
 ```
 
 #### Specialized Generators (Faker-backed)
+
 - `{ "$gen": "email" }`: Random email address.
 - `{ "$gen": "fullName" }`: Random person name.
 - `{ "$gen": "phoneNumber" }`: Random phone number.
@@ -75,13 +86,17 @@ You can nest generators to create highly variable data.
 ## 3. Complex Examples
 
 ### Email with Timestamp
+
 To create a unique but traceable email address:
+
 ```json
 "email": "tester+{{$timestamp}}@example.com"
 ```
 
 ### Variable + Timestamp
+
 Combine a stored variable with a dynamic suffix:
+
 ```json
 "orderReference": "{{prefix}}_{{$timestamp}}"
 ```
@@ -97,12 +112,12 @@ Combine a stored variable with a dynamic suffix:
 
 ## 5. Summary Table
 
-| Requirement | Syntax / Pattern |
-| :--- | :--- |
-| **Simple Variable** | `"{{myVar}}"` |
-| **Current Time (Unix)** | `"{{$timestamp}}"` |
-| **Current Date (ISO)** | `"{{$isoDate}}"` |
-| **Alphanumeric (Len 4)**| `{"$gen": "string", "length": 4, "alphanumeric": true}` |
-| **Numeric Only (Len 4)**| `{"$gen": "string", "length": 4, "numeric": true}` |
-| **Random Range (0-99)**| `{"$gen": "number", "min": 0, "max": 99}` |
-| **Combined String** | `"prefix_{{var}}_{{$timestamp}}"` |
+| Requirement              | Syntax / Pattern                                        |
+| :----------------------- | :------------------------------------------------------ |
+| **Simple Variable**      | `"{{myVar}}"`                                           |
+| **Current Time (Unix)**  | `"{{$timestamp}}"`                                      |
+| **Current Date (ISO)**   | `"{{$isoDate}}"`                                        |
+| **Alphanumeric (Len 4)** | `{"$gen": "string", "length": 4, "alphanumeric": true}` |
+| **Numeric Only (Len 4)** | `{"$gen": "string", "length": 4, "numeric": true}`      |
+| **Random Range (0-99)**  | `{"$gen": "number", "min": 0, "max": 99}`               |
+| **Combined String**      | `"prefix_{{var}}_{{$timestamp}}"`                       |

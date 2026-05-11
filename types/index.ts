@@ -31,44 +31,37 @@ export type VariableValue =
 // Network types
 // =========================================================================================================
 // HTTP methods supported in the test steps
-type HTTPMethod =
-  | "GET"
-  | "POST"
-  | "PUT"
-  | "DELETE"
-  | "PATCH"
-  | "HEAD"
-  | "OPTIONS"
+type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS'
 
 type AssertionOperators =
-  | "equals"
-  | "notEquals"
-  | "exists"
-  | "notExists"
-  | "isNull"
-  | "isNotNull"
-  | "isGreaterThan"
-  | "isLessThan"
-  | "isGreaterThanOrEquals"
-  | "isLessThanOrEquals"
-  | "contains"
-  | "notContains"
-  | "matches"
-  | "notMatches"
-  | "hasLength"
-  | "hasMinLength"
-  | "hasMaxLength"
-  | "includes"
-  | "notIncludes"
-  | "isEmpty"
-  | "isNotEmpty"
-  | "containsSubset"
-  | "notContainsSubset"
-  | "isString"
-  | "isNumber"
-  | "isBoolean"
-  | "isArray"
-  | "isObject"
+  | 'equals'
+  | 'notEquals'
+  | 'exists'
+  | 'notExists'
+  | 'isNull'
+  | 'isNotNull'
+  | 'isGreaterThan'
+  | 'isLessThan'
+  | 'isGreaterThanOrEquals'
+  | 'isLessThanOrEquals'
+  | 'contains'
+  | 'notContains'
+  | 'matches'
+  | 'notMatches'
+  | 'hasLength'
+  | 'hasMinLength'
+  | 'hasMaxLength'
+  | 'includes'
+  | 'notIncludes'
+  | 'isEmpty'
+  | 'isNotEmpty'
+  | 'containsSubset'
+  | 'notContainsSubset'
+  | 'isString'
+  | 'isNumber'
+  | 'isBoolean'
+  | 'isArray'
+  | 'isObject'
 
 // auto fill property helps in automatic fill of the request payload values
 // from the request schema ( extracted from the swagger or openapi specification )
@@ -106,7 +99,7 @@ type Res = {
   schema?: {
     name: string
     // true by default
-    validation?: boolean | "warn"
+    validation?: boolean | 'warn'
   }
   validations: {
     //can be single status code or an array of status codes
@@ -120,7 +113,7 @@ type Assertions = {
   // name for the assertion which will be used in the test report to identify the assertion
   title: string
   // response body or header to perform the assertion on
-  from: "body" | "header"
+  from: 'body' | 'header'
   // JSON Path or JMESPath to specify the field in the
   // however for the header this would be key name of the header
   path: string
@@ -128,16 +121,16 @@ type Assertions = {
   value?: any
   //   default will be error
   // error by default
-  validation?: "warn" | "error"
+  validation?: 'warn' | 'error'
 }
 
 interface ExtractedValue {
   name: string
-  from: "body" | "header"
+  from: 'body' | 'header'
   //   can be key , JSON path or JMESPath  header
   path: string
   // extracted values will be stored as the variables  at the respective scope
-  scope: "case" | "suite" | "global"
+  scope: 'case' | 'suite' | 'global'
 }
 
 type CommonTestStep = {
@@ -188,7 +181,7 @@ type Testcase = {
   // defaults to the false
   disabled?: boolean
   // will be a handled using the tags just need to add this testtype as tag while handling this.
-  testType?: "positive" | "negative"
+  testType?: 'positive' | 'negative'
   variables?: Variables
   // playwrigh tags
   tags: string[]

@@ -28,16 +28,21 @@ my-api-tests/
 ## 2. Global Configuration
 
 ### `project.json`
+
 The entry point for the runner. Defines metadata and global lifecycle hooks.
+
 - **Type**: `Project`
 - **Hooks**: `beforeAll`, `afterAll` (global scope).
 
 ### `variables.json`
+
 Defines global variables available across the entire project.
+
 - **Type**: `Variables` (`Record<string, any>`)
 - **Priority**: Lowest (overridden by environment, suite, and case variables).
 
 ### `playwright.config.ts`
+
 Extends `playson/playwright.config.base`. Users should only override specific Playwright settings like `workers` or `reporter`.
 
 ---
@@ -61,7 +66,9 @@ Selected via `--env <name>` flag (e.g., `--env dev` loads `dev.env.json`).
 Managed by `playson sync-schemas`. Used for response validation and request payload auto-filling.
 
 ### Auto-fill Logic
+
 Helps automatically populate request payloads from schemas.
+
 - **Type**: `AutoFillType`
 - **Fields**: `includeFields`, `excludeFields`.
 - **Behavior**: Functions like a JS spread operator; explicit `payload` values override auto-filled values.
@@ -102,13 +109,16 @@ A `TestSuite` contains multiple `Testcase` objects.
 ## 8. Variables & Scoping
 
 ### Resolution Order (Highest to Lowest)
+
 1.  **Case Variables** (defined in `Testcase`)
 2.  **Suite Variables** (defined in `TestSuite`)
 3.  **Environment Variables** (`environments/*.env.json`)
 4.  **Global Variables** (`variables.json`)
 
 ### Extraction Scope
+
 Extracted values from responses can be stored at three levels:
+
 - `"case"`: Current test case only.
 - `"suite"`: All cases within the same suite.
 - `"global"`: Persistent for the remainder of the test run.
@@ -118,10 +128,12 @@ Extracted values from responses can be stored at three levels:
 ## 9. Technical Reference (Type Definitions)
 
 ### Network & Assertions
+
 - **HTTP Methods**: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`.
 - **Assertion Operators**: Supports existence (`exists`), equality (`isEquals`), type checks (`isArray`, `isString`), numeric comparisons (`isGreaterThan`), regex (`regexPattern`), and length checks.
 
 ### Request (`Req`)
+
 ```ts
 {
   method: HTTPMethod;
@@ -135,6 +147,7 @@ Extracted values from responses can be stored at three levels:
 ```
 
 ### Response (`Res`)
+
 ```ts
 {
   schema?: { name: string; validation?: boolean | "warn" };
@@ -147,10 +160,13 @@ Extracted values from responses can be stored at three levels:
 ```
 
 ### Test Step (`TestStep`)
+
 Can be **Inline** (full definition) or **Referenced** (`ref` to a script).
+
 - **Inline Properties**: `title`, `description`, `disabled`, `wait`, `flags`, `handlers`, `request`, `response`.
 
 ### Test Case (`Testcase`)
+
 ```ts
 {
   id: string;
@@ -165,6 +181,7 @@ Can be **Inline** (full definition) or **Referenced** (`ref` to a script).
 ```
 
 ### Test Suite (`TestSuite`)
+
 ```ts
 {
   title: string;

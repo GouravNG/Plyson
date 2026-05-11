@@ -5,11 +5,11 @@ Assertions validate the response body or headers after each test step. Each asse
 ```typescript
 type Assertions = {
   title: string
-  from: "body" | "header"
+  from: 'body' | 'header'
   path: string
   operator: AssertionOperators
   value?: any
-  validation?: "warn" | "error" // defaults to "error"
+  validation?: 'warn' | 'error' // defaults to "error"
 }
 ```
 
@@ -256,42 +256,42 @@ For catching schema drift — asserting a field's type hasn't changed. No `value
 
 ```typescript
 type AssertionOperators =
-  | "equals"
-  | "notEquals"
-  | "exists"
-  | "notExists"
-  | "isNull"
-  | "isNotNull"
-  | "isGreaterThan"
-  | "isLessThan"
-  | "isGreaterThanOrEquals"
-  | "isLessThanOrEquals"
-  | "contains"
-  | "notContains"
-  | "matches"
-  | "notMatches"
-  | "hasLength"
-  | "hasMinLength"
-  | "hasMaxLength"
-  | "includes"
-  | "notIncludes"
-  | "isEmpty"
-  | "isNotEmpty"
-  | "containsSubset"
-  | "notContainsSubset"
-  | "isString"
-  | "isNumber"
-  | "isBoolean"
-  | "isArray"
-  | "isObject"
+  | 'equals'
+  | 'notEquals'
+  | 'exists'
+  | 'notExists'
+  | 'isNull'
+  | 'isNotNull'
+  | 'isGreaterThan'
+  | 'isLessThan'
+  | 'isGreaterThanOrEquals'
+  | 'isLessThanOrEquals'
+  | 'contains'
+  | 'notContains'
+  | 'matches'
+  | 'notMatches'
+  | 'hasLength'
+  | 'hasMinLength'
+  | 'hasMaxLength'
+  | 'includes'
+  | 'notIncludes'
+  | 'isEmpty'
+  | 'isNotEmpty'
+  | 'containsSubset'
+  | 'notContainsSubset'
+  | 'isString'
+  | 'isNumber'
+  | 'isBoolean'
+  | 'isArray'
+  | 'isObject'
 
 type Assertions = {
   title: string
-  from: "body" | "header"
+  from: 'body' | 'header'
   path: string
   operator: AssertionOperators
   value?: any
-  validation?: "warn" | "error"
+  validation?: 'warn' | 'error'
 }
 ```
 

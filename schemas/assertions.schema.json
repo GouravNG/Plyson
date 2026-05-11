@@ -8,11 +8,7 @@
     "title": {
       "type": "string",
       "description": "Name for the assertion which will be used in the test report to identify the assertion",
-      "examples": [
-        "Status code is 200",
-        "Response contains user ID",
-        "Email format is valid"
-      ]
+      "examples": ["Status code is 200", "Response contains user ID", "Email format is valid"]
     },
     "from": {
       "type": "string",
@@ -22,12 +18,7 @@
     "path": {
       "type": "string",
       "description": "JSONPath or JMESPath to specify the field. For headers, this would be the key name of the header",
-      "examples": [
-        "user.id",
-        "data[0].email",
-        "$.response.status",
-        "Content-Type"
-      ]
+      "examples": ["user.id", "data[0].email", "$.response.status", "Content-Type"]
     },
     "operator": {
       "type": "string",
@@ -66,13 +57,7 @@
     },
     "value": {
       "description": "The expected value to compare against. Not required for existence or type checks.",
-      "examples": [
-        200,
-        "user@example.com",
-        "[a-zA-Z]+@[a-zA-Z]+\\.[a-zA-Z]+",
-        true,
-        0
-      ]
+      "examples": [200, "user@example.com", "[a-zA-Z]+@[a-zA-Z]+\\.[a-zA-Z]+", true, 0]
     },
     "validation": {
       "type": "string",

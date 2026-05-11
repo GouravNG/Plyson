@@ -9,6 +9,7 @@ Each phase ends with working, tested code. Later phases build on earlier ones wi
 **Goal:** Empty repo becomes a correctly structured TypeScript project with all types, zod schemas, and error classes defined. No runtime logic yet — just the skeleton everything else will hang on.
 
 **Deliverables:**
+
 - `package.json` with all dependencies declared
 - `tsconfig.json` configured for strict mode
 - Full `src/` module structure (empty files with correct exports)
@@ -167,6 +168,7 @@ All tests must pass with `npx vitest run`.
 **Goal:** The `VariableStore` and `Resolver` are fully implemented and unit tested. This is the most foundational runtime component — everything else depends on correct variable resolution.
 
 **Deliverables:**
+
 - `VariableStore` — push/pop/get/set/snapshot with correct 4-scope priority
 - Reserved globals (`$timestamp`, `$isoDate`, `$guid`)
 - `Resolver` — recursive walk, token interpolation, type preservation, whitespace tolerance
@@ -329,6 +331,7 @@ All tests pass with npx vitest run.
 **Goal:** All 14 built-in generators implemented, registered, tested. The full `$gen` system works including nested resolution and option validation.
 
 **Deliverables:**
+
 - `GeneratorRegistry` with `register` / `run` / `has`
 - `registerBuiltins()` function
 - All 14 generator classes with full option handling
@@ -488,6 +491,7 @@ All tests pass with npx vitest run — no regressions on phase 1 or 2 tests.
 **Goal:** The framework can discover files, validate them, resolve refs, and send HTTP requests. By the end of this phase you can point the loader at a real project directory and get a `ProjectGraph` back.
 
 **Deliverables:**
+
 - `ProjectLoader` — file discovery, zod parsing, ref resolution, aggregate error collection
 - `HttpExecutor` — pathParams, autoFill merge, flags, Playwright `APIRequestContext` dispatch
 - `generateFromSchema` and field filter for autoFill
@@ -666,6 +670,7 @@ All tests pass with npx vitest run — no regressions.
 **Goal:** The three post-response engines are complete. Every assertion operator maps correctly to a Playwright `expect()` call. Path extraction works for JSONPath, JMESPath, and headers.
 
 **Deliverables:**
+
 - `PathEngine` — JSONPath + JMESPath auto-detection, filter expression handling, header extraction
 - `AssertionEngine` — all 27 operators, soft error collection, status code check, AJV schema validation
 - `ExtractionEngine` — path extraction + store write-back
@@ -851,6 +856,7 @@ All tests pass with npx vitest run — no regressions on any previous phase.
 **Goal:** The framework is fully working end-to-end. `playson run --env dev` discovers suites, registers them as Playwright tests, and executes them. CLI commands are wired up.
 
 **Deliverables:**
+
 - `registerSuites` — Playwright `test.describe` / `test()` registration
 - `runSteps` — full step execution pipeline in correct order
 - `safeParseJson` and `sleep` utilities
@@ -1022,11 +1028,11 @@ No regressions on any unit tests.
 
 ## Test pyramid summary
 
-| Layer | When | Tool | Coverage target |
-|---|---|---|---|
-| Unit | Phases 2–5 | vitest | Every function, every branch, every error path |
-| Integration | Phase 3 | vitest | Resolver + store + generators end-to-end |
-| E2E | Phase 6 | vitest + local server | Full step execution pipeline |
+| Layer       | When       | Tool                  | Coverage target                                |
+| ----------- | ---------- | --------------------- | ---------------------------------------------- |
+| Unit        | Phases 2–5 | vitest                | Every function, every branch, every error path |
+| Integration | Phase 3    | vitest                | Resolver + store + generators end-to-end       |
+| E2E         | Phase 6    | vitest + local server | Full step execution pipeline                   |
 
 Run `npx vitest run` at the end of every phase. No phase ships with a failing test.
 
