@@ -1,0 +1,150 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project Configuration",
+  "description": "Root project configuration file (project.json) that defines project-level settings, global setup/teardown steps, and default environment. This file is located at the root of the project.",
+  "type": "object",
+  "required": ["title", "version"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Human-readable title of the test project"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the project's purpose and scope"
+    },
+    "version": {
+      "type": "string",
+      "description": "Project version (should match the version in package.json)",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "beforeAll": {
+      "type": "array",
+      "title": "Global Setup Steps",
+      "description": "Global level setup steps executed before all test suites and cases",
+      "items": {
+        "$ref": "testcase.schema.json#/definitions/TestStep"
+      }
+    },
+    "afterAll": {
+      "type": "array",
+      "title": "Global Teardown Steps",
+      "description": "Global level teardown steps executed after all test suites and cases",
+      "items": {
+        "$ref": "testcase.schema.json#/definitions/TestStep"
+      }
+    },
+    "defaultEnv": {
+      "type": "string",
+      "description": "Default environment name to use when running via CLI (e.g., 'dev', 'staging'). Corresponds to environment JSON files like dev.env.json, staging.env.json in the environments folder."
+    }
+  },
+  "examples": [
+    {
+      "title": "API Test Suite",
+      "description": "Comprehensive API testing suite for the main application",
+      "version": "1.0.0",
+      "defaultEnv": "dev"
+    },
+    {
+      "title": "E-Commerce Platform Tests",
+      "description": "Complete test suite for e-commerce platform including user management, products, orders, and payments",
+      "version": "2.1.0",
+      "defaultEnv": "dev",
+      "beforeAll": [
+        {
+          "title": "Initialize test environment",
+          "request": {
+            "method": "POST",
+            "endpoint": "/api/v1/setup"
+          },
+          "response": {
+            "validations": [
+              {
+                "statusCode": 200
+              }
+            ]
+          }
+        },
+        {
+          "title": "Load test fixtures",
+          "request": {
+            "method": "POST",
+            "endpoint": "/api/v1/fixtures/load",
+            "payload": {
+              "fixtures": ["users", "products", "categories"]
+            }
+          },
+          "response": {
+            "validations": [
+              {
+                "statusCode": 200
+              }
+            ]
+          }
+        }
+      ],
+      "afterAll": [
+        {
+          "title": "Cleanup test data",
+          "request": {
+            "method": "POST",
+            "endpoint": "/api/v1/cleanup"
+          },
+          "response": {
+            "validations": [
+              {
+                "statusCode": 200
+              }
+            ]
+          }
+        },
+        {
+          "title": "Generate test report",
+          "request": {
+            "method": "POST",
+            "endpoint": "/api/v1/report/generate"
+          },
+          "response": {
+            "validations": [
+              {
+                "statusCode": 200
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "Payment Gateway Tests",
+      "version": "1.5.3",
+      "description": "Tests for payment processing APIs including card validation, transaction processing, and refunds",
+      "defaultEnv": "staging",
+      "beforeAll": [
+        {
+          "title": "Validate payment gateway connectivity",
+          "request": {
+            "method": "GET",
+            "endpoint": "/api/v1/gateway/health"
+          },
+          "response": {
+            "validations": [
+              {
+                "statusCode": 200,
+                "assertions": [
+                  {
+                    "title": "Gateway is healthy",
+                    "from": "body",
+                    "path": "status",
+                    "operator": "isEquals",
+                    "value": "healthy"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

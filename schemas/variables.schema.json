@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Variables",
+  "description": "Holds the values of the variables defined at different levels such as project, suite or case level. Global level variables exist in their own file in root with variable.json file.",
+  "definitions": {
+    "GeneratorObject": {
+      "type": "object",
+      "title": "Generator Object",
+      "description": "Represents a dynamic data generator object. Used for on-the-fly data creation via Faker.js.",
+      "required": ["$gen"],
+      "properties": {
+        "$gen": {
+          "type": "string",
+          "description": "The generator function name to use (e.g., 'firstName', 'email', 'phoneNumber')"
+        }
+      },
+      "additionalProperties": {
+        "description": "Additional configuration parameters for the generator function"
+      },
+      "examples": [
+        {
+          "$gen": "firstName"
+        },
+        {
+          "$gen": "email",
+          "provider": "gmail.com"
+        },
+        {
+          "$gen": "phoneNumber",
+          "format": "+1-###-###-####"
+        },
+        {
+          "$gen": "name",
+          "firstName": true,
+          "lastName": true
+        }
+      ]
+    },
+    "VariableValue": {
+      "type": ["string", "number", "boolean", "null", "array", "object"],
+      "title": "Variable Value",
+      "description": "Values in the variable store can be primitives, arrays, objects, or generator objects that need resolution.",
+      "examples": [
+        "string_value",
+        42,
+        true,
+        null,
+        ["item1", "item2"],
+        {
+          "nested": "object"
+        },
+        {
+          "$gen": "email"
+        }
+      ]
+    }
+  },
+  "type": "object",
+  "additionalProperties": {
+    "$ref": "#/definitions/VariableValue"
+  },
+  "examples": [
+    {
+      "username": "john_doe",
+      "password": "secure_pass123",
+      "apiKey": {
+        "$gen": "uuid"
+      },
+      "userEmail": {
+        "$gen": "email"
+      },
+      "retryCount": 3,
+      "isActive": true,
+      "tags": ["admin", "user", "moderator"]
+    }
+  ]
+}

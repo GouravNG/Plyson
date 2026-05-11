@@ -1,0 +1,201 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Assertion",
+  "description": "Defines assertion validations to be performed on the HTTP response",
+  "type": "object",
+  "required": ["title", "from", "path", "operator"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Name for the assertion which will be used in the test report to identify the assertion",
+      "examples": [
+        "Status code is 200",
+        "Response contains user ID",
+        "Email format is valid"
+      ]
+    },
+    "from": {
+      "type": "string",
+      "enum": ["body", "header"],
+      "description": "Whether to perform the assertion on the response body or header"
+    },
+    "path": {
+      "type": "string",
+      "description": "JSONPath or JMESPath to specify the field. For headers, this would be the key name of the header",
+      "examples": [
+        "user.id",
+        "data[0].email",
+        "$.response.status",
+        "Content-Type"
+      ]
+    },
+    "operator": {
+      "type": "string",
+      "title": "Assertion Operator",
+      "description": "The comparison or validation operator to use",
+      "enum": [
+        "equals",
+        "notEquals",
+        "exists",
+        "notExists",
+        "isNull",
+        "isNotNull",
+        "isGreaterThan",
+        "isLessThan",
+        "isGreaterThanOrEquals",
+        "isLessThanOrEquals",
+        "contains",
+        "notContains",
+        "matches",
+        "notMatches",
+        "hasLength",
+        "hasMinLength",
+        "hasMaxLength",
+        "includes",
+        "notIncludes",
+        "isEmpty",
+        "isNotEmpty",
+        "containsSubset",
+        "notContainsSubset",
+        "isString",
+        "isNumber",
+        "isBoolean",
+        "isArray",
+        "isObject"
+      ]
+    },
+    "value": {
+      "description": "The expected value to compare against. Not required for existence or type checks.",
+      "examples": [
+        200,
+        "user@example.com",
+        "[a-zA-Z]+@[a-zA-Z]+\\.[a-zA-Z]+",
+        true,
+        0
+      ]
+    },
+    "validation": {
+      "type": "string",
+      "enum": ["warn", "error"],
+      "default": "error",
+      "description": "Severity level for assertion failure. 'warn' marks breaking changes, 'error' fails the test"
+    }
+  },
+  "definitions": {
+    "AssertionOperators": {
+      "type": "string",
+      "enum": [
+        "equals",
+        "notEquals",
+        "exists",
+        "notExists",
+        "isNull",
+        "isNotNull",
+        "isGreaterThan",
+        "isLessThan",
+        "isGreaterThanOrEquals",
+        "isLessThanOrEquals",
+        "contains",
+        "notContains",
+        "matches",
+        "notMatches",
+        "hasLength",
+        "hasMinLength",
+        "hasMaxLength",
+        "includes",
+        "notIncludes",
+        "isEmpty",
+        "isNotEmpty",
+        "containsSubset",
+        "notContainsSubset",
+        "isString",
+        "isNumber",
+        "isBoolean",
+        "isArray",
+        "isObject"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "title": "Status code is 200",
+      "from": "header",
+      "path": "status",
+      "operator": "equals",
+      "value": 200
+    },
+    {
+      "title": "Response user ID exists",
+      "from": "body",
+      "path": "$.data.user.id",
+      "operator": "exists"
+    },
+    {
+      "title": "Email is valid format",
+      "from": "body",
+      "path": "$.email",
+      "operator": "matches",
+      "value": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+    },
+    {
+      "title": "User array is present",
+      "from": "body",
+      "path": "$.users",
+      "operator": "isArray"
+    },
+    {
+      "title": "Response has at least 5 results",
+      "from": "body",
+      "path": "$.results",
+      "operator": "hasMinLength",
+      "value": 5
+    },
+    {
+      "title": "Created timestamp is greater than now",
+      "from": "body",
+      "path": "$.createdAt",
+      "operator": "isGreaterThan",
+      "value": 1000000000
+    },
+    {
+      "title": "Response message contains success",
+      "from": "body",
+      "path": "$.message",
+      "operator": "contains",
+      "value": "success"
+    },
+    {
+      "title": "Authorization header exists",
+      "from": "header",
+      "path": "Authorization",
+      "operator": "exists"
+    },
+    {
+      "title": "User is not null (warning only)",
+      "from": "body",
+      "path": "$.user",
+      "operator": "isNotNull",
+      "validation": "warn"
+    },
+    {
+      "title": "Array has at most 10 items",
+      "from": "body",
+      "path": "$.data",
+      "operator": "hasMaxLength",
+      "value": 10
+    },
+    {
+      "title": "Array is empty",
+      "from": "body",
+      "path": "$.items",
+      "operator": "isEmpty"
+    },
+    {
+      "title": "Response contains required fields",
+      "from": "body",
+      "path": "$.data",
+      "operator": "containsSubset",
+      "value": { "id": "", "email": "", "name": "" }
+    }
+  ]
+}

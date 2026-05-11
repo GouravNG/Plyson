@@ -1,0 +1,249 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Test Suite",
+  "description": "Defines a test suite containing multiple test cases with setup/teardown steps, variables, and metadata. Test suites are stored as *.test.json files in the suites folder.",
+  "type": "object",
+  "required": ["title", "tags", "testCases"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Human-readable title of the test suite"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of what this test suite validates"
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether to skip all test cases within this suite during execution"
+    },
+    "tags": {
+      "type": "array",
+      "description": "Suite-level tags available to all test cases within the suite",
+      "items": {
+        "type": "string"
+      }
+    },
+    "variables": {
+      "type": "object",
+      "title": "Suite Level Variables",
+      "description": "Variables scoped to this suite, overriding project level variables but can be overridden by test case variables",
+      "additionalProperties": true
+    },
+    "beforeAll": {
+      "type": "array",
+      "title": "Setup Steps",
+      "description": "Test steps to execute once before all test cases in the suite",
+      "items": {
+        "$ref": "testcase.schema.json#/definitions/TestStep"
+      }
+    },
+    "afterAll": {
+      "type": "array",
+      "title": "Teardown Steps",
+      "description": "Test steps to execute once after all test cases in the suite",
+      "items": {
+        "$ref": "testcase.schema.json#/definitions/TestStep"
+      }
+    },
+    "testCases": {
+      "type": "array",
+      "title": "Test Cases",
+      "description": "Array of test cases within this suite",
+      "minItems": 1,
+      "items": {
+        "$ref": "testcase.schema.json"
+      }
+    }
+  },
+  "examples": [
+    {
+      "title": "User Management API Tests",
+      "description": "Comprehensive test suite for user CRUD operations",
+      "tags": ["api", "user", "smoke", "regression"],
+      "variables": {
+        "baseDelay": 500,
+        "defaultTimeout": 5000
+      },
+      "beforeAll": [
+        {
+          "title": "Setup test database",
+          "request": {
+            "method": "POST",
+            "endpoint": "/api/v1/admin/setup-test-db"
+          },
+          "response": {
+            "validations": [
+              {
+                "statusCode": 200
+              }
+            ]
+          }
+        },
+        {
+          "title": "Authenticate as admin",
+          "request": {
+            "method": "POST",
+            "endpoint": "/api/v1/auth/login",
+            "payload": {
+              "username": "admin",
+              "password": "admin123"
+            }
+          },
+          "response": {
+            "validations": [
+              {
+                "statusCode": 200
+              }
+            ],
+            "extract": [
+              {
+                "name": "adminToken",
+                "from": "body",
+                "path": "token",
+                "scope": "suite"
+              }
+            ]
+          }
+        }
+      ],
+      "afterAll": [
+        {
+          "title": "Cleanup test data",
+          "request": {
+            "method": "POST",
+            "endpoint": "/api/v1/admin/cleanup-test-db",
+            "headers": {
+              "Authorization": "Bearer token"
+            }
+          },
+          "response": {
+            "validations": [
+              {
+                "statusCode": 200
+              }
+            ]
+          }
+        }
+      ],
+      "testCases": [
+        {
+          "id": "create-user-success",
+          "title": "Create user with valid data",
+          "testType": "positive",
+          "tags": ["create", "positive"],
+          "steps": [
+            {
+              "title": "Create new user",
+              "request": {
+                "method": "POST",
+                "endpoint": "/api/v1/users",
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "payload": {
+                  "name": "Alice Smith",
+                  "email": "alice@example.com",
+                  "role": "user"
+                }
+              },
+              "response": {
+                "validations": [
+                  {
+                    "statusCode": 201,
+                    "assertions": [
+                      {
+                        "title": "User ID exists",
+                        "from": "body",
+                        "path": "id",
+                        "operator": "exists"
+                      },
+                      {
+                        "title": "Email is correct",
+                        "from": "body",
+                        "path": "email",
+                        "operator": "isEquals",
+                        "value": "alice@example.com"
+                      }
+                    ]
+                  }
+                ],
+                "extract": [
+                  {
+                    "name": "newUserId",
+                    "from": "body",
+                    "path": "id",
+                    "scope": "case"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "list-users",
+          "title": "List all users",
+          "testType": "positive",
+          "tags": ["list", "positive"],
+          "steps": [
+            {
+              "title": "Get users list",
+              "request": {
+                "method": "GET",
+                "endpoint": "/api/v1/users",
+                "queryParams": {
+                  "limit": 10,
+                  "offset": 0
+                }
+              },
+              "response": {
+                "validations": [
+                  {
+                    "statusCode": 200,
+                    "assertions": [
+                      {
+                        "title": "Response is array",
+                        "from": "body",
+                        "path": "data",
+                        "operator": "isArray"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "delete-user",
+          "title": "Delete user",
+          "testType": "positive",
+          "tags": ["delete", "positive"],
+          "steps": [
+            {
+              "ref": "handlers/getUserId.handlers"
+            },
+            {
+              "title": "Delete user",
+              "request": {
+                "method": "DELETE",
+                "endpoint": "/api/v1/users/{userId}",
+                "pathParams": {
+                  "userId": "123"
+                }
+              },
+              "response": {
+                "validations": [
+                  {
+                    "statusCode": 204
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

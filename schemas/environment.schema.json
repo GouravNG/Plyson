@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Environment Configuration",
+  "description": "Environment-specific configuration file (*.env.json) containing API domain, OpenAPI/Swagger spec URL, and environment variables. These files are stored in the environments folder (e.g., dev.env.json, staging.env.json, prod.env.json). Use --env=<env_name> when running CLI commands to specify which environment to use.",
+  "type": "object",
+  "required": ["baseUrl"],
+  "properties": {
+    "baseUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Base API domain/URL for this environment (e.g., https://api.dev.example.com)"
+    },
+    "specUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the OpenAPI or Swagger specification for this environment. Used to retrieve request and response schemas for validation and auto-fill functionality."
+    },
+    "variables": {
+      "type": "object",
+      "title": "Environment Variables",
+      "description": "Environment-specific variables available to all test suites and cases in this environment. These override project and suite-level variables.",
+      "additionalProperties": true
+    }
+  },
+  "examples": [
+    {
+      "baseUrl": "https://api.dev.example.com"
+    },
+    {
+      "baseUrl": "https://api.staging.example.com",
+      "specUrl": "https://api.staging.example.com/swagger.json",
+      "variables": {
+        "timeout": 5000,
+        "retryCount": 3,
+        "adminUsername": "stage_admin",
+        "adminPassword": "stage_pass123"
+      }
+    },
+    {
+      "baseUrl": "https://api.example.com",
+      "specUrl": "https://api.example.com/openapi.json",
+      "variables": {
+        "apiVersion": "v1",
+        "region": "us-east-1",
+        "environment": "production",
+        "timeout": 10000,
+        "retryCount": 5,
+        "slowRequestThreshold": 2000,
+        "dbBackupEnabled": true,
+        "cacheTTL": 3600,
+        "logLevel": "info",
+        "serviceEndpoints": {
+          "auth": "https://auth.example.com",
+          "payment": "https://payment.example.com",
+          "notifications": "https://notifications.example.com"
+        },
+        "apiKeys": {
+          "sendgrid": "SG.xxxxxxxxxxxxxxxxxxxxxxxx",
+          "stripe": "sk_live_xxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+      }
+    },
+    {
+      "baseUrl": "http://localhost:3000",
+      "specUrl": "http://localhost:3000/api-docs/swagger.json",
+      "variables": {
+        "environment": "local",
+        "timeout": 3000,
+        "debugMode": true,
+        "mockData": true,
+        "skipAuth": false,
+        "logRequests": true
+      }
+    },
+    {
+      "baseUrl": "https://qa-api.example.com",
+      "specUrl": "https://qa-api.example.com/openapi.yaml",
+      "variables": {
+        "environment": "qa",
+        "testDataPath": "/fixtures/qa",
+        "reportPath": "/reports/qa",
+        "slackWebhook": "https://hooks.slack.com/services/XXX/YYY/ZZZ",
+        "emailNotifications": ["qa-team@example.com"],
+        "maxConcurrentTests": 5
+      }
+    }
+  ]
+}
