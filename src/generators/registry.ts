@@ -2,7 +2,12 @@ import { UnknownGeneratorError } from '../errors'
 import { VariableValue } from '../types'
 import { BooleanGenerator } from './boolean.generator'
 import { DateGenerator, FutureDateGenerator, PastDateGenerator } from './date.generator'
-import { EmailGenerator, IpAddressGenerator, UuidGenerator, UrlGenerator } from './internet.generator'
+import {
+  EmailGenerator,
+  IpAddressGenerator,
+  UuidGenerator,
+  UrlGenerator,
+} from './internet.generator'
 import { NumberGenerator } from './number.generator'
 import { FirstNameGenerator, FullNameGenerator, LastNameGenerator } from './person.generator'
 import { PhoneNumberGenerator } from './phone.generator'

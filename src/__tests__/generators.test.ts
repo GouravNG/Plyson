@@ -46,7 +46,9 @@ describe('Generators', () => {
     })
 
     it('should throw on min > max', () => {
-      expect(() => GeneratorRegistry.run('number', { min: 50, max: 10 })).toThrow(GeneratorOptionError)
+      expect(() => GeneratorRegistry.run('number', { min: 50, max: 10 })).toThrow(
+        GeneratorOptionError
+      )
     })
   })
 
@@ -57,7 +59,9 @@ describe('Generators', () => {
     })
 
     it('should throw on invalid probability', () => {
-      expect(() => GeneratorRegistry.run('boolean', { probability: 1.5 })).toThrow(GeneratorOptionError)
+      expect(() => GeneratorRegistry.run('boolean', { probability: 1.5 })).toThrow(
+        GeneratorOptionError
+      )
     })
   })
 
@@ -85,7 +89,9 @@ describe('Generators', () => {
     })
 
     it('should throw on invalid within', () => {
-      expect(() => GeneratorRegistry.run('pastDate', { within: 'bad' })).toThrow(GeneratorOptionError)
+      expect(() => GeneratorRegistry.run('pastDate', { within: 'bad' })).toThrow(
+        GeneratorOptionError
+      )
     })
   })
 

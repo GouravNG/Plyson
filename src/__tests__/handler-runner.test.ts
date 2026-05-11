@@ -7,15 +7,19 @@ describe('HandlerRunner', () => {
   it('should execute handlers in order', async () => {
     const log: string[] = []
     const h1: HandlerModule = {
-      run: async () => { log.push('h1') }
+      run: async () => {
+        log.push('h1')
+      },
     }
     const h2: HandlerModule = {
-      run: async () => { log.push('h2') }
+      run: async () => {
+        log.push('h2')
+      },
     }
 
     const handlers = new Map<string, HandlerModule>([
       ['h1', h1],
-      ['h2', h2]
+      ['h2', h2],
     ])
 
     const ctx = {} as HandlerContext
@@ -33,15 +37,19 @@ describe('HandlerRunner', () => {
   it('should stop execution if a handler throws', async () => {
     const log: string[] = []
     const h1: HandlerModule = {
-      run: async () => { throw new Error('fail') }
+      run: async () => {
+        throw new Error('fail')
+      },
     }
     const h2: HandlerModule = {
-      run: async () => { log.push('h2') }
+      run: async () => {
+        log.push('h2')
+      },
     }
 
     const handlers = new Map<string, HandlerModule>([
       ['h1', h1],
-      ['h2', h2]
+      ['h2', h2],
     ])
 
     const ctx = {} as HandlerContext

@@ -54,7 +54,9 @@ export class ProjectLoader {
       const parsed = JSON.parse(content)
       const result = VariablesSchema.safeParse(parsed)
       if (!result.success) {
-        errors.push(new LoadError(`Invalid variables.json: ${result.error.message}`, 'variables.json'))
+        errors.push(
+          new LoadError(`Invalid variables.json: ${result.error.message}`, 'variables.json')
+        )
       } else {
         variables = result.data
       }
@@ -71,12 +73,20 @@ export class ProjectLoader {
       const parsed = JSON.parse(content)
       const result = EnvironmentVariablesSchema.safeParse(parsed)
       if (!result.success) {
-        errors.push(new LoadError(`Invalid environment file ${env}.env.json: ${result.error.message}`, `environments/${env}.env.json`))
+        errors.push(
+          new LoadError(
+            `Invalid environment file ${env}.env.json: ${result.error.message}`,
+            `environments/${env}.env.json`
+          )
+        )
       } else {
         environment = result.data
       }
     } catch (e: any) {
-      const loadErr = new LoadError(`Environment file not found or unreadable: ${envFile}`, `environments/${env}.env.json`)
+      const loadErr = new LoadError(
+        `Environment file not found or unreadable: ${envFile}`,
+        `environments/${env}.env.json`
+      )
       // According to algorithm, throw immediately if env is missing as we cannot continue
       if (errors.length > 0) {
         throw new AggregateLoadError([...errors, loadErr])
@@ -155,7 +165,12 @@ export class ProjectLoader {
           const suite = result.data
           for (const tc of suite.testCases) {
             if (scripts.has(tc.id) || suiteIds.has(tc.id)) {
-              errors.push(new LoadError(`Collision: Testcase ID "${tc.id}" already exists in scripts or another suite`, file))
+              errors.push(
+                new LoadError(
+                  `Collision: Testcase ID "${tc.id}" already exists in scripts or another suite`,
+                  file
+                )
+              )
             } else {
               suiteIds.add(tc.id)
             }

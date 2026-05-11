@@ -64,7 +64,7 @@ describe('VariableStore', () => {
     const store = new VariableStore()
     store.set('key', 'value', 'case')
     expect(store.get('key')).toBe('value')
-    
+
     // Check it's actually in case scope
     store.pop('case')
     expect(store.get('key')).toBeUndefined()

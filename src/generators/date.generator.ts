@@ -10,7 +10,10 @@ export interface DateOptions {
 export function parseWithin(within: string): { years?: number; months?: number; days?: number } {
   const match = within.match(/^(\d+)(d|M|y)$/)
   if (!match) {
-    throw new GeneratorOptionError('date', `Invalid "within": "${within}". Use e.g. "7d", "3M", "1y"`)
+    throw new GeneratorOptionError(
+      'date',
+      `Invalid "within": "${within}". Use e.g. "7d", "3M", "1y"`
+    )
   }
   const n = parseInt(match[1])
   const unit = match[2]

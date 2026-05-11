@@ -14,7 +14,10 @@ export class NumberGenerator implements Generator<NumberOptions> {
     const { min = 0, max = 1_000_000, float = false, precision = 2 } = options
 
     if (typeof min !== 'number' || typeof max !== 'number' || min > max) {
-      throw new GeneratorOptionError('number', `min (${min}) must be less than or equal to max (${max})`)
+      throw new GeneratorOptionError(
+        'number',
+        `min (${min}) must be less than or equal to max (${max})`
+      )
     }
 
     if (float) {

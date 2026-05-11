@@ -17,7 +17,7 @@ describe('ProjectLoader', () => {
     expect(graph.handlers.has('debug')).toBe(true)
     expect(graph.scripts.has('login-script')).toBe(true)
     expect(graph.suites.length).toBe(1)
-    
+
     // Check ref resolution
     const suite = graph.suites[0]
     const testCase = suite.testCases[0]

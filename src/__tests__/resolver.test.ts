@@ -77,7 +77,7 @@ describe('Resolver', () => {
     for (let i = 0; i < 11; i++) {
       deepGen = { $gen: 'echo', val: deepGen }
     }
-    
+
     expect(() => resolver.resolve(deepGen)).toThrow(ResolutionError)
     expect(() => resolver.resolve(deepGen)).toThrow(/\$gen nesting too deep/)
   })
@@ -85,16 +85,16 @@ describe('Resolver', () => {
   it('should resolvePhase1 (variables resolution)', () => {
     const store = new VariableStore()
     store.push('global', { base: 'value' })
-    
+
     const variables = {
       name: 'Alice',
-      ref: 'prefix_{{base}}'
+      ref: 'prefix_{{base}}',
     }
 
     const resolved = resolvePhase1(variables, store)
     expect(resolved).toEqual({
       name: 'Alice',
-      ref: 'prefix_value'
+      ref: 'prefix_value',
     })
   })
 
@@ -106,8 +106,8 @@ describe('Resolver', () => {
       method: 'GET',
       endpoint: '/users/{{id}}',
       headers: {
-        Host: '{{host}}'
-      }
+        Host: '{{host}}',
+      },
     }
 
     const resolved = resolvePhase2(request, store, 'step 1')

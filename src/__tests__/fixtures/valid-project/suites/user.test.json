@@ -6,9 +6,7 @@
       "id": "user-test-1",
       "title": "Test Case 1",
       "tags": ["smoke"],
-      "steps": [
-        { "ref": "login-script" }
-      ]
+      "steps": [{ "ref": "login-script" }]
     }
   ]
 }

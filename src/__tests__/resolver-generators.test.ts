@@ -21,11 +21,11 @@ describe('Resolver + Generators Integration', () => {
     const variables = {
       userEmail: { $gen: 'email', domain: 'test.com' },
       userId: { $gen: 'uuid' },
-      userAge: { $gen: 'number', min: 18, max: 99 }
+      userAge: { $gen: 'number', min: 18, max: 99 },
     }
 
     const resolved = resolvePhase1(variables, store)
-    
+
     expect(resolved.userEmail).toMatch(/@test\.com$/)
     expect(resolved.userId).toMatch(/^[0-9a-f-]{36}$/)
     expect(resolved.userAge).toBeGreaterThanOrEqual(18)
@@ -45,10 +45,10 @@ describe('Resolver + Generators Integration', () => {
     */
     const variables = {
       // Generate a random length between 4 and 8, then generate a string of that length
-      randomString: { 
-        $gen: 'string', 
-        length: { $gen: 'number', min: 4, max: 8 } 
-      }
+      randomString: {
+        $gen: 'string',
+        length: { $gen: 'number', min: 4, max: 8 },
+      },
     }
 
     const resolved = resolvePhase1(variables, store)
@@ -64,7 +64,7 @@ describe('Resolver + Generators Integration', () => {
       { "firstName": { "$gen": "firstName" } }
     */
     const initialVars = {
-      firstName: { $gen: 'firstName' }
+      firstName: { $gen: 'firstName' },
     }
     const resolvedInitial = resolvePhase1(initialVars, store)
     store.push('case', resolvedInitial)
@@ -74,10 +74,10 @@ describe('Resolver + Generators Integration', () => {
       { "username": "user_{{firstName}}" }
     */
     const dependentVars = {
-      username: 'user_{{firstName}}'
+      username: 'user_{{firstName}}',
     }
     const resolvedDependent = resolvePhase1(dependentVars, store)
-    
+
     expect(resolvedDependent.username).toBe(`user_${resolvedInitial.firstName}`)
   })
 })

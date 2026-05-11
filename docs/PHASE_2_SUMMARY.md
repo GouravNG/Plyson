@@ -10,6 +10,7 @@ Phase 2 focused on the core runtime components for data management and token int
 ## 1. Variable Store (`src/core/variable-store.ts`)
 
 Implemented a scoped variable management system:
+
 - **Scoped Layers:** Support for `global`, `environment`, `suite`, and `case` scopes.
 - **Priority Resolution:** `get()` walks scopes in order (`case` > `suite` > `environment` > `global`).
 - **Reserved Globals:** Built-in support for `$timestamp`, `$isoDate`, and `$guid` (using `@faker-js/faker`).
@@ -20,14 +21,15 @@ Implemented a scoped variable management system:
 ## 2. Resolver (`src/core/resolver.ts`)
 
 Implemented a recursive resolution engine for tokens and generators:
+
 - **Token Interpolation:** Trims whitespace and resolves `{{ token }}` syntax.
 - **Type Preservation:** Single-token strings preserve their original type (e.g., `{{ age }}` returns a number, not a string).
 - **Mixed Content:** Strings with mixed text and tokens are correctly interpolated as strings.
 - **Generator Execution:** Integrates with `GeneratorRegistry` to execute `$gen` objects.
 - **Recursion Safety:** Implemented a depth limit (10) to prevent infinite loops in nested generators.
-- **Phase Functions:** 
-    - `resolvePhase1`: Resolves variable blocks (used for test case variables).
-    - `resolvePhase2`: Resolves full request objects.
+- **Phase Functions:**
+  - `resolvePhase1`: Resolves variable blocks (used for test case variables).
+  - `resolvePhase2`: Resolves full request objects.
 
 ---
 
@@ -41,8 +43,8 @@ Implemented a recursive resolution engine for tokens and generators:
 ## 4. Verification
 
 - **Unit Tests:**
-    - `src/__tests__/variable-store.test.ts`: Verified scope priority, reserved globals, and snapshots.
-    - `src/__tests__/resolver.test.ts`: Verified token interpolation (type-safe), recursive object/array resolution, and generator nesting limits.
+  - `src/__tests__/variable-store.test.ts`: Verified scope priority, reserved globals, and snapshots.
+  - `src/__tests__/resolver.test.ts`: Verified token interpolation (type-safe), recursive object/array resolution, and generator nesting limits.
 - **Results:** All 17 tests (including Phase 1 smoke tests) are passing.
 
 ---

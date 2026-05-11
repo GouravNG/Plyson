@@ -24,6 +24,7 @@ Phase 1 focused on setting up the foundational infrastructure for the `play-son`
 ## 2. Core Type System (`src/types/index.ts`)
 
 Defined the contract for the entire framework using TypeScript interfaces and type aliases:
+
 - **Foundational Types:** `Variables`, `Scope`, `VariableValue`, `GeneratorObject`.
 - **Request/Response:** `Req`, `Res`, `HTTPMethod`, `AutoFillType`.
 - **Assertions:** `Assertions`, `AssertionOperators`, `ExtractedValue`.
@@ -35,6 +36,7 @@ Defined the contract for the entire framework using TypeScript interfaces and ty
 ## 3. Zod Validation Schemas (`src/types/index.ts`)
 
 Implemented Zod schemas for all core types to ensure runtime data integrity:
+
 - `VariablesSchema`
 - `AssertionSchema` (including defaults for `validation`)
 - `ReqSchema` & `ResSchema`
@@ -47,6 +49,7 @@ Implemented Zod schemas for all core types to ensure runtime data integrity:
 ## 4. Error Hierarchy (`src/errors/index.ts`)
 
 Created a robust error handling system with specific error classes:
+
 - `PlaysonError` (Abstract base)
 - `LoadError` & `AggregateLoadError` (For project loading phase)
 - `ResolutionError` (For variable interpolation)

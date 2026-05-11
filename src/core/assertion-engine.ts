@@ -72,7 +72,11 @@ export class AssertionEngine {
     }
   }
 
-  private static applyOperator(actual: unknown, operator: AssertionOperators, value?: unknown): void {
+  private static applyOperator(
+    actual: unknown,
+    operator: AssertionOperators,
+    value?: unknown
+  ): void {
     const e = expect(actual)
 
     switch (operator) {

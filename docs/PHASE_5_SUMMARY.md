@@ -18,10 +18,10 @@ Phase 5 implemented the post-response processing pipeline, enabling the framewor
 ## 2. Assertion Engine (`src/core/assertion-engine.ts`)
 
 - **Full Operator Suite:** Implemented all 27 declarative operators (e.g., `equals`, `containsSubset`, `matches`, `isObject`) mapping them to Playwright `expect()`.
-- **Validation Pipeline:** 
-    - Mandatory status code check.
-    - Optional JSON Schema validation via AJV.
-    - Inline assertions with path extraction.
+- **Validation Pipeline:**
+  - Mandatory status code check.
+  - Optional JSON Schema validation via AJV.
+  - Inline assertions with path extraction.
 - **Soft Failures:** Support for `validation: "warn"` which records a `SoftError` instead of failing the step immediately.
 
 ---
@@ -43,11 +43,11 @@ Phase 5 implemented the post-response processing pipeline, enabling the framewor
 
 ## 5. Verification
 
-- **Unit Tests:** 
-    - `src/__tests__/path-engine.test.ts`: Verified JSONPath/JMESPath auto-detection and extraction.
-    - `src/__tests__/assertion-engine.test.ts`: Verified status code checks, soft errors, and all major operator categories.
-    - `src/__tests__/extraction-engine.test.ts`: Verified body/header extraction and scope write-back.
-    - `src/__tests__/handler-runner.test.ts`: Verified ordered execution and error propagation.
+- **Unit Tests:**
+  - `src/__tests__/path-engine.test.ts`: Verified JSONPath/JMESPath auto-detection and extraction.
+  - `src/__tests__/assertion-engine.test.ts`: Verified status code checks, soft errors, and all major operator categories.
+  - `src/__tests__/extraction-engine.test.ts`: Verified body/header extraction and scope write-back.
+  - `src/__tests__/handler-runner.test.ts`: Verified ordered execution and error propagation.
 - **Results:** 74 tests passing across the entire project.
 
 ---

@@ -18,6 +18,7 @@ Phase 3 implemented the full data generation system, including the central regis
 ## 2. Built-in Generators
 
 Implemented 14 generators across specialized modules:
+
 - **Core Types:** `string`, `number`, `boolean` (with probability support).
 - **Dates:** `date` (current), `pastDate`, `futureDate` (with `within` parsing e.g., "7d", "3M", "1y").
 - **Internet:** `uuid`, `email` (with domain/prefix support), `url`, `ipAddress`.
@@ -36,10 +37,10 @@ Implemented 14 generators across specialized modules:
 ## 4. Verification
 
 - **Unit Tests (`src/__tests__/generators.test.ts`):** Verified happy paths and error conditions for every single generator.
-- **Integration Tests (`src/__tests__/resolver-generators.test.ts`):** 
-    - Verified that `$gen` objects are correctly resolved by the `Resolver`.
-    - Verified **nested generator resolution** (e.g., using a `number` generator to determine the `length` for a `string` generator).
-    - Verified token interpolation within generator options.
+- **Integration Tests (`src/__tests__/resolver-generators.test.ts`):**
+  - Verified that `$gen` objects are correctly resolved by the `Resolver`.
+  - Verified **nested generator resolution** (e.g., using a `number` generator to determine the `length` for a `string` generator).
+  - Verified token interpolation within generator options.
 - **Results:** 39 tests passing across the entire project.
 
 ---

@@ -35,7 +35,7 @@ describe('PathEngine', () => {
 
   it('should extract header case-insensitively', () => {
     const mockResponse = {
-      headers: () => ({ 'content-type': 'application/json' })
+      headers: () => ({ 'content-type': 'application/json' }),
     } as unknown as APIResponse
     expect(pathEngine.extractHeader(mockResponse, 'Content-Type')).toBe('application/json')
   })
