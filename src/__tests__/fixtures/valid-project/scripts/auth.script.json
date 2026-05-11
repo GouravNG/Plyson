@@ -1,0 +1,18 @@
+{
+  "id": "login-script",
+  "title": "Login Script",
+  "tags": ["auth"],
+  "steps": [
+    {
+      "title": "Post Login",
+      "request": {
+        "method": "POST",
+        "endpoint": "/login",
+        "payload": { "username": "admin" }
+      },
+      "response": {
+        "validations": { "statusCode": 200 }
+      }
+    }
+  ]
+}
