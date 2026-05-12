@@ -186,7 +186,7 @@ export class ProjectLoader {
     const resolveRefsInSteps = (steps: TestStep[], sourceFile: string) => {
       for (let i = 0; i < steps.length; i++) {
         const step = steps[i]
-        if ('ref' in step) {
+        if ('ref' in step && step.ref) {
           const target = scripts.get(step.ref)
           if (!target) {
             errors.push(new LoadError(`Ref "${step.ref}" not found`, sourceFile))

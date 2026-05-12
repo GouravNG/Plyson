@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker'
 import { Generator } from './registry'
-import { VariableValue } from '../types'
 
 export class UuidGenerator implements Generator {
   run(): string {

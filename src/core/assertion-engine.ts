@@ -123,9 +123,9 @@ export class AssertionEngine {
       case 'isNotEmpty':
         return expect((actual as any[]).length).toBeGreaterThan(0)
       case 'containsSubset':
-        return e.toMatchObject(value as object)
+        return e.toMatchObject(value as any)
       case 'notContainsSubset':
-        return e.not.toMatchObject(value as object)
+        return e.not.toMatchObject(value as any)
       case 'isString':
         return e.toEqual(expect.any(String))
       case 'isNumber':

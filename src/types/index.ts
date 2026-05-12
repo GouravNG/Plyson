@@ -172,7 +172,7 @@ export type ResolvedStep = Omit<CommonTestStep, 'request'> & {
 // ZOD SCHEMAS
 // =========================================================================================================
 
-export const VariablesSchema = z.record(z.any())
+export const VariablesSchema = z.record(z.string(), z.any())
 
 export const GeneratorObjectSchema = z
   .object({
@@ -245,11 +245,11 @@ export const ExtractedValueSchema = z.object({
 export const ReqSchema = z.object({
   method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS']),
   endpoint: z.string(),
-  queryParams: z.record(z.any()).optional(),
-  pathParams: z.record(z.any()).optional(),
-  headers: z.record(z.any()).optional(),
+  queryParams: z.record(z.string(), z.any()).optional(),
+  pathParams: z.record(z.string(), z.any()).optional(),
+  headers: z.record(z.string(), z.any()).optional(),
   autoFill: AutoFillTypeSchema.optional(),
-  payload: z.record(z.any()).optional(),
+  payload: z.record(z.string(), z.any()).optional(),
 })
 
 export const ResSchema = z.object({

@@ -13,7 +13,7 @@ import { FirstNameGenerator, FullNameGenerator, LastNameGenerator } from './pers
 import { PhoneNumberGenerator } from './phone.generator'
 import { StringGenerator } from './string.generator'
 
-export interface Generator<O extends Record<string, unknown> = Record<string, unknown>> {
+export interface Generator<O extends object = Record<string, unknown>> {
   run(options: O): VariableValue
 }
 

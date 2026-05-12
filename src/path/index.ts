@@ -14,8 +14,8 @@ export class PathEngine {
     return this.extractJmesPath(source, path)
   }
 
-  private extractJsonPath(source: unknown, path: string): unknown {
-    const result = JSONPath({ path, json: source, wrap: true })
+  private extractJsonPath(source: any, path: string): unknown {
+    const result = JSONPath({ path, json: source, wrap: true }) as any[]
 
     // filter expressions always return the full array so isEmpty/isNotEmpty work correctly
     if (this.isFilterExpression(path)) {

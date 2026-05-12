@@ -1,6 +1,5 @@
 import { APIResponse } from '@playwright/test'
 import { HandlerModule, VariableValue, Scope } from '../types'
-import { VariableStore } from './variable-store'
 import { LoadError } from '../errors'
 import { ResolvedRequest } from './http-executor'
 

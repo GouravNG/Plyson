@@ -1,5 +1,5 @@
 import { APIRequestContext, APIResponse } from '@playwright/test'
-import { Req, ResolvedStep, HTTPMethod } from '../types'
+import { Req, ResolvedStep } from '../types'
 import { generateFromSchema } from '../autofill/schema-generator'
 import { LoadError } from '../errors'
 
