@@ -1,0 +1,32 @@
+{
+  "id": "echo-script",
+  "title": "Reusable Echo Script",
+  "tags": ["reusable"],
+  "steps": [
+    {
+      "title": "Echo from Script",
+      "request": {
+        "method": "POST",
+        "endpoint": "/echo",
+        "payload": {
+          "message": "hello from ref",
+          "globalCheck": "{{globalVar}}"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 200,
+          "assertions": [
+            {
+              "title": "Global variable resolved in script",
+              "from": "body",
+              "path": "$.globalCheck",
+              "operator": "equals",
+              "value": "globalValue"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "globalVar": "globalValue",
+  "appName": "play-son-e2e",
+  "priorityTest": "global"
+}

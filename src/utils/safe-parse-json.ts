@@ -5,11 +5,10 @@ import { APIResponse } from '@playwright/test'
  * If Content-Type is not application/json or parsing fails, returns raw text.
  */
 export async function safeParseJson(response: APIResponse): Promise<unknown> {
-  const ct = response.headers()['content-type'] ?? ''
-  if (!ct.includes('application/json')) return response.text()
+  const text = await response.text()
   try {
-    return await response.json()
+    return JSON.parse(text)
   } catch {
-    return response.text() // content-type said JSON but body wasn't — degrade gracefully
+    return text
   }
 }

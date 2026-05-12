@@ -1,0 +1,75 @@
+{
+  "title": "Variable Priority Test",
+  "tags": ["priority"],
+  "variables": {
+    "priorityTest": "suite",
+    "suiteOnly": "present"
+  },
+  "testCases": [
+    {
+      "id": "priority-case-override",
+      "title": "Case should override suite",
+      "tags": ["priority"],
+      "variables": {
+        "priorityTest": "case"
+      },
+      "steps": [
+        {
+          "title": "Verify Case Priority",
+          "request": {
+            "method": "POST",
+            "endpoint": "/echo",
+            "payload": {
+              "val": "{{priorityTest}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Case value won",
+                  "from": "body",
+                  "path": "$.val",
+                  "operator": "equals",
+                  "value": "case"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "priority-suite-override",
+      "title": "Suite should override environment",
+      "tags": ["priority"],
+      "steps": [
+        {
+          "title": "Verify Suite Priority",
+          "request": {
+            "method": "POST",
+            "endpoint": "/echo",
+            "payload": {
+              "val": "{{priorityTest}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Suite value won",
+                  "from": "body",
+                  "path": "$.val",
+                  "operator": "equals",
+                  "value": "suite"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
