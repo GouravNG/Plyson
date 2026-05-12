@@ -1,5 +1,146 @@
+import { test, APIRequestContext } from '@playwright/test'
 import { ProjectGraph } from './project-loader'
 import { VariableStore } from './variable-store'
+import { HttpExecutor, ResolvedRequest } from './http-executor'
+import { Resolver, resolvePhase1, resolvePhase2 } from './resolver'
+import { AssertionEngine } from './assertion-engine'
+import { ExtractionEngine } from './extraction-engine'
+import { HandlerRunner, HandlerContext } from './handler-runner'
+import { TestStep, SoftError, ResolvedStep } from '../types'
+import { sleep } from '../utils/sleep'
+import { safeParseJson } from '../utils/safe-parse-json'
 
-export function registerSuites(graph: ProjectGraph, store: VariableStore): void {}
-export async function runSteps(): Promise<void> {}
+/**
+ * Registers all suites from the project graph as Playwright tests.
+ */
+export function registerSuites(graph: ProjectGraph, store: VariableStore): void {
+  test.beforeAll(async ({ request }) => {
+    store.push('global', graph.variables)
+    store.push('environment', graph.environment.variables ?? {})
+    if (graph.project.beforeAll) {
+      await runSteps(graph.project.beforeAll, request, store, graph)
+    }
+  })
+
+  test.afterAll(async ({ request }) => {
+    if (graph.project.afterAll) {
+      await runSteps(graph.project.afterAll, request, store, graph)
+    }
+  })
+
+  for (const suite of graph.suites) {
+    const describeFn = suite.disabled ? test.describe.skip : test.describe
+
+    describeFn(suite.title, () => {
+      test.beforeAll(async ({ request }) => {
+        store.push('suite', suite.variables ?? {})
+        if (suite.beforeAll) {
+          await runSteps(suite.beforeAll, request, store, graph)
+        }
+      })
+
+      test.afterAll(async ({ request }) => {
+        if (suite.afterAll) {
+          await runSteps(suite.afterAll, request, store, graph)
+        }
+        store.pop('suite')
+      })
+
+      for (const testCase of suite.testCases) {
+        const testFn = testCase.disabled ? test.skip : test
+        const tags = testCase.tags.map((t) => (t.startsWith('@') ? t : `@${t}`))
+
+        testFn(testCase.title, { tag: tags }, async ({ request }) => {
+          // Phase 1 — resolve case variables once before any step runs
+          const resolvedVars = resolvePhase1(testCase.variables ?? {}, store)
+          store.push('case', resolvedVars)
+
+          try {
+            await runSteps(testCase.steps, request, store, graph)
+          } finally {
+            store.pop('case')
+          }
+        })
+      }
+    })
+  }
+}
+
+/**
+ * Executes a list of test steps.
+ */
+async function runSteps(
+  steps: TestStep[],
+  request: APIRequestContext,
+  store: VariableStore,
+  graph: ProjectGraph
+): Promise<void> {
+  const executor = new HttpExecutor(request, graph.environment.baseUrl, graph.schemas)
+
+  for (const step of steps) {
+    // Skip if it's a referenced step that wasn't resolved (shouldn't happen with ProjectLoader)
+    if ('ref' in step) continue
+    if (step.disabled) continue
+    if (step.wait) await sleep(step.wait)
+
+    // Phase 2 resolution — fresh per step
+    const resolvedRequest = resolvePhase2(step.request, store, step.title)
+
+    const response = await executor.execute({
+      ...step,
+      request: resolvedRequest as ResolvedRequest,
+    } as ResolvedStep)
+
+    const body = await safeParseJson(response)
+    const softErrors: SoftError[] = []
+
+    // 1. Status code check
+    AssertionEngine.checkStatusCode(response.status(), step.response.validations.statusCode)
+
+    // 2. Schema validation
+    if (step.response.schema) {
+      await AssertionEngine.validateSchema(body, step.response.schema, graph.schemas, softErrors)
+    }
+
+    // 3. Inline assertions
+    for (const assertion of step.response.validations.assertions ?? []) {
+      const resolver = new Resolver(store, step.title)
+      const resolvedAssertion = {
+        ...assertion,
+        value: assertion.value !== undefined ? resolver.resolve(assertion.value) : undefined,
+      }
+      await AssertionEngine.runAssertion(resolvedAssertion, body, response, softErrors)
+    }
+
+    // 4. Extraction Engine
+    for (const extraction of step.response.extract ?? []) {
+      ExtractionEngine.runExtraction(extraction, body, response, store)
+    }
+
+    // 5. Handler Runner
+    if (step.handlers && step.handlers.length > 0) {
+      const ctx: HandlerContext = {
+        request: resolvedRequest as ResolvedRequest,
+        response,
+        body,
+        status: response.status(),
+        store: {
+          get: (name: string) => store.get(name),
+          set: (name: string, value: any, scope: any) => store.set(name, value, scope),
+        },
+        warn: (title: string, message: string) => {
+          softErrors.push({ title, error: new Error(message) })
+        },
+      }
+      await HandlerRunner.runHandlers(step.handlers, ctx, graph.handlers)
+    }
+
+    // Record soft errors as Playwright annotations
+    for (const soft of softErrors) {
+      test.info().annotations.push({
+        type: 'warn',
+        description: `${soft.title}: ${soft.error instanceof Error ? soft.error.message : String(soft.error)}`,
+      })
+    }
+  }
+}

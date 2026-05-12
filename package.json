@@ -1,12 +1,14 @@
 {
   "name": "play-son",
   "version": "0.1.0",
+  "type": "module",
   "description": "A declarative API testing framework built on Playwright",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "build": "tsc",
     "format": "prettier --write ."
   },

@@ -1,0 +1,90 @@
+{
+  "title": "User API Suite",
+  "tags": ["user"],
+  "testCases": [
+    {
+      "id": "get-users",
+      "title": "Should get all users",
+      "tags": ["smoke"],
+      "steps": [
+        {
+          "title": "Get users",
+          "request": {
+            "method": "GET",
+            "endpoint": "/users"
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Data exists",
+                  "from": "body",
+                  "path": "$.data",
+                  "operator": "exists"
+                },
+                {
+                  "title": "Data is not empty",
+                  "from": "body",
+                  "path": "$.data",
+                  "operator": "isNotEmpty"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "auth-and-profile",
+      "title": "Should auth and get profile",
+      "tags": ["auth"],
+      "steps": [
+        {
+          "title": "Login",
+          "request": {
+            "method": "POST",
+            "endpoint": "/auth"
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200
+            },
+            "extract": [
+              {
+                "name": "token",
+                "from": "body",
+                "path": "$.access_token",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Get profile",
+          "request": {
+            "method": "GET",
+            "endpoint": "/profile",
+            "headers": {
+              "Authorization": "Bearer {{token}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Role is admin",
+                  "from": "body",
+                  "path": "$.role",
+                  "operator": "equals",
+                  "value": "admin"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
