@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { Generator } from './registry'
+import { Generator } from './registry.js'
 
 export interface PhoneOptions {
   style?: 'international' | 'national'

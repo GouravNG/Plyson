@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { pathEngine } from '../path'
+import { pathEngine } from '../path/index.js'
 import { APIResponse } from '@playwright/test'
 
 describe('PathEngine', () => {

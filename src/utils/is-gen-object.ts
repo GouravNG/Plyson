@@ -1,4 +1,4 @@
-import { GeneratorObject } from '../types'
+import { GeneratorObject } from '../types/index.js'
 
 /**
  * Type guard to check if a value is a GeneratorObject.

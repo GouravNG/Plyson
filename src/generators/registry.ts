@@ -1,17 +1,17 @@
-import { UnknownGeneratorError } from '../errors'
-import { VariableValue } from '../types'
-import { BooleanGenerator } from './boolean.generator'
-import { DateGenerator, FutureDateGenerator, PastDateGenerator } from './date.generator'
+import { UnknownGeneratorError } from '../errors/index.js'
+import { VariableValue } from '../types/index.js'
+import { BooleanGenerator } from './boolean.generator.js'
+import { DateGenerator, FutureDateGenerator, PastDateGenerator } from './date.generator.js'
 import {
   EmailGenerator,
   IpAddressGenerator,
   UuidGenerator,
   UrlGenerator,
-} from './internet.generator'
-import { NumberGenerator } from './number.generator'
-import { FirstNameGenerator, FullNameGenerator, LastNameGenerator } from './person.generator'
-import { PhoneNumberGenerator } from './phone.generator'
-import { StringGenerator } from './string.generator'
+} from './internet.generator.js'
+import { NumberGenerator } from './number.generator.js'
+import { FirstNameGenerator, FullNameGenerator, LastNameGenerator } from './person.generator.js'
+import { PhoneNumberGenerator } from './phone.generator.js'
+import { StringGenerator } from './string.generator.js'
 
 export interface Generator<O extends object = Record<string, unknown>> {
   run(options: O): VariableValue

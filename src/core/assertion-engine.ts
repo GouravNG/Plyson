@@ -1,9 +1,9 @@
 import { expect, APIResponse } from '@playwright/test'
 import Ajv from 'ajv'
 import addFormats from 'ajv-formats'
-import { Assertions, AssertionOperators, SoftError } from '../types'
-import { pathEngine } from '../path'
-import { AssertionError, LoadError, SchemaValidationError } from '../errors'
+import { Assertions, AssertionOperators, SoftError } from '../types/index.js'
+import { pathEngine } from '../path/index.js'
+import { AssertionError, LoadError, SchemaValidationError } from '../errors/index.js'
 
 const ajv = new Ajv({ allErrors: true })
 addFormats(ajv)

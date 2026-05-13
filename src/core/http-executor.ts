@@ -1,7 +1,7 @@
 import { APIRequestContext, APIResponse } from '@playwright/test'
-import { Req, ResolvedStep } from '../types'
-import { generateFromSchema } from '../autofill/schema-generator'
-import { LoadError } from '../errors'
+import { Req, ResolvedStep } from '../types/index.js'
+import { generateFromSchema } from '../autofill/schema-generator.js'
+import { LoadError } from '../errors/index.js'
 
 export interface ResolvedRequest extends Req {}
 

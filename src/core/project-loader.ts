@@ -14,8 +14,8 @@ import {
   TestcaseSchema,
   HandlerModule,
   TestStep,
-} from '../types'
-import { LoadError, AggregateLoadError } from '../errors'
+} from '../types/index.js'
+import { LoadError, AggregateLoadError } from '../errors/index.js'
 
 export interface ProjectGraph {
   project: Project

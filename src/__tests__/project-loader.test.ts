@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { ProjectLoader } from '../core/project-loader'
+import { ProjectLoader } from '../core/project-loader.js'
 import * as path from 'path'
-import { AggregateLoadError, LoadError } from '../errors'
+import { AggregateLoadError, LoadError } from '../errors/index.js'
 
 describe('ProjectLoader', () => {
   const fixtureDir = path.resolve(__dirname, 'fixtures/valid-project')

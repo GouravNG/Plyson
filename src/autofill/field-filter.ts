@@ -1,4 +1,4 @@
-import { AutoFillFields } from '../types'
+import { AutoFillFields } from '../types/index.js'
 
 /**
  * Applies includeFields or excludeFields filtering to a list of fields.

@@ -1,11 +1,11 @@
 import { test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { ProjectLoader } from '../../core/project-loader'
-import { registerSuites } from '../../core/test-runner'
-import { VariableStore } from '../../core/variable-store'
-import { registerBuiltins } from '../../generators/registry'
-import { createMockServer, MockServer } from './mock-server'
+import { ProjectLoader } from '../../core/project-loader.js'
+import { registerSuites } from '../../core/test-runner.js'
+import { VariableStore } from '../../core/variable-store.js'
+import { registerBuiltins } from '../../generators/registry.js'
+import { createMockServer, MockServer } from './mock-server.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)

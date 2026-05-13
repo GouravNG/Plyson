@@ -1,0 +1,26 @@
+{
+  "title": "Sample Suite",
+  "tags": [
+    "sample"
+  ],
+  "testCases": [
+    {
+      "id": "sample-get",
+      "title": "Sample GET request",
+      "steps": [
+        {
+          "title": "Check status",
+          "request": {
+            "method": "GET",
+            "endpoint": "/"
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

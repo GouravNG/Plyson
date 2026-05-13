@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { HandlerContext } from '../core/handler-runner'
-import { ResolvedRequest } from '../core/http-executor'
+import { HandlerContext } from '../core/handler-runner.js'
+import { ResolvedRequest } from '../core/http-executor.js'
 
 // =========================================================================================================
 // Foundation types

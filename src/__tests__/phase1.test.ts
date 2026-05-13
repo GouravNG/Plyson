@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { TestSuiteSchema, AssertionSchema, AssertionOperatorsSchema } from '../types'
+import { TestSuiteSchema, AssertionSchema, AssertionOperatorsSchema } from '../types/index.js'
 
 describe('Phase 1: Zod Schema Validation', () => {
   it('should parse a valid TestSuite fixture without errors', () => {

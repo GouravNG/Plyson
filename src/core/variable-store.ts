@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { Scope, Variables, VariableValue } from '../types'
+import { Scope, Variables, VariableValue } from '../types/index.js'
 
 const RESERVED_GLOBALS: Record<string, () => any> = {
   $timestamp: () => Date.now(),

@@ -1,8 +1,8 @@
-import { ResolutionError } from '../errors'
-import { GeneratorRegistry } from '../generators/registry'
-import { GeneratorObject, Req, Variables, VariableValue } from '../types'
-import { isGenObject } from '../utils/is-gen-object'
-import { VariableStore } from './variable-store'
+import { ResolutionError } from '../errors/index.js'
+import { GeneratorRegistry } from '../generators/registry.js'
+import { GeneratorObject, Req, Variables, VariableValue } from '../types/index.js'
+import { isGenObject } from '../utils/is-gen-object.js'
+import { VariableStore } from './variable-store.js'
 
 const TOKEN_RE = /\{\{\s*(.*?)\s*\}\}/g
 

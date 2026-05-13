@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest'
-import { GeneratorRegistry, registerBuiltins } from '../generators/registry'
-import { GeneratorOptionError, UnknownGeneratorError } from '../errors'
+import { GeneratorRegistry, registerBuiltins } from '../generators/registry.js'
+import { GeneratorOptionError, UnknownGeneratorError } from '../errors/index.js'
 
 describe('Generators', () => {
   beforeEach(() => {

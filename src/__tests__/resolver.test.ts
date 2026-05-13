@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
-import { Resolver, resolvePhase1, resolvePhase2 } from '../core/resolver'
-import { VariableStore } from '../core/variable-store'
-import { GeneratorRegistry } from '../generators/registry'
-import { ResolutionError } from '../errors'
-import { Req } from '../types'
+import { Resolver, resolvePhase1, resolvePhase2 } from '../core/resolver.js'
+import { VariableStore } from '../core/variable-store.js'
+import { GeneratorRegistry } from '../generators/registry.js'
+import { ResolutionError } from '../errors/index.js'
+import { Req } from '../types/index.js'
 
 vi.mock('../generators/registry', () => ({
   GeneratorRegistry: {

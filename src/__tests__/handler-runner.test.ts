@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
-import { HandlerRunner, HandlerContext } from '../core/handler-runner'
-import { HandlerModule } from '../types'
-import { LoadError } from '../errors'
+import { HandlerRunner, HandlerContext } from '../core/handler-runner.js'
+import { HandlerModule } from '../types/index.js'
+import { LoadError } from '../errors/index.js'
 
 describe('HandlerRunner', () => {
   it('should execute handlers in order', async () => {

@@ -164,6 +164,34 @@ type ReferencedTestStep = {
   description?: string
 }
 
+// :::: DRAFT ::::
+// Variable in source should be used in
+// between the start and end testcase.
+type LoopTestStep = {
+  // variable source name available Array
+  // Could be the variable or from external datasource like cSV.
+  // string if source file path is defined
+  source: string | keyof Variables
+  // index of the Testcase
+  start: number
+  end: number
+}
+
+// :::: DRAFT ::::
+// Utility teststep
+// Teststep that handledy external code
+type UtilityTestStep = {
+  // case SCREAMING_SNAKE_CASE.
+  // ex: COGNITO_AUTH_UTILITY
+  // file name conventions utils/**/*.utils.ts
+  // below to be discussed can have alternative behvior
+  // should named export the same in pascel case exmple
+  // export cognitoAuthUtility
+  action: string
+  description?: string
+  params: Record<string, unknown>
+}
+
 type InlineTestStep = CommonTestStep & { ref?: never }
 
 type TestStep = ReferencedTestStep | InlineTestStep

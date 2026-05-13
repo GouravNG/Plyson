@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { VariableStore } from '../core/variable-store'
+import { VariableStore } from '../core/variable-store.js'
 
 describe('VariableStore', () => {
   it('should handle scope priority (case > suite > environment > global)', () => {

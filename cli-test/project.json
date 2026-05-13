@@ -1,0 +1,6 @@
+{
+  "title": "New API Project",
+  "description": "API testing project created with play-son",
+  "version": "1.0.0",
+  "defaultEnv": "dev"
+}

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
-import { AutoFillFields } from '../types'
-import { applyFieldFilter } from './field-filter'
+import { AutoFillFields } from '../types/index.js'
+import { applyFieldFilter } from './field-filter.js'
 
 /**
  * Generates a payload object from a JSON schema, respecting field filters.

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
-import { GeneratorOptionError } from '../errors'
-import { Generator } from './registry'
+import { GeneratorOptionError } from '../errors/index.js'
+import { Generator } from './registry.js'
 
 export interface BooleanOptions {
   probability?: number

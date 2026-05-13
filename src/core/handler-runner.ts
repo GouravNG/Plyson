@@ -1,7 +1,7 @@
 import { APIResponse } from '@playwright/test'
-import { HandlerModule, VariableValue, Scope } from '../types'
-import { LoadError } from '../errors'
-import { ResolvedRequest } from './http-executor'
+import { HandlerModule, VariableValue, Scope } from '../types/index.js'
+import { LoadError } from '../errors/index.js'
+import { ResolvedRequest } from './http-executor.js'
 
 export interface HandlerContext {
   request: ResolvedRequest

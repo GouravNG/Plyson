@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach } from 'vitest'
-import { resolvePhase1 } from '../core/resolver'
-import { VariableStore } from '../core/variable-store'
-import { registerBuiltins } from '../generators/registry'
+import { resolvePhase1 } from '../core/resolver.js'
+import { VariableStore } from '../core/variable-store.js'
+import { registerBuiltins } from '../generators/registry.js'
 
 describe('Resolver + Generators Integration', () => {
   beforeEach(() => {

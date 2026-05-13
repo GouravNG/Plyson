@@ -1,8 +1,8 @@
 import { APIResponse } from '@playwright/test'
-import { ExtractedValue } from '../types'
-import { pathEngine } from '../path'
-import { VariableStore } from './variable-store'
-import { ExtractionError } from '../errors'
+import { ExtractedValue } from '../types/index.js'
+import { pathEngine } from '../path/index.js'
+import { VariableStore } from './variable-store.js'
+import { ExtractionError } from '../errors/index.js'
 
 export class ExtractionEngine {
   /**

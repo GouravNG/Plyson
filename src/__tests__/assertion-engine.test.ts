@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { AssertionEngine } from '../core/assertion-engine'
+import { AssertionEngine } from '../core/assertion-engine.js'
 import { APIResponse } from '@playwright/test'
-import { AssertionError } from '../errors'
+import { AssertionError } from '../errors/index.js'
 
 describe('AssertionEngine', () => {
   const mockResponse = {

@@ -1,4 +1,4 @@
-import { HandlerContext } from '../core/handler-runner'
+import { HandlerContext } from '../core/handler-runner.js'
 
 export async function run(ctx: HandlerContext) {
   const body = ctx.body as any
