@@ -1,7 +1,7 @@
 {
   "name": "play-son",
   "description": "A declarative API testing framework built on Playwright",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
