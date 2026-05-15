@@ -1,12 +1,26 @@
 {
   "name": "play-son",
+  "description": "A declarative API testing framework built on Playwright",
   "version": "0.1.0",
   "type": "module",
-  "description": "A declarative API testing framework built on Playwright",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
     "playson": "./dist/cli/index.js"
+  },
+  "files": [
+    "dist",
+    "schemas",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GouravNG/Play-son.git"
   },
   "scripts": {
     "test": "vitest run",
