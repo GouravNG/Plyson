@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { AssertionEngine } from '../core/assertion-engine.js'
-import { APIResponse } from '@playwright/test'
+import type { APIResponse } from '@playwright/test'
 import { AssertionError } from '../errors/index.js'
 
 describe('AssertionEngine', () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { pathEngine } from '../path/index.js'
-import { APIResponse } from '@playwright/test'
+import type { APIResponse } from '@playwright/test'
 
 describe('PathEngine', () => {
   it('should extract single value using JSONPath', () => {

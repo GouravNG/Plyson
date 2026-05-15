@@ -1,4 +1,4 @@
-import { test as pwTest, expect as pwExpect, type APIRequestContext } from '@playwright/test'
+import type { APIRequestContext } from '@playwright/test'
 import { ProjectGraph } from './project-loader.js'
 import { VariableStore } from './variable-store.js'
 import { HttpExecutor, ResolvedRequest } from './http-executor.js'
@@ -16,9 +16,13 @@ import { safeParseJson } from '../utils/safe-parse-json.js'
 export function registerSuites(
   graph: ProjectGraph,
   store: VariableStore,
-  test: any = pwTest,
-  expect: any = pwExpect
+  test: any,
+  expect: any
 ): void {
+  if (!test || !expect) {
+    throw new Error('registerSuites requires the active Playwright test and expect instances.')
+  }
+
   AssertionEngine.setExpect(expect)
 
   test.beforeAll(async ({ request }: { request: APIRequestContext }) => {

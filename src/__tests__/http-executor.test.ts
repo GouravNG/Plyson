@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { HttpExecutor } from '../core/http-executor.js'
-import { APIRequestContext, APIResponse } from '@playwright/test'
-import { ResolvedStep } from '../types/index.js'
+import type { APIRequestContext, APIResponse } from '@playwright/test'
+import type { ResolvedStep } from '../types/index.js'
 
 describe('HttpExecutor', () => {
   const mockContext = {

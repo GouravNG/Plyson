@@ -1,4 +1,4 @@
-import { test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { ProjectLoader } from '../../core/project-loader.js'
@@ -31,4 +31,4 @@ const store = new VariableStore()
 // Load the project graph and register the suites
 // Playwright discovery will pick up the tests registered by registerSuites
 const graph = await loader.load(rootDir, 'test')
-registerSuites(graph, store)
+registerSuites(graph, store, test, expect)

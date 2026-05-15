@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { ExtractionEngine } from '../core/extraction-engine.js'
 import { VariableStore } from '../core/variable-store.js'
-import { APIResponse } from '@playwright/test'
+import type { APIResponse } from '@playwright/test'
 import { ExtractionError } from '../errors/index.js'
 
 describe('ExtractionEngine', () => {
