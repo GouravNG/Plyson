@@ -1,9 +1,13 @@
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { AssertionEngine } from '../core/assertion-engine.js'
 import { APIResponse } from '@playwright/test'
 import { AssertionError } from '../errors/index.js'
 
 describe('AssertionEngine', () => {
+  beforeAll(() => {
+    AssertionEngine.setExpect(expect)
+  })
+
   const mockResponse = {
     headers: () => ({ 'content-type': 'application/json' }),
   } as unknown as APIResponse
