@@ -1,6 +1,6 @@
 import { JSONPath } from 'jsonpath-plus'
 import jmespath from 'jmespath'
-import { APIResponse } from '@playwright/test'
+import type { APIResponse } from '@playwright/test'
 
 export class PathEngine {
   /**

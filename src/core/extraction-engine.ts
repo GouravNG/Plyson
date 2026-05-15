@@ -1,4 +1,4 @@
-import { APIResponse } from '@playwright/test'
+import type { APIResponse } from '@playwright/test'
 import { ExtractedValue } from '../types/index.js'
 import { pathEngine } from '../path/index.js'
 import { VariableStore } from './variable-store.js'

@@ -2,17 +2,13 @@ import { Command } from 'commander';
 import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export const runCommand = new Command('run')
   .description('Run play-son tests via Playwright')
   .argument('[paths...]', 'Specific test paths to run')
   .option('-e, --env <name>', 'Environment to use')
   .allowUnknownOption()
-  .action(async (paths, options) => {
+  .action(async (_paths, options) => {
     const rootDir = process.cwd();
     let env = options.env;
 
@@ -33,9 +29,6 @@ export const runCommand = new Command('run')
       console.error('Error: Environment is required. Use --env <name> or set defaultEnv in project.json');
       process.exit(1);
     }
-
-    // Path to the playwright-runner.js
-    const runnerPath = path.resolve(__dirname, '../../core/playwright-runner.js');
     
     const envVars = {
       ...process.env,
@@ -45,17 +38,11 @@ export const runCommand = new Command('run')
 
     // Prepare playwright arguments
     // We want to pass everything that wasn't consumed by our options.
-    // commander.args contains paths and unknown options.
     
     // Construct the playwright test command arguments
-    const playwrightArgs = ['test', runnerPath];
+    const playwrightArgs = ['test'];
     
-    // Add paths if provided
-    if (paths && paths.length > 0) {
-      playwrightArgs.push(...paths);
-    }
-
-    // Add all other arguments passed to this command, excluding --env/-e and its value
+    // Add all arguments passed to this command, excluding --env/-e and its value
     const rawArgs = process.argv.slice(process.argv.indexOf('run') + 1);
     for (let i = 0; i < rawArgs.length; i++) {
       const arg = rawArgs[i];
@@ -63,9 +50,6 @@ export const runCommand = new Command('run')
         i++; // skip value
         continue;
       }
-      // If it's a path we already added, or it was the 'run' command itself, skip it
-      if (paths.includes(arg)) continue;
-      
       playwrightArgs.push(arg);
     }
 

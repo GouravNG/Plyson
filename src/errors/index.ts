@@ -18,7 +18,8 @@ export class LoadError extends PlaysonError {
 
 export class AggregateLoadError extends Error {
   constructor(public errors: LoadError[]) {
-    super(`Failed to load project with ${errors.length} errors.`)
+    const errorList = errors.map((e) => `  - ${e.message}`).join('\n')
+    super(`Failed to load project with ${errors.length} errors:\n${errorList}`)
     this.name = 'AggregateLoadError'
   }
 }

@@ -1,4 +1,4 @@
-import { expect, APIResponse } from '@playwright/test'
+import type { expect as playwrightExpect, APIResponse } from '@playwright/test'
 import Ajv from 'ajv'
 import addFormats from 'ajv-formats'
 import { Assertions, AssertionOperators, SoftError } from '../types/index.js'
@@ -8,7 +8,12 @@ import { AssertionError, LoadError, SchemaValidationError } from '../errors/inde
 const ajv = new Ajv({ allErrors: true })
 addFormats(ajv)
 
+let expect: typeof playwrightExpect
+
 export class AssertionEngine {
+  static setExpect(instance: typeof playwrightExpect) {
+    expect = instance
+  }
   /**
    * Checks the status code against expected value(s).
    */

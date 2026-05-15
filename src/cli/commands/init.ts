@@ -29,6 +29,9 @@ export const initCommand = new Command('init')
     });
 
     // Create placeholder files
+    const sanitizedProjectName = projectName === '.' ? path.basename(rootDir) : path.basename(projectName);
+    const packageJsonName = sanitizedProjectName.toLowerCase().replace(/[^a-z0-9-_]/g, '-');
+
     const placeholders = {
       'project.json': {
         title: projectName === '.' ? 'New API Project' : projectName,
@@ -55,6 +58,7 @@ export const initCommand = new Command('init')
           {
             "id": "sample-get",
             "title": "Should return 200 OK from root",
+            "tags": [],
             "steps": [
               {
                 "title": "GET /",
@@ -71,13 +75,56 @@ export const initCommand = new Command('init')
             ]
           }
         ]
-      }
+      },
+      'suites/playson.spec.ts': `import { test, expect } from '@playwright/test';
+import { bootstrap } from 'play-son';
+
+/**
+ * This is the entry point for play-son tests. 
+ * It discovers all *.test.json files and registers them as Playwright tests.
+ */
+await bootstrap(test, expect);
+`,
+      'package.json': {
+        "name": packageJsonName,
+        "version": "1.0.0",
+        "type": "module",
+        "scripts": {
+          "test": "playson run"
+        },
+        "dependencies": {
+          "play-son": "latest"
+        },
+        "devDependencies": {
+          "@playwright/test": "^1.59.1"
+        }
+      },
+      'playwright.config.ts': `import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  timeout: 30000,
+  retries: 1,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: 'html',
+  use: {
+    trace: 'on-first-retry',
+  },
+});
+`,
+      '.gitignore': `node_modules/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+.env
+`
     };
 
     Object.entries(placeholders).forEach(([filename, content]) => {
       const filePath = path.join(rootDir, filename);
       if (!fs.existsSync(filePath)) {
-        fs.writeFileSync(filePath, JSON.stringify(content, null, 2));
+        const fileContent = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+        fs.writeFileSync(filePath, fileContent);
         console.log(`Created ${filename}`);
       } else {
         console.log(`${filename} already exists, skipping.`);

@@ -63,9 +63,30 @@ describe('CLI Commands', () => {
       expect(fs.existsSync(path.join(projectPath, 'project.json'))).toBe(true);
       expect(fs.existsSync(path.join(projectPath, 'environments/dev.env.json'))).toBe(true);
       expect(fs.existsSync(path.join(projectPath, 'suites/sample.test.json'))).toBe(true);
+      expect(fs.existsSync(path.join(projectPath, 'package.json'))).toBe(true);
+      expect(fs.existsSync(path.join(projectPath, 'playwright.config.ts'))).toBe(true);
+      expect(fs.existsSync(path.join(projectPath, '.gitignore'))).toBe(true);
 
       const projectJson = JSON.parse(fs.readFileSync(path.join(projectPath, 'project.json'), 'utf-8'));
       expect(projectJson.title).toBe('test-init');
+
+      const packageJson = JSON.parse(fs.readFileSync(path.join(projectPath, 'package.json'), 'utf-8'));
+      expect(packageJson.name).toBe('test-init');
+      expect(packageJson.scripts.test).toBe('playson run');
+    });
+
+    it('should handle "." as project name and use current directory name for package.json', async () => {
+      // Create a subdirectory to simulate running 'init .'
+      const subDir = path.join(testDir, 'current-dir-test');
+      fs.mkdirSync(subDir);
+      process.chdir(subDir);
+
+      await program.parseAsync(['node', 'playson', 'init', '.']);
+
+      const packageJson = JSON.parse(fs.readFileSync(path.join(subDir, 'package.json'), 'utf-8'));
+      expect(packageJson.name).toBe('current-dir-test');
+      expect(packageJson.name).not.toContain('./');
+      expect(packageJson.name).not.toContain('.');
     });
   });
 

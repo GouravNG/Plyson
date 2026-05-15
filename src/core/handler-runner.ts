@@ -1,4 +1,4 @@
-import { APIResponse } from '@playwright/test'
+import type { APIResponse } from '@playwright/test'
 import { HandlerModule, VariableValue, Scope } from '../types/index.js'
 import { LoadError } from '../errors/index.js'
 import { ResolvedRequest } from './http-executor.js'

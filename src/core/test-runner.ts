@@ -1,4 +1,4 @@
-import { test, APIRequestContext } from '@playwright/test'
+import type { APIRequestContext } from '@playwright/test'
 import { ProjectGraph } from './project-loader.js'
 import { VariableStore } from './variable-store.js'
 import { HttpExecutor, ResolvedRequest } from './http-executor.js'
@@ -13,18 +13,20 @@ import { safeParseJson } from '../utils/safe-parse-json.js'
 /**
  * Registers all suites from the project graph as Playwright tests.
  */
-export function registerSuites(graph: ProjectGraph, store: VariableStore): void {
-  test.beforeAll(async ({ request }) => {
+export function registerSuites(graph: ProjectGraph, store: VariableStore, test: any, expect: any): void {
+  AssertionEngine.setExpect(expect)
+
+  test.beforeAll(async ({ request }: { request: APIRequestContext }) => {
     store.push('global', graph.variables)
     store.push('environment', graph.environment.variables ?? {})
     if (graph.project.beforeAll) {
-      await runSteps(graph.project.beforeAll, request, store, graph)
+      await runSteps(graph.project.beforeAll, request, store, graph, test)
     }
   })
 
-  test.afterAll(async ({ request }) => {
+  test.afterAll(async ({ request }: { request: APIRequestContext }) => {
     if (graph.project.afterAll) {
-      await runSteps(graph.project.afterAll, request, store, graph)
+      await runSteps(graph.project.afterAll, request, store, graph, test)
     }
   })
 
@@ -32,31 +34,31 @@ export function registerSuites(graph: ProjectGraph, store: VariableStore): void 
     const describeFn = suite.disabled ? test.describe.skip : test.describe
 
     describeFn(suite.title, () => {
-      test.beforeAll(async ({ request }) => {
+      test.beforeAll(async ({ request }: { request: APIRequestContext }) => {
         store.push('suite', suite.variables ?? {})
         if (suite.beforeAll) {
-          await runSteps(suite.beforeAll, request, store, graph)
+          await runSteps(suite.beforeAll, request, store, graph, test)
         }
       })
 
-      test.afterAll(async ({ request }) => {
+      test.afterAll(async ({ request }: { request: APIRequestContext }) => {
         if (suite.afterAll) {
-          await runSteps(suite.afterAll, request, store, graph)
+          await runSteps(suite.afterAll, request, store, graph, test)
         }
         store.pop('suite')
       })
 
       for (const testCase of suite.testCases) {
         const testFn = testCase.disabled ? test.skip : test
-        const tags = testCase.tags.map((t) => (t.startsWith('@') ? t : `@${t}`))
+        const tags = testCase.tags.map((t: string) => (t.startsWith('@') ? t : `@${t}`))
 
-        testFn(testCase.title, { tag: tags }, async ({ request }) => {
+        testFn(testCase.title, { tag: tags }, async ({ request }: { request: APIRequestContext }) => {
           // Phase 1 — resolve case variables once before any step runs
           const resolvedVars = resolvePhase1(testCase.variables ?? {}, store)
           store.push('case', resolvedVars)
 
           try {
-            await runSteps(testCase.steps, request, store, graph)
+            await runSteps(testCase.steps, request, store, graph, test)
           } finally {
             store.pop('case')
           }
@@ -73,7 +75,8 @@ async function runSteps(
   steps: TestStep[],
   request: APIRequestContext,
   store: VariableStore,
-  graph: ProjectGraph
+  graph: ProjectGraph,
+  test: any
 ): Promise<void> {
   const executor = new HttpExecutor(request, graph.environment.baseUrl, graph.schemas)
 

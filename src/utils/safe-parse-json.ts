@@ -1,4 +1,4 @@
-import { APIResponse } from '@playwright/test'
+import type { APIResponse } from '@playwright/test'
 
 /**
  * Safely parses the response body as JSON.
