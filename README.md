@@ -22,6 +22,7 @@ npm install play-son
 ## Quick Start
 
 1. Initialize a new project:
+
    ```bash
    npx playson init my-tests
    ```
@@ -34,6 +35,7 @@ npm install play-son
 ## Documentation
 
 For detailed information, please refer to the [docs](./docs) directory:
+
 - [Architecture](./docs/ARCHITECTURE.md)
 - [CLI Reference](./docs/CLI.md)
 - [Assertions](./docs/ASSERTIONS.md)

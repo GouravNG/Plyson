@@ -40,20 +40,21 @@ Every generatable field uses a `$gen` key as the directive signal. The value is 
 
 ```json
 {
-  "name":  { "$gen": "fullName" },
+  "name": { "$gen": "fullName" },
   "email": { "$gen": "email" },
-  "age":   { "$gen": "int", "min": 18, "max": 65 },
-  "id":    { "$gen": "uuid" }
+  "age": { "$gen": "int", "min": 18, "max": 65 },
+  "id": { "$gen": "uuid" }
 }
 ```
 
 **Output:**
+
 ```json
 {
-  "name":  "Dr. Alice Monroe",
+  "name": "Dr. Alice Monroe",
   "email": "alice.monroe@example.com",
-  "age":   34,
-  "id":    "b3d2f1a0-..."
+  "age": 34,
+  "id": "b3d2f1a0-..."
 }
 ```
 
@@ -65,9 +66,9 @@ Plain values (no `$gen`) are passed through as-is:
 
 ```json
 {
-  "role":      "admin",
-  "active":    true,
-  "name":      { "$gen": "fullName" },
+  "role": "admin",
+  "active": true,
+  "name": { "$gen": "fullName" },
   "createdAt": { "$gen": "past" }
 }
 ```
@@ -88,7 +89,7 @@ The resolver walks the schema recursively:
     }
   },
   "company": {
-    "name":    { "$gen": "name" },
+    "name": { "$gen": "name" },
     "address": { "$gen": "streetAddress" }
   }
 }
@@ -102,7 +103,7 @@ Adding `$count` at the root or field level generates an array of values:
 
 ```json
 {
-  "$gen":   "fullName",
+  "$gen": "fullName",
   "$count": 5
 }
 ```
@@ -114,9 +115,9 @@ Or generating an array of full objects:
 ```json
 {
   "$count": 10,
-  "name":   { "$gen": "fullName" },
-  "email":  { "$gen": "email" },
-  "age":    { "$gen": "int", "min": 18, "max": 65 }
+  "name": { "$gen": "fullName" },
+  "email": { "$gen": "email" },
+  "age": { "$gen": "int", "min": 18, "max": 65 }
 }
 ```
 
@@ -199,13 +200,9 @@ function resolve(schema) {
   if (!$gen) {
     if ($count) {
       // $count on plain object → generate array of objects
-      return Array.from({ length: $count }, () =>
-        resolve({ ...params })
-      )
+      return Array.from({ length: $count }, () => resolve({ ...params }))
     }
-    return Object.fromEntries(
-      Object.entries(schema).map(([key, val]) => [key, resolve(val)])
-    )
+    return Object.fromEntries(Object.entries(schema).map(([key, val]) => [key, resolve(val)]))
   }
 
   // Has $gen — find and call the faker method
@@ -213,8 +210,8 @@ function resolve(schema) {
 
   const generate = () =>
     Object.keys(params).length > 0
-      ? method(params)   // pass params object if any
-      : method()         // call with no args
+      ? method(params) // pass params object if any
+      : method() // call with no args
 
   // $count on a $gen field → return array
   if ($count) {
@@ -231,22 +228,23 @@ function resolve(schema) {
 
 ```js
 const schema = {
-  "$count": 3,
-  "name":   { "$gen": "fullName" },
-  "email":  { "$gen": "email" },
-  "age":    { "$gen": "int", "min": 18, "max": 65 },
-  "id":     { "$gen": "uuid" },
-  "address": {
-    "street":  { "$gen": "streetAddress" },
-    "city":    { "$gen": "city" },
-    "country": { "$gen": "country" }
-  }
+  $count: 3,
+  name: { $gen: 'fullName' },
+  email: { $gen: 'email' },
+  age: { $gen: 'int', min: 18, max: 65 },
+  id: { $gen: 'uuid' },
+  address: {
+    street: { $gen: 'streetAddress' },
+    city: { $gen: 'city' },
+    country: { $gen: 'country' },
+  },
 }
 
 console.log(resolve(schema))
 ```
 
 **Output:**
+
 ```json
 [
   {
@@ -268,14 +266,14 @@ console.log(resolve(schema))
 
 ## Why This Works
 
-| Concern | Who Handles It |
-|---|---|
-| Type correctness | Faker |
-| Value format (email, uuid, iban...) | Faker |
-| Range validation (min/max) | Faker |
-| Locale-aware data | Faker |
-| Realistic data quality | Faker |
-| Schema parsing & routing | Your resolver (3 functions) |
+| Concern                             | Who Handles It              |
+| ----------------------------------- | --------------------------- |
+| Type correctness                    | Faker                       |
+| Value format (email, uuid, iban...) | Faker                       |
+| Range validation (min/max)          | Faker                       |
+| Locale-aware data                   | Faker                       |
+| Realistic data quality              | Faker                       |
+| Schema parsing & routing            | Your resolver (3 functions) |
 
 Your backend code has exactly **one job**: find the method and call it. Faker does the rest.
 
@@ -283,11 +281,11 @@ Your backend code has exactly **one job**: find the method and call it. Faker do
 
 ## Reserved Keys
 
-| Key | Purpose |
-|---|---|
-| `$gen` | Faker method name (required for generation) |
-| `$count` | Number of items to generate (array output) |
-| `$module` | Module hint for ambiguous method names |
+| Key       | Purpose                                     |
+| --------- | ------------------------------------------- |
+| `$gen`    | Faker method name (required for generation) |
+| `$count`  | Number of items to generate (array output)  |
+| `$module` | Module hint for ambiguous method names      |
 
 All other keys in a `$gen` node are forwarded as params to the faker method.
 
@@ -301,7 +299,9 @@ function resolve(schema) {
     // ... resolution logic
   } catch (err) {
     if (err.message.includes('No faker method found')) {
-      throw new Error(`Unknown $gen method: "${schema.$gen}". Check fakerjs.dev/api for valid methods.`)
+      throw new Error(
+        `Unknown $gen method: "${schema.$gen}". Check fakerjs.dev/api for valid methods.`
+      )
     }
     throw err
   }

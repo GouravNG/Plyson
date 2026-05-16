@@ -1,183 +1,207 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { Command } from 'commander';
-import { initCommand } from '../cli/commands/init.js';
-import { generateCommand } from '../cli/commands/generate.js';
-import { validateCommand } from '../cli/commands/validate.js';
-import { syncSchemasCommand } from '../cli/commands/sync-schemas.js';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import { Command } from 'commander'
+import { initCommand } from '../cli/commands/init.js'
+import { generateCommand } from '../cli/commands/generate.js'
+import { validateCommand } from '../cli/commands/validate.js'
+import { syncSchemasCommand } from '../cli/commands/sync-schemas.js'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // Mock @inquirer/prompts
 vi.mock('@inquirer/prompts', () => ({
   confirm: vi.fn(),
-  select: vi.fn()
-}));
+  select: vi.fn(),
+}))
 
-import { confirm, select } from '@inquirer/prompts';
+import { confirm, select } from '@inquirer/prompts'
 
 describe('CLI Commands', () => {
-  const testDir = path.resolve(__dirname, '../../test-project-tmp');
-  let exitSpy: any;
-  let program: Command;
+  const testDir = path.resolve(__dirname, '../../test-project-tmp')
+  let exitSpy: any
+  let program: Command
 
   beforeEach(() => {
     if (fs.existsSync(testDir)) {
-      fs.rmSync(testDir, { recursive: true, force: true });
+      fs.rmSync(testDir, { recursive: true, force: true })
     }
-    fs.mkdirSync(testDir, { recursive: true });
-    process.chdir(testDir);
-    
-    // Silence console
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-    
-    exitSpy = vi.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined): never => {
-      throw new Error(`process.exit: ${code}`);
-    });
+    fs.mkdirSync(testDir, { recursive: true })
+    process.chdir(testDir)
 
-    program = new Command();
-    program.addCommand(initCommand);
-    program.addCommand(generateCommand);
-    program.addCommand(validateCommand);
-    program.addCommand(syncSchemasCommand);
-  });
+    // Silence console
+    vi.spyOn(console, 'log').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    exitSpy = vi
+      .spyOn(process, 'exit')
+      .mockImplementation((code?: string | number | null | undefined): never => {
+        throw new Error(`process.exit: ${code}`)
+      })
+
+    program = new Command()
+    program.addCommand(initCommand)
+    program.addCommand(generateCommand)
+    program.addCommand(validateCommand)
+    program.addCommand(syncSchemasCommand)
+  })
 
   afterEach(() => {
-    process.chdir(path.resolve(__dirname, '../..'));
+    process.chdir(path.resolve(__dirname, '../..'))
     if (fs.existsSync(testDir)) {
-      fs.rmSync(testDir, { recursive: true, force: true });
+      fs.rmSync(testDir, { recursive: true, force: true })
     }
-    vi.clearAllMocks();
-    exitSpy.mockRestore();
-  });
+    vi.clearAllMocks()
+    exitSpy.mockRestore()
+  })
 
   describe('init', () => {
     it('should initialize a new project with correct structure', async () => {
-      await program.parseAsync(['node', 'playson', 'init', 'test-init']);
+      await program.parseAsync(['node', 'playson', 'init', 'test-init'])
 
-      const projectPath = path.join(testDir, 'test-init');
-      expect(fs.existsSync(path.join(projectPath, 'project.json'))).toBe(true);
-      expect(fs.existsSync(path.join(projectPath, 'environments/dev.env.json'))).toBe(true);
-      expect(fs.existsSync(path.join(projectPath, 'suites/sample.test.json'))).toBe(true);
-      expect(fs.existsSync(path.join(projectPath, 'package.json'))).toBe(true);
-      expect(fs.existsSync(path.join(projectPath, 'playwright.config.ts'))).toBe(true);
-      expect(fs.existsSync(path.join(projectPath, '.gitignore'))).toBe(true);
+      const projectPath = path.join(testDir, 'test-init')
+      expect(fs.existsSync(path.join(projectPath, 'project.json'))).toBe(true)
+      expect(fs.existsSync(path.join(projectPath, 'environments/dev.env.json'))).toBe(true)
+      expect(fs.existsSync(path.join(projectPath, 'suites/sample.test.json'))).toBe(true)
+      expect(fs.existsSync(path.join(projectPath, 'package.json'))).toBe(true)
+      expect(fs.existsSync(path.join(projectPath, 'playwright.config.ts'))).toBe(true)
+      expect(fs.existsSync(path.join(projectPath, '.gitignore'))).toBe(true)
 
-      const projectJson = JSON.parse(fs.readFileSync(path.join(projectPath, 'project.json'), 'utf-8'));
-      expect(projectJson.title).toBe('test-init');
+      const projectJson = JSON.parse(
+        fs.readFileSync(path.join(projectPath, 'project.json'), 'utf-8')
+      )
+      expect(projectJson.title).toBe('test-init')
 
-      const packageJson = JSON.parse(fs.readFileSync(path.join(projectPath, 'package.json'), 'utf-8'));
-      expect(packageJson.name).toBe('test-init');
-      expect(packageJson.scripts.test).toBe('playson run');
-    });
+      const packageJson = JSON.parse(
+        fs.readFileSync(path.join(projectPath, 'package.json'), 'utf-8')
+      )
+      expect(packageJson.name).toBe('test-init')
+      expect(packageJson.scripts.test).toBe('playson run')
+    })
 
     it('should handle "." as project name and use current directory name for package.json', async () => {
       // Create a subdirectory to simulate running 'init .'
-      const subDir = path.join(testDir, 'current-dir-test');
-      fs.mkdirSync(subDir);
-      process.chdir(subDir);
+      const subDir = path.join(testDir, 'current-dir-test')
+      fs.mkdirSync(subDir)
+      process.chdir(subDir)
 
-      await program.parseAsync(['node', 'playson', 'init', '.']);
+      await program.parseAsync(['node', 'playson', 'init', '.'])
 
-      const packageJson = JSON.parse(fs.readFileSync(path.join(subDir, 'package.json'), 'utf-8'));
-      expect(packageJson.name).toBe('current-dir-test');
-      expect(packageJson.name).not.toContain('./');
-      expect(packageJson.name).not.toContain('.');
-    });
-  });
+      const packageJson = JSON.parse(fs.readFileSync(path.join(subDir, 'package.json'), 'utf-8'))
+      expect(packageJson.name).toBe('current-dir-test')
+      expect(packageJson.name).not.toContain('./')
+      expect(packageJson.name).not.toContain('.')
+    })
+  })
 
   describe('generate', () => {
     beforeEach(async () => {
-      fs.writeFileSync('variables.json', JSON.stringify({}));
-      fs.mkdirSync('environments', { recursive: true });
-      fs.writeFileSync('environments/dev.env.json', JSON.stringify({ baseUrl: 'http://loc', variables: {} }));
-      fs.writeFileSync('environments/prod.env.json', JSON.stringify({ baseUrl: 'http://loc', variables: {} }));
-    });
+      fs.writeFileSync('variables.json', JSON.stringify({}))
+      fs.mkdirSync('environments', { recursive: true })
+      fs.writeFileSync(
+        'environments/dev.env.json',
+        JSON.stringify({ baseUrl: 'http://loc', variables: {} })
+      )
+      fs.writeFileSync(
+        'environments/prod.env.json',
+        JSON.stringify({ baseUrl: 'http://loc', variables: {} })
+      )
+    })
 
     it('should add a variable to variables.json', async () => {
-      await program.parseAsync(['node', 'playson', 'generate', 'var', 'myKey', 'myValue']);
+      await program.parseAsync(['node', 'playson', 'generate', 'var', 'myKey', 'myValue'])
 
-      const vars = JSON.parse(fs.readFileSync('variables.json', 'utf-8'));
-      expect(vars.myKey).toBe('myValue');
-    });
+      const vars = JSON.parse(fs.readFileSync('variables.json', 'utf-8'))
+      expect(vars.myKey).toBe('myValue')
+    })
 
     it('should add env-var to all environment files', async () => {
-      await program.parseAsync(['node', 'playson', 'generate', 'env-var', 'apiKey', 'secret-val', '--env', 'prod']);
+      await program.parseAsync([
+        'node',
+        'playson',
+        'generate',
+        'env-var',
+        'apiKey',
+        'secret-val',
+        '--env',
+        'prod',
+      ])
 
-      const devEnv = JSON.parse(fs.readFileSync('environments/dev.env.json', 'utf-8'));
-      const prodEnv = JSON.parse(fs.readFileSync('environments/prod.env.json', 'utf-8'));
+      const devEnv = JSON.parse(fs.readFileSync('environments/dev.env.json', 'utf-8'))
+      const prodEnv = JSON.parse(fs.readFileSync('environments/prod.env.json', 'utf-8'))
 
-      expect(prodEnv.variables.apiKey).toBe('secret-val');
-      expect(devEnv.variables.apiKey).toBe('');
-    });
+      expect(prodEnv.variables.apiKey).toBe('secret-val')
+      expect(devEnv.variables.apiKey).toBe('')
+    })
 
     it('should create a handler boilerplate', async () => {
-      await program.parseAsync(['node', 'playson', 'generate', 'handler', 'my-handler']);
+      await program.parseAsync(['node', 'playson', 'generate', 'handler', 'my-handler'])
 
-      expect(fs.existsSync('handlers/my-handler.handler.ts')).toBe(true);
-      const content = fs.readFileSync('handlers/my-handler.handler.ts', 'utf-8');
-      expect(content).toContain("import { HandlerContext } from '../types/index.js'");
-    });
-  });
+      expect(fs.existsSync('handlers/my-handler.handler.ts')).toBe(true)
+      const content = fs.readFileSync('handlers/my-handler.handler.ts', 'utf-8')
+      expect(content).toContain("import { HandlerContext } from '../types/index.js'")
+    })
+  })
 
   describe('validate', () => {
     it('should repair broken JSON syntax interactively', async () => {
-      fs.writeFileSync('project.json', JSON.stringify({ title: 'test', version: '1.0.0' }));
-      fs.mkdirSync('environments', { recursive: true });
-      fs.writeFileSync('environments/dev.env.json', JSON.stringify({ baseUrl: 'http://loc' }));
+      fs.writeFileSync('project.json', JSON.stringify({ title: 'test', version: '1.0.0' }))
+      fs.mkdirSync('environments', { recursive: true })
+      fs.writeFileSync('environments/dev.env.json', JSON.stringify({ baseUrl: 'http://loc' }))
 
-      fs.mkdirSync('scripts', { recursive: true });
-      const brokenJson = '{"id": "test", "title": "test", "steps": [], }';
-      fs.writeFileSync('scripts/broken.script.json', brokenJson);
-      
-      vi.mocked(confirm).mockResolvedValue(true);
+      fs.mkdirSync('scripts', { recursive: true })
+      const brokenJson = '{"id": "test", "title": "test", "steps": [], }'
+      fs.writeFileSync('scripts/broken.script.json', brokenJson)
+
+      vi.mocked(confirm).mockResolvedValue(true)
 
       try {
-        await program.parseAsync(['node', 'playson', 'validate', '.', '--repair']);
+        await program.parseAsync(['node', 'playson', 'validate', '.', '--repair'])
       } catch (e: any) {
-        if (!e.message.startsWith('process.exit')) throw e;
+        if (!e.message.startsWith('process.exit')) throw e
       }
 
-      const repaired = JSON.parse(fs.readFileSync('scripts/broken.script.json', 'utf-8'));
-      expect(repaired.id).toBe('test');
-      expect(confirm).toHaveBeenCalled();
-    });
-  });
+      const repaired = JSON.parse(fs.readFileSync('scripts/broken.script.json', 'utf-8'))
+      expect(repaired.id).toBe('test')
+      expect(confirm).toHaveBeenCalled()
+    })
+  })
 
   describe('sync-schemas', () => {
     it('should sync schemas from specUrl and handle stale files', async () => {
       const spec = {
         components: {
           schemas: {
-            User: { type: 'object' }
-          }
-        }
-      };
+            User: { type: 'object' },
+          },
+        },
+      }
 
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => spec
-      });
+        json: async () => spec,
+      })
 
-      fs.mkdirSync('environments', { recursive: true });
-      fs.writeFileSync('environments/dev.env.json', JSON.stringify({ specUrl: 'http://example.com/spec' }));
-      
-      fs.mkdirSync('schemas', { recursive: true });
-      fs.writeFileSync('schemas/Stale.schema.json', '{}');
+      fs.mkdirSync('environments', { recursive: true })
+      fs.writeFileSync(
+        'environments/dev.env.json',
+        JSON.stringify({ specUrl: 'http://example.com/spec' })
+      )
 
-      vi.mocked(confirm).mockResolvedValue(true);
-      vi.mocked(select).mockResolvedValue('delete');
+      fs.mkdirSync('schemas', { recursive: true })
+      fs.writeFileSync('schemas/Stale.schema.json', '{}')
 
-      await program.parseAsync(['node', 'playson', 'sync-schemas', '--env', 'dev']);
+      vi.mocked(confirm).mockResolvedValue(true)
+      vi.mocked(select).mockResolvedValue('delete')
 
-      expect(fs.existsSync('schemas/User.schema.json')).toBe(true);
-      expect(fs.existsSync('schemas/Stale.schema.json')).toBe(false);
-      expect(confirm).toHaveBeenCalled();
-      expect(select).toHaveBeenCalled();
-    });
-  });
-});
+      await program.parseAsync(['node', 'playson', 'sync-schemas', '--env', 'dev'])
+
+      expect(fs.existsSync('schemas/User.schema.json')).toBe(true)
+      expect(fs.existsSync('schemas/Stale.schema.json')).toBe(false)
+      expect(confirm).toHaveBeenCalled()
+      expect(select).toHaveBeenCalled()
+    })
+  })
+})

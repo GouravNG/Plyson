@@ -1,8 +1,6 @@
 {
   "title": "Sample Suite",
-  "tags": [
-    "sample"
-  ],
+  "tags": ["sample"],
   "testCases": [
     {
       "id": "sample-get",

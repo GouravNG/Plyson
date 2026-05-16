@@ -212,6 +212,10 @@ export class ProjectLoader {
         resolveRefsInSteps(tc.steps, `testcase ${tc.id}`)
       }
     }
+    // Also resolve refs in project global hooks
+    if (project.beforeAll) resolveRefsInSteps(project.beforeAll, 'project beforeAll')
+    if (project.afterAll) resolveRefsInSteps(project.afterAll, 'project afterAll')
+
     // Also resolve refs in scripts themselves (they can ref other scripts)
     for (const [id, tc] of scripts) {
       resolveRefsInSteps(tc.steps, `script ${id}`)

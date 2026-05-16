@@ -1,12 +1,13 @@
-name: Publish to NPM
+name: CI Validation
 
 on:
-  release:
-    types: [created]
+  pull_request:
+    branches:
+      - master
   workflow_dispatch:
 
 jobs:
-  publish:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,7 +16,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
@@ -28,8 +28,11 @@ jobs:
       - name: Check Formatting
         run: npx prettier --check .
 
-      - name: Run tests
+      - name: Run Unit Tests
         run: npm test
+
+      - name: Build Check
+        run: npm run build
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
@@ -41,14 +44,6 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-publish
+          name: playwright-report-ci
           path: playwright-report/
-          retention-days: 30
-
-      - name: Build package
-        run: npm run build
-
-      - name: Publish to NPM
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH }}
+          retention-days: 7
