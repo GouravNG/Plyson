@@ -204,5 +204,35 @@ describe('AssertionEngine', () => {
       expect(softErrors.length).toBe(1)
       expect(softErrors[0].title).toBe('warn me')
     })
+
+    it('should NOT validate if validation is false (Issue #11)', async () => {
+      const schemas = new Map([
+        ['User', { type: 'object', properties: { name: { type: 'string' } }, required: ['name'] }],
+      ])
+      const body = { age: 25 }
+      const softErrors: any[] = []
+
+      await expect(
+        AssertionEngine.validateSchema(body, { name: 'User', validation: false }, schemas, softErrors)
+      ).resolves.not.toThrow()
+    })
+
+    it('should push schema validation errors to softErrors when validation is warn (Issue #12)', async () => {
+      const schemas = new Map([
+        ['User', { type: 'object', properties: { name: { type: 'string' } }, required: ['name'] }],
+      ])
+      const body = { age: 25 }
+      const softErrors: any[] = []
+
+      await AssertionEngine.validateSchema(
+        body,
+        { name: 'User', validation: 'warn' },
+        schemas,
+        softErrors
+      )
+      expect(softErrors.length).toBe(1)
+      expect(softErrors[0].title).toBe('schema:User')
+      expect(Array.isArray(softErrors[0].error)).toBe(true)
+    })
   })
 })

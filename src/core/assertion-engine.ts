@@ -36,6 +36,8 @@ export class AssertionEngine {
     schemas: Map<string, any>,
     softErrors: SoftError[]
   ): Promise<void> {
+    if (config.validation === false) return
+
     const schema = schemas.get(config.name)
     if (!schema) {
       throw new LoadError(`Schema "${config.name}" not found in schemas/`)

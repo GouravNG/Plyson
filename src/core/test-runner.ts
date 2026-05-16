@@ -59,9 +59,17 @@ export function registerSuites(
 
       for (const testCase of suite.testCases) {
         const testFn = testCase.disabled ? test.skip : test
-        const tags = testCase.tags.map((t: string) => (t.startsWith('@') ? t : `@${t}`))
+        const allTags = [...new Set([...suite.tags, ...testCase.tags])]
+        if (testCase.testType) {
+          allTags.push(testCase.testType)
+        }
+        const formattedTags = allTags.map((t: string) => (t.startsWith('@') ? t : `@${t}`))
 
-        testFn(testCase.title, { tag: tags }, async ({ request }: { request: APIRequestContext }) => {
+        testFn(testCase.title, { tag: formattedTags }, async ({ request }: { request: APIRequestContext }) => {
+          if (testCase.testType) {
+            test.info().annotations.push({ type: 'testType', description: testCase.testType })
+          }
+
           // Phase 1 — resolve case variables once before any step runs
           const resolvedVars = resolvePhase1(testCase.variables ?? {}, store)
           store.push('case', resolvedVars)
@@ -149,9 +157,19 @@ async function runSteps(
 
     // Record soft errors as Playwright annotations
     for (const soft of softErrors) {
+      let description = ''
+      if (soft.error instanceof Error) {
+        description = soft.error.message
+      } else if (Array.isArray(soft.error)) {
+        // likely AJV errors
+        description = JSON.stringify(soft.error, null, 2)
+      } else {
+        description = String(soft.error)
+      }
+
       test.info().annotations.push({
         type: 'warn',
-        description: `${soft.title}: ${soft.error instanceof Error ? soft.error.message : String(soft.error)}`,
+        description: `${soft.title}: ${description}`,
       })
     }
   }
