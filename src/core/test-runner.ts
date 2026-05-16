@@ -65,21 +65,25 @@ export function registerSuites(
         }
         const formattedTags = allTags.map((t: string) => (t.startsWith('@') ? t : `@${t}`))
 
-        testFn(testCase.title, { tag: formattedTags }, async ({ request }: { request: APIRequestContext }) => {
-          if (testCase.testType) {
-            test.info().annotations.push({ type: 'testType', description: testCase.testType })
-          }
+        testFn(
+          testCase.title,
+          { tag: formattedTags },
+          async ({ request }: { request: APIRequestContext }) => {
+            if (testCase.testType) {
+              test.info().annotations.push({ type: 'testType', description: testCase.testType })
+            }
 
-          // Phase 1 — resolve case variables once before any step runs
-          const resolvedVars = resolvePhase1(testCase.variables ?? {}, store)
-          store.push('case', resolvedVars)
+            // Phase 1 — resolve case variables once before any step runs
+            const resolvedVars = resolvePhase1(testCase.variables ?? {}, store)
+            store.push('case', resolvedVars)
 
-          try {
-            await runSteps(testCase.steps, request, store, graph, test)
-          } finally {
-            store.pop('case')
+            try {
+              await runSteps(testCase.steps, request, store, graph, test)
+            } finally {
+              store.pop('case')
+            }
           }
-        })
+        )
       }
     })
   }

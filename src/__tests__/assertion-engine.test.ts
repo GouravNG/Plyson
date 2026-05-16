@@ -213,7 +213,12 @@ describe('AssertionEngine', () => {
       const softErrors: any[] = []
 
       await expect(
-        AssertionEngine.validateSchema(body, { name: 'User', validation: false }, schemas, softErrors)
+        AssertionEngine.validateSchema(
+          body,
+          { name: 'User', validation: false },
+          schemas,
+          softErrors
+        )
       ).resolves.not.toThrow()
     })
 
