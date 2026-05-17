@@ -1,0 +1,128 @@
+{
+  "title": "Auth Logout",
+  "description": "Tests for the /auth/logout endpoint",
+  "tags": ["automated", "auth", "logout"],
+  "testCases": [
+    {
+      "id": "auth-logout-pos-001",
+      "title": "Logout successfully with valid token",
+      "testType": "positive",
+      "tags": ["positive", "post", "auth"],
+      "variables": {
+        "logoutEmail": "logout.{{$timestamp}}@example.com"
+      },
+      "steps": [
+        {
+          "title": "Register a new user",
+          "request": {
+            "method": "POST",
+            "endpoint": "{{REGISTER_PATH}}",
+            "payload": {
+              "email": "{{logoutEmail}}",
+              "password": "Password123",
+              "firstname": "Logout",
+              "lastname": "Positive"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201
+            }
+          }
+        },
+        {
+          "title": "Login to get token",
+          "request": {
+            "method": "POST",
+            "endpoint": "{{LOGIN_PATH}}",
+            "payload": {
+              "email": "{{logoutEmail}}",
+              "password": "Password123"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200
+            },
+            "extract": [
+              {
+                "name": "logoutToken",
+                "from": "body",
+                "path": "$.token",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Logout",
+          "request": {
+            "method": "POST",
+            "endpoint": "{{LOGOUT_PATH}}",
+            "headers": {
+              "Authorization": "Bearer {{logoutToken}}"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Success is true",
+                  "from": "body",
+                  "path": "$.success",
+                  "operator": "equals",
+                  "value": true
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "auth-logout-neg-unauthorized",
+      "title": "Fail to logout without valid token",
+      "testType": "negative",
+      "tags": ["negative", "post", "auth"],
+      "steps": [
+        {
+          "title": "Logout attempt without token",
+          "request": {
+            "method": "POST",
+            "endpoint": "{{LOGOUT_PATH}}"
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 401
+            }
+          }
+        },
+        {
+          "title": "Logout attempt with invalid token",
+          "request": {
+            "method": "POST",
+            "endpoint": "{{LOGOUT_PATH}}",
+            "headers": {
+              "Authorization": "Bearer invalid-token"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 401
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
