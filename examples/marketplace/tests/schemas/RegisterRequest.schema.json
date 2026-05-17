@@ -1,6 +1,11 @@
 {
   "type": "object",
-  "required": ["email", "password", "firstname", "lastname"],
+  "required": [
+    "email",
+    "password",
+    "firstname",
+    "lastname"
+  ],
   "properties": {
     "email": {
       "type": "string",
@@ -23,7 +28,10 @@
     },
     "role": {
       "type": "string",
-      "enum": ["ADMIN", "USER"],
+      "enum": [
+        "ADMIN",
+        "USER"
+      ],
       "default": "USER"
     }
   }

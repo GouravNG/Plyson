@@ -10,7 +10,7 @@
     "items": {
       "type": "array",
       "items": {
-        "$ref": "OrderItem.schema.json"
+        "$ref": "#/components/schemas/OrderItem"
       }
     },
     "subtotal": {
@@ -18,7 +18,14 @@
     },
     "status": {
       "type": "string",
-      "enum": ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"]
+      "enum": [
+        "PENDING",
+        "CONFIRMED",
+        "PROCESSING",
+        "SHIPPED",
+        "DELIVERED",
+        "CANCELLED"
+      ]
     },
     "statusHistory": {
       "type": "array",

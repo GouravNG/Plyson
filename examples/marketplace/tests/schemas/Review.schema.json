@@ -24,7 +24,11 @@
     },
     "status": {
       "type": "string",
-      "enum": ["PENDING", "APPROVED", "REJECTED"]
+      "enum": [
+        "PENDING",
+        "APPROVED",
+        "REJECTED"
+      ]
     },
     "moderationNote": {
       "type": "string",
