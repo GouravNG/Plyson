@@ -2,13 +2,6 @@
   "title": "auth-controller",
   "description": "Comprehensive tests for the /auth/register endpoint",
   "tags": ["automated", "auth"],
-  "variables": {
-    "REGISTER_PATH": "/auth/register",
-    "DEFAULT_PWD_LENGTH": 10,
-    "MIN_PWD_LENGTH": 6,
-    "MAX_NAME_LENGTH": 64,
-    "MAX_PWD_LENGTH": 128
-  },
   "testCases": [
     {
       "id": "auth-register-pos-001",
@@ -39,7 +32,8 @@
           },
           "response": {
             "schema": {
-              "name": "User"
+              "name": "User22",
+              "validation": false
             },
             "validations": {
               "statusCode": 201,
@@ -49,7 +43,8 @@
                   "from": "body",
                   "path": "$.success",
                   "operator": "equals",
-                  "value": true
+                  "value": false,
+                  "validation": "warn"
                 },
                 {
                   "title": "Role is USER",

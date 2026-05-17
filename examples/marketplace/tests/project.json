@@ -2,5 +2,13 @@
   "title": "Marketplace API Validation",
   "description": "API testing project created with play-son",
   "version": "1.0.0",
-  "defaultEnv": "local"
+  "defaultEnv": "local",
+  "beforeAll": [
+    {
+      "ref": "TC-ADMIN-AUTH"
+    },
+    {
+      "ref": "TC-USER-AUTH"
+    }
+  ]
 }

@@ -28,6 +28,16 @@ export function buildOpenAPISpec(host, version = "3.0.0") {
         deletedAt: { type: "string", format: "date-time", nullable: true },
       },
     },
+    LoginResponse: {
+      type: "object",
+      properties: {
+        success: { type: "boolean", example: true },
+        message: { type: "string" },
+        token: { type: "string" },
+        expiresAt: { type: "string", format: "date-time" },
+        user: { $ref: "#/components/schemas/User" },
+      },
+    },
     Business: {
       type: "object",
       properties: {
@@ -169,7 +179,7 @@ export function buildOpenAPISpec(host, version = "3.0.0") {
         post: {
           tags: ["Auth"], summary: "Login and receive a Bearer token",
           requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["email", "password"], properties: { email: { type: "string", format: "email" }, password: { type: "string" } } } } } },
-          responses: { 200: { description: "Token", content: { "application/json": { schema: { type: "object", properties: { token: { type: "string" }, expiresAt: { type: "string", format: "date-time" }, user: { $ref: "#/components/schemas/User" } } } } } }, 401: p401, 422: p422 },
+          responses: { 200: jsonOk("Token", "#/components/schemas/LoginResponse"), 401: p401, 422: p422 },
         },
       },
       "/auth/logout": {
