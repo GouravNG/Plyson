@@ -19,7 +19,7 @@
                 "$gen": "email"
               },
               "password": {
-                "$gen": "alphanumeric",
+                "$gen": "string",
                 "length": "{{DEFAULT_PWD_LENGTH}}"
               },
               "firstname": {
@@ -82,7 +82,7 @@
                 "$gen": "email"
               },
               "password": {
-                "$gen": "alphanumeric",
+                "$gen": "string",
                 "length": "{{DEFAULT_PWD_LENGTH}}"
               },
               "firstname": {
@@ -124,7 +124,7 @@
             "endpoint": "{{REGISTER_PATH}}",
             "payload": {
               "password": {
-                "$gen": "alphanumeric",
+                "$gen": "string",
                 "length": "{{DEFAULT_PWD_LENGTH}}"
               },
               "firstname": {
@@ -166,7 +166,7 @@
             "payload": {
               "email": "not-an-email",
               "password": {
-                "$gen": "alphanumeric",
+                "$gen": "string",
                 "length": "{{DEFAULT_PWD_LENGTH}}"
               },
               "firstname": {
@@ -251,7 +251,7 @@
                 "$gen": "email"
               },
               "password": {
-                "$gen": "alphanumeric",
+                "$gen": "string",
                 "length": "{{DEFAULT_PWD_LENGTH}}"
               },
               "lastname": {
@@ -292,7 +292,7 @@
                 "$gen": "email"
               },
               "password": {
-                "$gen": "alphanumeric",
+                "$gen": "string",
                 "length": "{{DEFAULT_PWD_LENGTH}}"
               },
               "firstname": {
@@ -333,7 +333,7 @@
                 "$gen": "email"
               },
               "password": {
-                "$gen": "alphanumeric",
+                "$gen": "string",
                 "length": "{{DEFAULT_PWD_LENGTH}}"
               },
               "firstname": {
@@ -378,7 +378,7 @@
                 "$gen": "email"
               },
               "password": {
-                "$gen": "alphanumeric",
+                "$gen": "string",
                 "length": "{{DEFAULT_PWD_LENGTH}}"
               },
               "firstname": {
@@ -411,7 +411,7 @@
             "payload": {
               "email": "{{duplicateEmail}}",
               "password": {
-                "$gen": "alphanumeric",
+                "$gen": "string",
                 "length": "{{DEFAULT_PWD_LENGTH}}"
               },
               "firstname": {
@@ -462,15 +462,15 @@
                 "$gen": "email"
               },
               "firstname": {
-                "$gen": "alpha",
+                "$gen": "string",
                 "length": "{{MAX_NAME_LENGTH}}"
               },
               "lastname": {
-                "$gen": "alpha",
+                "$gen": "string",
                 "length": "{{MAX_NAME_LENGTH}}"
               },
               "password": {
-                "$gen": "alphanumeric",
+                "$gen": "string",
                 "length": "{{MAX_PWD_LENGTH}}"
               }
             }

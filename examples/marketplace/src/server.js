@@ -49,7 +49,7 @@ import { buildOpenAPISpec } from './openapi.js'
 const CONFIG = {
   PORT: Number(process.env.PORT) || 3000,
   TOKEN_TTL_MS: Number(process.env.TOKEN_TTL_MS) || 2 * 60 * 60 * 1000,
-  RATE_LIMIT: Number(process.env.RATE_LIMIT) || 60,
+  RATE_LIMIT: Number(process.env.RATE_LIMIT) || 120,
   RATE_WINDOW_MS: 60_000,
   HASH_SALT: process.env.HASH_SALT || "mock_salt_change_in_prod",
   VERSION: "3.0.0",

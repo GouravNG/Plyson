@@ -16,11 +16,17 @@
     },
     "role": {
       "type": "string",
-      "enum": ["ADMIN", "USER"]
+      "enum": [
+        "ADMIN",
+        "USER"
+      ]
     },
     "status": {
       "type": "string",
-      "enum": ["ACTIVE", "INACTIVE"]
+      "enum": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
     },
     "createdAt": {
       "type": "string",
