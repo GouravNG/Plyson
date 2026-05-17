@@ -1,0 +1,57 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "userId": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/OrderItem"
+      }
+    },
+    "subtotal": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "CONFIRMED",
+        "PROCESSING",
+        "SHIPPED",
+        "DELIVERED",
+        "CANCELLED"
+      ]
+    },
+    "statusHistory": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "shippingAddress": {
+      "type": "string",
+      "nullable": true
+    },
+    "note": {
+      "type": "string",
+      "nullable": true
+    },
+    "cancelReason": {
+      "type": "string",
+      "nullable": true
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

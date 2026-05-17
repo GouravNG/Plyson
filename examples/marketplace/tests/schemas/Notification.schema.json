@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "userId": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "AUTH",
+        "ORDER",
+        "REVIEW",
+        "BROADCAST"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "read": {
+      "type": "boolean"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

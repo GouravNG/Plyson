@@ -1,0 +1,18 @@
+{
+  "allOf": [
+    {
+      "$ref": "#/components/schemas/Error"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
+}

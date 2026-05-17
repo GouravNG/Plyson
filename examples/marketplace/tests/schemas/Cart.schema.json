@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "userId": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/CartItem"
+      }
+    },
+    "subtotal": {
+      "type": "number"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

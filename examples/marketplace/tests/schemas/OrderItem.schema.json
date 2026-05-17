@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "serviceId": {
+      "type": "string"
+    },
+    "serviceName": {
+      "type": "string"
+    },
+    "price": {
+      "type": "number"
+    },
+    "qty": {
+      "type": "integer"
+    },
+    "lineTotal": {
+      "type": "number"
+    }
+  }
+}

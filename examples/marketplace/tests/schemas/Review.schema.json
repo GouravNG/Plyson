@@ -1,0 +1,46 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "userId": {
+      "type": "string"
+    },
+    "serviceId": {
+      "type": "string"
+    },
+    "orderId": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "comment": {
+      "type": "string",
+      "nullable": true
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "APPROVED",
+        "REJECTED"
+      ]
+    },
+    "moderationNote": {
+      "type": "string",
+      "nullable": true
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

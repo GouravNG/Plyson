@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "serviceId": {
+      "type": "string"
+    },
+    "qty": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "addedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "service": {
+      "$ref": "#/components/schemas/Service"
+    }
+  }
+}
