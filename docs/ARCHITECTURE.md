@@ -170,6 +170,8 @@ Wraps Playwright's `APIRequestContext`. Responsibilities:
 
 When `autoFill` is configured, the executor fetches the named schema from `schemas/`, generates a payload from it respecting `includeFields` / `excludeFields`, then merges the step's explicit `payload` on top (explicit values win on key conflicts). The merged result is the final request body.
 
+The AutoFill generator automatically resolves `$ref` pointers by looking up the target in the project's loaded schemas. It supports cross-schema references (e.g., `User.schema.json` referring to `Profile.schema.json`) and includes a recursion guard to handle circular schemas gracefully.
+
 ---
 
 ### 6. Assertion Engine
@@ -182,6 +184,10 @@ Runs after every HTTP response. Iterates `response.validations.assertions` in or
 2. Response schema validation (`response.schema`) — if configured
 3. Inline assertions (`validations.assertions`) — in the order declared
 4. Handlers (`handlers`) — after all inline assertions
+
+**Schema Validation:**
+
+Response schemas are validated using AJV. At startup, the engine registers all schemas from the `schemas/` directory with AJV, using their filename (e.g., `User.schema.json`) as their unique identifier. This allows schemas to use relative `$ref` pointers to other schema files, which are automatically resolved by AJV during validation.
 
 **Per assertion:**
 

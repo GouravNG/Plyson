@@ -7,18 +7,47 @@ import { applyFieldFilter } from './field-filter.js'
  */
 export function generateFromSchema(
   schema: any,
-  filterConfig: AutoFillFields
+  filterConfig: AutoFillFields,
+  allSchemas: Map<string, any> = new Map(),
+  depth = 0
 ): Record<string, unknown> {
-  const properties = schema.properties ?? {}
+  // If the root schema is a ref, resolve it first
+  let targetSchema = schema
+  if (schema.$ref) {
+    const name = schema.$ref.replace('.schema.json', '')
+    targetSchema = allSchemas.get(name) || schema
+  }
+
+  const properties = targetSchema.properties ?? {}
   const allFields = Object.keys(properties)
   const activeFields = applyFieldFilter(allFields, filterConfig)
 
   return Object.fromEntries(
-    activeFields.map((field) => [field, generateValueForField(properties[field])])
+    activeFields.map((field) => [
+      field,
+      generateValueForField(properties[field], allSchemas, depth),
+    ])
   )
 }
 
-function generateValueForField(schema: any): unknown {
+function generateValueForField(
+  schema: any,
+  allSchemas: Map<string, any>,
+  depth = 0
+): unknown {
+  if (!schema) return null
+  if (depth > 10) return null // Recursion guard
+
+  // Handle $ref
+  if (schema.$ref) {
+    const name = schema.$ref.replace('.schema.json', '')
+    const target = allSchemas.get(name)
+    if (target) {
+      return generateValueForField(target, allSchemas, depth + 1)
+    }
+    return null
+  }
+
   if (schema.example !== undefined) return schema.example
   if (schema.enum?.length) return schema.enum[0]
 
@@ -33,7 +62,7 @@ function generateValueForField(schema: any): unknown {
     case 'array':
       return []
     case 'object':
-      return schema.properties ? generateFromSchema(schema, {}) : {}
+      return schema.properties ? generateFromSchema(schema, {}, allSchemas, depth + 1) : {}
     default:
       return null
   }

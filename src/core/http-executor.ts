@@ -56,7 +56,7 @@ export class HttpExecutor {
       throw new LoadError(`Schema "${schemaName}" not found`, 'http-executor')
     }
 
-    const generated = generateFromSchema(schema, filterConfig)
+    const generated = generateFromSchema(schema, filterConfig, schemas)
     // Explicit payload wins over generated values
     return { ...generated, ...step.request.payload }
   }
