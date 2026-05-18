@@ -39,6 +39,7 @@
     "jmespath": "^0.16.0",
     "jsonpath-plus": "^10.4.0",
     "jsonrepair": "^3.14.0",
+    "picocolors": "^1.1.1",
     "zod": "^4.4.3"
   },
   "peerDependencies": {
