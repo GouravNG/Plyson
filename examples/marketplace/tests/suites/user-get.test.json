@@ -1,0 +1,389 @@
+{
+  "title": "User Get Profile",
+  "description": "Comprehensive tests for the GET /user endpoint - retrieve authenticated user's profile",
+  "disabled": true,
+  "tags": ["automated", "user", "get", "profile"],
+  "beforeAll": [
+    {
+      "title": "Register user for profile retrieval",
+      "request": {
+        "method": "POST",
+        "endpoint": "{{REGISTER_PATH}}",
+        "payload": {
+          "email": "playson.getuser.{{$timestamp}}@playson.com",
+          "password": "Password@123",
+          "firstname": "Get",
+          "lastname": "User"
+        }
+      },
+      "response": {
+        "schema": {
+          "name": "User"
+        },
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "getUserEmail",
+            "from": "body",
+            "path": "$.user.email",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Login user for profile tests",
+      "request": {
+        "method": "POST",
+        "endpoint": "{{LOGIN_PATH}}",
+        "payload": {
+          "email": "{{getUserEmail}}",
+          "password": "Password@123"
+        }
+      },
+      "response": {
+        "schema": {
+          "name": "LoginResponse"
+        },
+        "validations": {
+          "statusCode": 200
+        },
+        "extract": [
+          {
+            "name": "getUserToken",
+            "from": "body",
+            "path": "$.token",
+            "scope": "suite"
+          },
+          {
+            "name": "getUserId",
+            "from": "body",
+            "path": "$.user.id",
+            "scope": "suite"
+          }
+        ]
+      }
+    }
+  ],
+  "afterAll": [
+    {
+      "title": "Clean up - Delete user after tests",
+      "request": {
+        "method": "DELETE",
+        "endpoint": "/user",
+        "headers": {
+          "Authorization": "Bearer {{getUserToken}}"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 200
+        }
+      }
+    }
+  ],
+  "testCases": [
+    {
+      "id": "user-get-pos-001",
+      "title": "Get user profile with valid authentication",
+      "testType": "positive",
+      "tags": ["positive", "get", "user"],
+      "steps": [
+        {
+          "title": "Retrieve authenticated user profile",
+          "request": {
+            "method": "GET",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer {{getUserToken}}"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "User"
+            },
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "User object exists in response",
+                  "from": "body",
+                  "path": "$.user",
+                  "operator": "exists"
+                },
+                {
+                  "title": "User ID matches",
+                  "from": "body",
+                  "path": "$.user.id",
+                  "operator": "equals",
+                  "value": "{{getUserId}}"
+                },
+                {
+                  "title": "User email matches",
+                  "from": "body",
+                  "path": "$.user.email",
+                  "operator": "equals",
+                  "value": "{{getUserEmail}}"
+                },
+                {
+                  "title": "First name is Get",
+                  "from": "body",
+                  "path": "$.user.firstname",
+                  "operator": "equals",
+                  "value": "Get"
+                },
+                {
+                  "title": "Last name is User",
+                  "from": "body",
+                  "path": "$.user.lastname",
+                  "operator": "equals",
+                  "value": "User"
+                },
+                {
+                  "title": "Role is USER",
+                  "from": "body",
+                  "path": "$.user.role",
+                  "operator": "equals",
+                  "value": "USER"
+                },
+                {
+                  "title": "Status is INACTIVE",
+                  "from": "body",
+                  "path": "$.user.status",
+                  "operator": "equals",
+                  "value": "INACTIVE"
+                },
+                {
+                  "title": "Created timestamp exists",
+                  "from": "body",
+                  "path": "$.user.createdAt",
+                  "operator": "exists"
+                },
+                {
+                  "title": "Updated timestamp exists",
+                  "from": "body",
+                  "path": "$.user.updatedAt",
+                  "operator": "exists"
+                }
+              ]
+            },
+            "extract": [
+              {
+                "name": "retrievedUserId",
+                "from": "body",
+                "path": "$.user.id",
+                "scope": "case"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-get-neg-no-auth",
+      "title": "Fail to get profile without authentication",
+      "testType": "negative",
+      "tags": ["negative", "get", "user", "auth"],
+      "steps": [
+        {
+          "title": "Request without authorization header",
+          "request": {
+            "method": "GET",
+            "endpoint": "/user",
+            "headers": {}
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 401,
+              "assertions": [
+                {
+                  "title": "Error message present",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-get-neg-invalid-token",
+      "title": "Fail to get profile with invalid token",
+      "testType": "negative",
+      "tags": ["negative", "get", "user", "auth"],
+      "steps": [
+        {
+          "title": "Request with malformed authorization token",
+          "request": {
+            "method": "GET",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer invalid_token_format"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 401,
+              "assertions": [
+                {
+                  "title": "Authentication error returned",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-get-neg-expired-token",
+      "title": "Fail to get profile with expired token",
+      "testType": "negative",
+      "tags": ["negative", "get", "user", "auth"],
+      "steps": [
+        {
+          "title": "Request with expired authorization token",
+          "request": {
+            "method": "GET",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer 0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 401,
+              "assertions": [
+                {
+                  "title": "Token validation error",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-get-neg-invalid-auth-header",
+      "title": "Fail with malformed Authorization header",
+      "testType": "negative",
+      "tags": ["negative", "get", "user", "auth"],
+      "steps": [
+        {
+          "title": "Request with malformed Authorization header (missing Bearer)",
+          "request": {
+            "method": "GET",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "{{getUserToken}}"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 401,
+              "assertions": [
+                {
+                  "title": "Invalid header format error",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-get-pos-response-structure",
+      "title": "Verify response structure for GET /user",
+      "testType": "positive",
+      "tags": ["positive", "get", "user", "response-structure"],
+      "steps": [
+        {
+          "title": "Get profile and verify response structure",
+          "request": {
+            "method": "GET",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer {{getUserToken}}"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "User"
+            },
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Response has user key",
+                  "from": "body",
+                  "path": "$.user",
+                  "operator": "exists"
+                },
+                {
+                  "title": "User has required id field",
+                  "from": "body",
+                  "path": "$.user.id",
+                  "operator": "exists"
+                },
+                {
+                  "title": "User has required email field",
+                  "from": "body",
+                  "path": "$.user.email",
+                  "operator": "exists"
+                },
+                {
+                  "title": "User has required firstname field",
+                  "from": "body",
+                  "path": "$.user.firstname",
+                  "operator": "exists"
+                },
+                {
+                  "title": "User has required lastname field",
+                  "from": "body",
+                  "path": "$.user.lastname",
+                  "operator": "exists"
+                },
+                {
+                  "title": "User has required role field",
+                  "from": "body",
+                  "path": "$.user.role",
+                  "operator": "exists"
+                },
+                {
+                  "title": "User has required status field",
+                  "from": "body",
+                  "path": "$.user.status",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

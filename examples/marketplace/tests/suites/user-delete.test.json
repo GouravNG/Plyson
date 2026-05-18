@@ -1,0 +1,466 @@
+{
+  "title": "User Delete Account",
+  "disabled": true,
+  "description": "Comprehensive tests for the DELETE /user endpoint - deactivate and delete user account",
+  "tags": ["automated", "user", "delete", "deactivate"],
+  "beforeAll": [
+    {
+      "title": "Register primary user for deletion tests",
+      "request": {
+        "method": "POST",
+        "endpoint": "{{REGISTER_PATH}}",
+        "payload": {
+          "email": "playson.deleteuser.primary.{{$timestamp}}@playson.com",
+          "password": "Primary@123",
+          "firstname": "Delete",
+          "lastname": "Primary"
+        }
+      },
+      "response": {
+        "schema": {
+          "name": "User"
+        },
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "deletePrimaryEmail",
+            "from": "body",
+            "path": "$.user.email",
+            "scope": "suite"
+          },
+          {
+            "name": "deletePrimaryId",
+            "from": "body",
+            "path": "$.user.id",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Login primary user",
+      "request": {
+        "method": "POST",
+        "endpoint": "{{LOGIN_PATH}}",
+        "payload": {
+          "email": "{{deletePrimaryEmail}}",
+          "password": "Primary@123"
+        }
+      },
+      "response": {
+        "schema": {
+          "name": "LoginResponse"
+        },
+        "validations": {
+          "statusCode": 200
+        },
+        "extract": [
+          {
+            "name": "deletePrimaryToken",
+            "from": "body",
+            "path": "$.token",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Register secondary user for deletion tests",
+      "request": {
+        "method": "POST",
+        "endpoint": "{{REGISTER_PATH}}",
+        "payload": {
+          "email": "playson.deleteuser.secondary.{{$timestamp}}@playson.com",
+          "password": "Secondary@123",
+          "firstname": "Delete",
+          "lastname": "Secondary"
+        }
+      },
+      "response": {
+        "schema": {
+          "name": "User"
+        },
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "deleteSecondaryEmail",
+            "from": "body",
+            "path": "$.user.email",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Login secondary user",
+      "request": {
+        "method": "POST",
+        "endpoint": "{{LOGIN_PATH}}",
+        "payload": {
+          "email": "{{deleteSecondaryEmail}}",
+          "password": "Secondary@123"
+        }
+      },
+      "response": {
+        "schema": {
+          "name": "LoginResponse"
+        },
+        "validations": {
+          "statusCode": 200
+        },
+        "extract": [
+          {
+            "name": "deleteSecondaryToken",
+            "from": "body",
+            "path": "$.token",
+            "scope": "suite"
+          }
+        ]
+      }
+    }
+  ],
+  "testCases": [
+    {
+      "id": "user-delete-pos-001",
+      "title": "Delete user account successfully",
+      "testType": "positive",
+      "tags": ["positive", "delete", "user", "account"],
+      "steps": [
+        {
+          "title": "Delete user account",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer {{deletePrimaryToken}}"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Success message present",
+                  "from": "body",
+                  "path": "$.message",
+                  "operator": "exists"
+                },
+                {
+                  "title": "Message indicates account deactivated",
+                  "from": "body",
+                  "path": "$.message",
+                  "operator": "includes",
+                  "value": "Account deactivated"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-delete-pos-002",
+      "title": "Deleted user cannot login again",
+      "testType": "positive",
+      "tags": ["positive", "delete", "user", "account", "session"],
+      "steps": [
+        {
+          "title": "Attempt to login with deleted user account",
+          "request": {
+            "method": "POST",
+            "endpoint": "{{LOGIN_PATH}}",
+            "payload": {
+              "email": "{{deletePrimaryEmail}}",
+              "password": "Primary@123"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 401,
+              "assertions": [
+                {
+                  "title": "Login fails after account deletion",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-delete-pos-003",
+      "title": "Deleted user cannot access profile",
+      "testType": "positive",
+      "tags": ["positive", "delete", "user", "account", "access"],
+      "steps": [
+        {
+          "title": "Attempt to get profile with deleted user token",
+          "request": {
+            "method": "GET",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer {{deletePrimaryToken}}"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 401,
+              "assertions": [
+                {
+                  "title": "Access denied with deleted user token",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-delete-neg-no-auth",
+      "title": "Fail to delete account without authentication",
+      "testType": "negative",
+      "tags": ["negative", "delete", "user", "auth"],
+      "steps": [
+        {
+          "title": "Attempt to delete without authorization header",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/user",
+            "headers": {}
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 403,
+              "assertions": [
+                {
+                  "title": "Forbidden error returned",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-delete-neg-invalid-token",
+      "title": "Fail to delete with invalid token",
+      "testType": "negative",
+      "tags": ["negative", "delete", "user", "auth"],
+      "steps": [
+        {
+          "title": "Attempt to delete with malformed token",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer invalid_token_xyz"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 401
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-delete-neg-double-delete",
+      "title": "Fail to delete already deleted account",
+      "testType": "negative",
+      "tags": ["negative", "delete", "user", "idempotency"],
+      "steps": [
+        {
+          "title": "Delete account first time",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer {{deleteSecondaryToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200
+            }
+          }
+        },
+        {
+          "title": "Attempt to delete same account second time",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer {{deleteSecondaryToken}}"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 401,
+              "assertions": [
+                {
+                  "title": "Access denied after first deletion",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-delete-pos-response-structure",
+      "title": "Verify delete response structure",
+      "testType": "positive",
+      "tags": ["positive", "delete", "user", "response-structure"],
+      "steps": [
+        {
+          "title": "Register user for response verification",
+          "request": {
+            "method": "POST",
+            "endpoint": "{{REGISTER_PATH}}",
+            "payload": {
+              "email": "playson.delete.response.{{$timestamp}}@playson.com",
+              "password": "Response@123",
+              "firstname": "Response",
+              "lastname": "Check"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "User"
+            },
+            "validations": {
+              "statusCode": 201
+            },
+            "extract": [
+              {
+                "name": "responseCheckEmail",
+                "from": "body",
+                "path": "$.user.email",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Login to get token",
+          "request": {
+            "method": "POST",
+            "endpoint": "{{LOGIN_PATH}}",
+            "payload": {
+              "email": "{{responseCheckEmail}}",
+              "password": "Response@123"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "LoginResponse"
+            },
+            "validations": {
+              "statusCode": 200
+            },
+            "extract": [
+              {
+                "name": "responseCheckToken",
+                "from": "body",
+                "path": "$.token",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Delete and verify response structure",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer {{responseCheckToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Response has message field",
+                  "from": "body",
+                  "path": "$.message",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-delete-neg-missing-bearer",
+      "title": "Fail with malformed Authorization header",
+      "testType": "negative",
+      "tags": ["negative", "delete", "user", "auth"],
+      "steps": [
+        {
+          "title": "Delete with invalid Authorization format",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "{{deletePrimaryToken}}"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 401,
+              "assertions": [
+                {
+                  "title": "Auth format error",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

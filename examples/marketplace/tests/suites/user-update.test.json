@@ -1,0 +1,404 @@
+{
+  "title": "User Update Profile",
+  "description": "Comprehensive tests for the PATCH /user endpoint - update user profile information",
+  "disabled": true,
+  "tags": ["automated", "user", "patch", "update"],
+  "beforeAll": [
+    {
+      "title": "Register user for profile updates",
+      "request": {
+        "method": "POST",
+        "endpoint": "{{REGISTER_PATH}}",
+        "payload": {
+          "email": "playson.updateuser.{{$timestamp}}@playson.com",
+          "password": "Original@123",
+          "firstname": "Original",
+          "lastname": "Name"
+        }
+      },
+      "response": {
+        "schema": {
+          "name": "User"
+        },
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "updateUserEmail",
+            "from": "body",
+            "path": "$.user.email",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Login user for profile update tests",
+      "request": {
+        "method": "POST",
+        "endpoint": "{{LOGIN_PATH}}",
+        "payload": {
+          "email": "{{updateUserEmail}}",
+          "password": "Original@123"
+        }
+      },
+      "response": {
+        "schema": {
+          "name": "LoginResponse"
+        },
+        "validations": {
+          "statusCode": 200
+        },
+        "extract": [
+          {
+            "name": "updateUserToken",
+            "from": "body",
+            "path": "$.token",
+            "scope": "suite"
+          }
+        ]
+      }
+    }
+  ],
+  "afterAll": [
+    {
+      "title": "Clean up - Delete updated user",
+      "request": {
+        "method": "DELETE",
+        "endpoint": "/user",
+        "headers": {
+          "Authorization": "Bearer {{updateUserToken}}"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 200
+        }
+      }
+    }
+  ],
+  "testCases": [
+    {
+      "id": "user-update-pos-001",
+      "title": "Update firstname successfully",
+      "testType": "positive",
+      "tags": ["positive", "patch", "user", "update"],
+      "steps": [
+        {
+          "title": "Update user firstname",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer {{updateUserToken}}"
+            },
+            "payload": {
+              "firstname": "Updated"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "User"
+            },
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Success message present",
+                  "from": "body",
+                  "path": "$.message",
+                  "operator": "exists"
+                },
+                {
+                  "title": "Updated user object exists",
+                  "from": "body",
+                  "path": "$.user",
+                  "operator": "exists"
+                },
+                {
+                  "title": "Firstname is updated",
+                  "from": "body",
+                  "path": "$.user.firstname",
+                  "operator": "equals",
+                  "value": "Updated"
+                },
+                {
+                  "title": "Last name remains unchanged",
+                  "from": "body",
+                  "path": "$.user.lastname",
+                  "operator": "equals",
+                  "value": "Name"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-update-pos-002",
+      "title": "Update lastname successfully",
+      "testType": "positive",
+      "tags": ["positive", "patch", "user", "update"],
+      "steps": [
+        {
+          "title": "Update user lastname",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer {{updateUserToken}}"
+            },
+            "payload": {
+              "lastname": "Surname"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "User"
+            },
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Lastname is updated",
+                  "from": "body",
+                  "path": "$.user.lastname",
+                  "operator": "equals",
+                  "value": "Surname"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-update-pos-003",
+      "title": "Update password successfully",
+      "testType": "positive",
+      "tags": ["positive", "patch", "user", "update", "password"],
+      "steps": [
+        {
+          "title": "Update user password",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer {{updateUserToken}}"
+            },
+            "payload": {
+              "password": "NewPassword@456"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "User"
+            },
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Success message present",
+                  "from": "body",
+                  "path": "$.message",
+                  "operator": "exists"
+                },
+                {
+                  "title": "Updated user object exists",
+                  "from": "body",
+                  "path": "$.user",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-update-pos-004",
+      "title": "Update multiple fields simultaneously",
+      "testType": "positive",
+      "tags": ["positive", "patch", "user", "update", "multiple"],
+      "steps": [
+        {
+          "title": "Update firstname and lastname together",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer {{updateUserToken}}"
+            },
+            "payload": {
+              "firstname": "John",
+              "lastname": "Smith",
+              "password": "CombinedUpdate@789"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "User"
+            },
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Firstname updated",
+                  "from": "body",
+                  "path": "$.user.firstname",
+                  "operator": "equals",
+                  "value": "John"
+                },
+                {
+                  "title": "Lastname updated",
+                  "from": "body",
+                  "path": "$.user.lastname",
+                  "operator": "equals",
+                  "value": "Smith"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-update-neg-no-auth",
+      "title": "Fail to update profile without authentication",
+      "testType": "negative",
+      "tags": ["negative", "patch", "user", "auth"],
+      "steps": [
+        {
+          "title": "Attempt to update without authorization",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/user",
+            "payload": {
+              "firstname": "NoAuth"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 401,
+              "assertions": [
+                {
+                  "title": "Authentication error returned",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-update-neg-invalid-token",
+      "title": "Fail to update with invalid token",
+      "testType": "negative",
+      "tags": ["negative", "patch", "user", "auth"],
+      "steps": [
+        {
+          "title": "Attempt update with malformed token",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer invalid_token_123"
+            },
+            "payload": {
+              "firstname": "Invalid"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 401
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-update-pos-empty-payload",
+      "title": "Update with empty payload (no changes)",
+      "testType": "positive",
+      "tags": ["positive", "patch", "user", "edge-case"],
+      "steps": [
+        {
+          "title": "Send PATCH with empty payload",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer {{updateUserToken}}"
+            },
+            "payload": {}
+          },
+          "response": {
+            "schema": {
+              "name": "User"
+            },
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Still returns user data",
+                  "from": "body",
+                  "path": "$.user",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "user-update-pos-firstname-trimmed",
+      "title": "Update firstname with leading/trailing spaces",
+      "testType": "positive",
+      "tags": ["positive", "patch", "user", "edge-case"],
+      "steps": [
+        {
+          "title": "Update firstname with whitespace",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/user",
+            "headers": {
+              "Authorization": "Bearer {{updateUserToken}}"
+            },
+            "payload": {
+              "firstname": "  Trimmed  "
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "User"
+            },
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Firstname is trimmed",
+                  "from": "body",
+                  "path": "$.user.firstname",
+                  "operator": "equals",
+                  "value": "Trimmed"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
