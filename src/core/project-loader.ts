@@ -15,7 +15,8 @@ import {
   HandlerModule,
   TestStep,
 } from '../types/index.js'
-import { LoadError, AggregateLoadError } from '../errors/index.js'
+import { LoadError } from '../errors/index.js'
+import { ConsoleLogger, Logger } from './logger.js'
 
 export interface ProjectGraph {
   project: Project
@@ -28,8 +29,13 @@ export interface ProjectGraph {
 }
 
 export class ProjectLoader {
+  private logger: Logger
+
+  constructor(logger?: Logger) {
+    this.logger = logger || new ConsoleLogger('project-loader')
+  }
+
   async load(rootDir: string, env: string): Promise<ProjectGraph> {
-    const errors: LoadError[] = []
     const absoluteRootDir = path.resolve(rootDir)
 
     // 1. Project
@@ -39,12 +45,12 @@ export class ProjectLoader {
       const parsed = JSON.parse(content)
       const result = ProjectSchema.safeParse(parsed)
       if (!result.success) {
-        errors.push(new LoadError(`Invalid project.json: ${result.error.message}`, 'project.json'))
-      } else {
-        project = result.data
+        throw new LoadError(`Invalid project.json: ${result.error.message}`, 'project.json')
       }
+      project = result.data
     } catch (e: any) {
-      errors.push(new LoadError(`Failed to read project.json: ${e.message}`, 'project.json'))
+      if (e instanceof LoadError) throw e
+      throw new LoadError(`Failed to read project.json: ${e.message}`, 'project.json')
     }
 
     // 2. Variables
@@ -54,9 +60,7 @@ export class ProjectLoader {
       const parsed = JSON.parse(content)
       const result = VariablesSchema.safeParse(parsed)
       if (!result.success) {
-        errors.push(
-          new LoadError(`Invalid variables.json: ${result.error.message}`, 'variables.json')
-        )
+        this.logger.warn('variables.json', `Invalid variables.json: ${result.error.message}`)
       } else {
         variables = result.data
       }
@@ -73,25 +77,18 @@ export class ProjectLoader {
       const parsed = JSON.parse(content)
       const result = EnvironmentVariablesSchema.safeParse(parsed)
       if (!result.success) {
-        errors.push(
-          new LoadError(
-            `Invalid environment file ${env}.env.json: ${result.error.message}`,
-            `environments/${env}.env.json`
-          )
+        throw new LoadError(
+          `Invalid environment file ${env}.env.json: ${result.error.message}`,
+          `environments/${env}.env.json`
         )
-      } else {
-        environment = result.data
       }
+      environment = result.data
     } catch (e: any) {
-      const loadErr = new LoadError(
+      if (e instanceof LoadError) throw e
+      throw new LoadError(
         `Environment file not found or unreadable: ${envFile}`,
         `environments/${env}.env.json`
       )
-      // According to algorithm, throw immediately if env is missing as we cannot continue
-      if (errors.length > 0) {
-        throw new AggregateLoadError([...errors, loadErr])
-      }
-      throw loadErr
     }
 
     // 4. Schemas
@@ -103,7 +100,7 @@ export class ProjectLoader {
         const stem = path.basename(file, '.schema.json')
         schemas.set(stem, JSON.parse(content))
       } catch (e: any) {
-        errors.push(new LoadError(`Failed to parse schema ${file}: ${e.message}`, file))
+        this.logger.warn(file, `Failed to parse schema: ${e.message}`)
       }
     }
 
@@ -118,12 +115,12 @@ export class ProjectLoader {
         const mod = await import(fileUrl)
         const stem = path.basename(file, '.handler.ts')
         if (typeof mod.run !== 'function') {
-          errors.push(new LoadError(`Handler "${stem}" missing run export`, file))
+          this.logger.warn(file, `Handler "${stem}" missing run export`)
         } else {
           handlers.set(stem, mod)
         }
       } catch (e: any) {
-        errors.push(new LoadError(`Failed to load handler ${file}: ${e.message}`, file))
+        this.logger.warn(file, `Failed to load handler: ${e.message}`)
       }
     }
 
@@ -136,17 +133,17 @@ export class ProjectLoader {
         const parsed = JSON.parse(content)
         const result = TestcaseSchema.safeParse(parsed)
         if (!result.success) {
-          errors.push(new LoadError(`Invalid script ${file}: ${result.error.message}`, file))
+          this.logger.warn(file, `Invalid script: ${result.error.message}`)
         } else {
           const tc = result.data
           if (scripts.has(tc.id)) {
-            errors.push(new LoadError(`Duplicate script id: ${tc.id}`, file))
+            this.logger.warn(file, `Duplicate script id: ${tc.id}`)
           } else {
             scripts.set(tc.id, tc)
           }
         }
       } catch (e: any) {
-        errors.push(new LoadError(`Failed to parse script ${file}: ${e.message}`, file))
+        this.logger.warn(file, `Failed to parse script: ${e.message}`)
       }
     }
 
@@ -160,25 +157,30 @@ export class ProjectLoader {
         const parsed = JSON.parse(content)
         const result = TestSuiteSchema.safeParse(parsed)
         if (!result.success) {
-          errors.push(new LoadError(`Invalid suite ${file}: ${result.error.message}`, file))
+          this.logger.warn(file, `Invalid suite: ${result.error.message}`)
         } else {
           const suite = result.data
+          let hasCollision = false
           for (const tc of suite.testCases) {
             if (scripts.has(tc.id) || suiteIds.has(tc.id)) {
-              errors.push(
-                new LoadError(
-                  `Collision: Testcase ID "${tc.id}" already exists in scripts or another suite`,
-                  file
-                )
+              this.logger.warn(
+                file,
+                `Collision: Testcase ID "${tc.id}" already exists in scripts or another suite`
               )
-            } else {
-              suiteIds.add(tc.id)
+              hasCollision = true
+              break
             }
           }
-          suites.push(suite)
+
+          if (!hasCollision) {
+            for (const tc of suite.testCases) {
+              suiteIds.add(tc.id)
+            }
+            suites.push(suite)
+          }
         }
       } catch (e: any) {
-        errors.push(new LoadError(`Failed to parse suite ${file}: ${e.message}`, file))
+        this.logger.warn(file, `Failed to parse suite: ${e.message}`)
       }
     }
 
@@ -189,40 +191,29 @@ export class ProjectLoader {
         if ('ref' in step && step.ref) {
           const target = scripts.get(step.ref)
           if (!target) {
-            errors.push(new LoadError(`Ref "${step.ref}" not found`, sourceFile))
+            this.logger.warn(sourceFile, `Ref "${step.ref}" not found`)
             continue
           }
-          // Replace step with target steps (flattening)
-          // The algorithm says "replace step with deep clone of the script's steps"
-          // This implies a single step with 'ref' can expand into multiple steps from the script.
-          // Let's re-read the technical details.
-          // "replace step in-place with deep clone of script's steps"
-          // This usually means splicing.
           const clonedSteps = JSON.parse(JSON.stringify(target.steps))
           steps.splice(i, 1, ...clonedSteps)
-          i += clonedSteps.length - 1 // Skip the newly added steps
+          i += clonedSteps.length - 1
         }
       }
     }
 
     for (const suite of suites) {
-      if (suite.beforeAll) resolveRefsInSteps(suite.beforeAll, 'suite beforeAll')
-      if (suite.afterAll) resolveRefsInSteps(suite.afterAll, 'suite afterAll')
+      if (suite.beforeAll) resolveRefsInSteps(suite.beforeAll, `suite ${suite.title} beforeAll`)
+      if (suite.afterAll) resolveRefsInSteps(suite.afterAll, `suite ${suite.title} afterAll`)
       for (const tc of suite.testCases) {
         resolveRefsInSteps(tc.steps, `testcase ${tc.id}`)
       }
     }
-    // Also resolve refs in project global hooks
+
     if (project.beforeAll) resolveRefsInSteps(project.beforeAll, 'project beforeAll')
     if (project.afterAll) resolveRefsInSteps(project.afterAll, 'project afterAll')
 
-    // Also resolve refs in scripts themselves (they can ref other scripts)
     for (const [id, tc] of scripts) {
       resolveRefsInSteps(tc.steps, `script ${id}`)
-    }
-
-    if (errors.length > 0) {
-      throw new AggregateLoadError(errors)
     }
 
     return {
