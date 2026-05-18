@@ -5,7 +5,7 @@ import { Assertions, AssertionOperators, SoftError } from '../types/index.js'
 import { pathEngine } from '../path/index.js'
 import { AssertionError, LoadError, SchemaValidationError } from '../errors/index.js'
 
-const ajv = new Ajv({ allErrors: true })
+const ajv = new Ajv({ allErrors: true, strict: false })
 addFormats(ajv)
 
 let expect: typeof playwrightExpect
@@ -14,6 +14,20 @@ export class AssertionEngine {
   static setExpect(instance: typeof playwrightExpect) {
     expect = instance
   }
+
+  /**
+   * Registers all schemas into the global AJV instance.
+   * Uses [name].schema.json as the $id so relative refs work.
+   */
+  static registerSchemas(schemas: Map<string, any>) {
+    for (const [name, schema] of schemas.entries()) {
+      const id = `${name}.schema.json`
+      if (!ajv.getSchema(id)) {
+        ajv.addSchema({ ...schema, $id: id }, id)
+      }
+    }
+  }
+
   /**
    * Checks the status code against expected value(s).
    */

@@ -88,7 +88,7 @@ describe('Bug Regressions (Issue #7, #5, #6)', () => {
       registerSuites(graph, store, playwrightTest, expect)
 
       expect(playwrightTest).toHaveBeenCalledWith(
-        'Test 1',
+        '[tc1] Test 1',
         expect.objectContaining({
           tag: expect.arrayContaining(['@smoke', '@critical', '@positive']),
         }),

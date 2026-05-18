@@ -55,8 +55,10 @@ export const syncSchemasCommand = new Command('sync-schemas')
 
       // 2. Sync files
       toUpdate.forEach((name) => {
+        const schema = JSON.parse(JSON.stringify(schemas[name]))
+        rewriteRefs(schema)
         const filePath = path.join(schemaDir, `${name}.schema.json`)
-        fs.writeFileSync(filePath, JSON.stringify(schemas[name], null, 2))
+        fs.writeFileSync(filePath, JSON.stringify(schema, null, 2))
         console.log(`✅ Synced: ${name}`)
       })
 
@@ -95,3 +97,28 @@ export const syncSchemasCommand = new Command('sync-schemas')
       console.error(`Error syncing schemas: ${error.message}`)
     }
   })
+
+/**
+ * Recursively rewrites internal OpenAPI references (#/components/schemas/X)
+ * to local file references (X.schema.json).
+ */
+function rewriteRefs(obj: any) {
+  if (!obj || typeof obj !== 'object') return
+
+  if (obj.$ref && typeof obj.$ref === 'string') {
+    if (
+      obj.$ref.startsWith('#/components/schemas/') ||
+      obj.$ref.startsWith('#/definitions/')
+    ) {
+      const parts = obj.$ref.split('/')
+      const name = parts[parts.length - 1]
+      obj.$ref = `${name}.schema.json`
+    }
+  }
+
+  for (const key of Object.keys(obj)) {
+    if (typeof obj[key] === 'object') {
+      rewriteRefs(obj[key])
+    }
+  }
+}
