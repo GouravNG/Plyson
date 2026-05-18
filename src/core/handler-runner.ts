@@ -12,7 +12,9 @@ export interface HandlerContext {
     get: (name: string) => VariableValue | undefined
     set: (name: string, value: VariableValue, scope: Scope) => void
   }
-  warn: (title: string, message: string) => void
+  log: (message: string) => void
+  warn: (title: string, message: any) => void
+  error: (message: any) => void
 }
 
 export class HandlerRunner {
