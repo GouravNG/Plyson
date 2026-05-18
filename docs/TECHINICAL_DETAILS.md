@@ -435,7 +435,6 @@ Instead of manual generator classes, play-son uses a declarative system that del
 ### Method Resolution
 
 The resolver finds faker methods using the following priority:
-
 1. **Fully Qualified**: `vehicle.type` → `faker.vehicle.type()`
 2. **Module Hint**: `$module: "vehicle"`, `$gen: "type"` → `faker.vehicle.type()`
 3. **Auto-Discovery**: `$gen: "fullName"` → Searches all faker modules for a `fullName` method.

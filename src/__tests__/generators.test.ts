@@ -41,9 +41,9 @@ describe('Faker JSON Schema System', () => {
       const schema = {
         user: {
           name: { $gen: 'fullName' },
-          age: { $gen: 'int', min: 18, max: 65 },
+          age: { $gen: 'int', min: 18, max: 65 }
         },
-        static: 'value',
+        static: 'value'
       }
       const res = resolver.resolve(schema) as any
       expect(typeof res.user.name).toBe('string')
@@ -54,7 +54,7 @@ describe('Faker JSON Schema System', () => {
     it('should resolve nested generators in options', () => {
       const schema = {
         $gen: 'alpha',
-        length: { $gen: 'int', min: 4, max: 4 },
+        length: { $gen: 'int', min: 4, max: 4 }
       }
       const res = resolver.resolve(schema) as string
       expect(res).toHaveLength(4)
@@ -66,14 +66,14 @@ describe('Faker JSON Schema System', () => {
       const res = resolver.resolve({ $gen: 'fullName', $count: 3 }) as string[]
       expect(Array.isArray(res)).toBe(true)
       expect(res).toHaveLength(3)
-      res.forEach((name) => expect(typeof name).toBe('string'))
+      res.forEach(name => expect(typeof name).toBe('string'))
     })
 
     it('should generate an array of objects', () => {
       const schema = {
         $count: 2,
         name: { $gen: 'fullName' },
-        email: { $gen: 'email' },
+        email: { $gen: 'email' }
       }
       const res = resolver.resolve(schema) as any[]
       expect(res).toHaveLength(2)
@@ -100,9 +100,7 @@ describe('Faker JSON Schema System', () => {
     })
 
     it('should throw on invalid module hint', () => {
-      expect(() => resolver.resolve({ $gen: 'fullName', $module: 'invalidMod' })).toThrow(
-        /Method "fullName" not found in module "invalidMod"/
-      )
+      expect(() => resolver.resolve({ $gen: 'fullName', $module: 'invalidMod' })).toThrow(/Method "fullName" not found in module "invalidMod"/)
     })
   })
 })
