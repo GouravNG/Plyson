@@ -12,8 +12,8 @@
       "variables": {
         "caseVar": "caseValue",
         "nestedGen": {
-          "$gen": "string",
-          "length": { "$gen": "number", "min": 10, "max": 10 }
+          "$gen": "alphanumeric",
+          "length": { "$gen": "int", "min": 10, "max": 10 }
         }
       },
       "steps": [
@@ -30,7 +30,7 @@
               "caseVal": "{{caseVar}}",
               "genVal": "{{nestedGen}}",
               "freshGen": { "$gen": "uuid" },
-              "numericGen": { "$gen": "string", "length": 4, "numeric": true }
+              "numericGen": { "$gen": "numeric", "length": 4 }
             }
           },
           "response": {

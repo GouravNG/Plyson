@@ -34,23 +34,6 @@ export class ResolutionError extends PlaysonError {
   }
 }
 
-export class GeneratorOptionError extends PlaysonError {
-  readonly code = 'GENERATOR_OPTION_ERROR'
-  constructor(
-    public generatorName: string,
-    message: string
-  ) {
-    super(`Invalid options for generator "${generatorName}": ${message}`)
-  }
-}
-
-export class UnknownGeneratorError extends PlaysonError {
-  readonly code = 'UNKNOWN_GENERATOR'
-  constructor(public generatorName: string) {
-    super(`Unknown generator: "${generatorName}"`)
-  }
-}
-
 export class AssertionError extends PlaysonError {
   readonly code = 'ASSERTION_ERROR'
   constructor(

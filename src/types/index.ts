@@ -12,6 +12,8 @@ export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 
 
 export type GeneratorObject = {
   $gen: string
+  $count?: number
+  $module?: string
   [key: string]: any
 }
 
@@ -177,6 +179,8 @@ export const VariablesSchema = z.record(z.string(), z.any())
 export const GeneratorObjectSchema = z
   .object({
     $gen: z.string(),
+    $count: z.number().optional(),
+    $module: z.string().optional(),
   })
   .catchall(z.any())
 

@@ -4,7 +4,6 @@ import { fileURLToPath } from 'url'
 import { ProjectLoader } from '../../core/project-loader.js'
 import { registerSuites } from '../../core/test-runner.js'
 import { VariableStore } from '../../core/variable-store.js'
-import { registerBuiltins } from '../../generators/registry.js'
 import { createMockServer, MockServer } from './mock-server.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -13,7 +12,6 @@ const __dirname = path.dirname(__filename)
 let server: MockServer
 
 test.beforeAll(async () => {
-  registerBuiltins()
   // Use port 3000 as configured in test.env.json
   server = await createMockServer(3000)
 })

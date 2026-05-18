@@ -20,23 +20,12 @@ src/
   core/
     project-loader.ts           # file discovery, validation, ref resolution
     variable-store.ts           # scoped variable registry
-    resolver.ts                 # token interpolation + $gen execution
+    resolver.ts                 # token interpolation + $gen execution (Faker JSON Schema)
     http-executor.ts            # Playwright APIRequestContext wrapper
     assertion-engine.ts         # operator → expect() mapping
     extraction-engine.ts        # path extraction → store write-back
     handler-runner.ts           # handler module loader + executor
     test-runner.ts              # Playwright test() registration
-
-  generators/
-    registry.ts                 # GeneratorRegistry class + registerBuiltins()
-    types.ts                    # Generator interface, option types
-    string.generator.ts         # $gen: "string"
-    number.generator.ts         # $gen: "number"
-    boolean.generator.ts        # $gen: "boolean"
-    date.generator.ts           # $gen: "date", "pastDate", "futureDate"
-    internet.generator.ts       # $gen: "uuid", "email", "url", "ipAddress"
-    person.generator.ts         # $gen: "fullName", "firstName", "lastName"
-    phone.generator.ts          # $gen: "phoneNumber"
 
   path/
     index.ts                    # auto-detect + dispatch
@@ -378,10 +367,15 @@ private executeGenerator(gen: GeneratorObject): VariableValue {
 
   this.depth++
   try {
-    const { $gen, ...rawOptions } = gen
-    // resolve options first — enables nested $gen inside options
+    const { $gen, $count, $module, ...rawOptions } = gen
     const options = this.resolve(rawOptions)
-    return GeneratorRegistry.run($gen, options)
+    const method = findFakerMethod($gen, $module)
+
+    const generate = () =>
+      Object.keys(options).length > 0 ? method(options) : method()
+
+    if ($count) return Array.from({ length: $count }, generate)
+    return generate()
   } finally {
     this.depth--
   }
@@ -434,369 +428,47 @@ function resolvePhase2(request: Req, store: VariableStore, stepTitle: string): R
 
 ---
 
-## 4. Generator Registry & Implementations
+## 4. Faker JSON Schema System
 
-### Registry
+Instead of manual generator classes, play-son uses a declarative system that delegates directly to `@faker-js/faker`. This allows the use of any faker method via a simple JSON directive.
 
-```typescript
-// generators/registry.ts
+### Method Resolution
 
-interface Generator<O extends Record<string, unknown> = Record<string, unknown>> {
-  run(options: O): VariableValue
-}
+The resolver finds faker methods using the following priority:
+1. **Fully Qualified**: `vehicle.type` → `faker.vehicle.type()`
+2. **Module Hint**: `$module: "vehicle"`, `$gen: "type"` → `faker.vehicle.type()`
+3. **Auto-Discovery**: `$gen: "fullName"` → Searches all faker modules for a `fullName` method.
 
-class GeneratorRegistry {
-  private static readonly generators = new Map<string, Generator>()
+### recursive `$count` Support
 
-  static register(name: string, generator: Generator): void {
-    this.generators.set(name, generator)
-  }
+The system supports generating arrays at any level using the `$count` directive.
 
-  static run(name: string, options: Record<string, unknown>): VariableValue {
-    const gen = this.generators.get(name)
-    if (!gen) throw new UnknownGeneratorError(name)
-    return gen.run(options)
-  }
-
-  static has(name: string): boolean {
-    return this.generators.has(name)
-  }
-}
-
-// called once at framework startup
-export function registerBuiltins(): void {
-  GeneratorRegistry.register('string', new StringGenerator())
-  GeneratorRegistry.register('number', new NumberGenerator())
-  GeneratorRegistry.register('boolean', new BooleanGenerator())
-  GeneratorRegistry.register('date', new DateGenerator())
-  GeneratorRegistry.register('pastDate', new PastDateGenerator())
-  GeneratorRegistry.register('futureDate', new FutureDateGenerator())
-  GeneratorRegistry.register('uuid', new UuidGenerator())
-  GeneratorRegistry.register('email', new EmailGenerator())
-  GeneratorRegistry.register('fullName', new FullNameGenerator())
-  GeneratorRegistry.register('firstName', new FirstNameGenerator())
-  GeneratorRegistry.register('lastName', new LastNameGenerator())
-  GeneratorRegistry.register('phoneNumber', new PhoneNumberGenerator())
-  GeneratorRegistry.register('url', new UrlGenerator())
-  GeneratorRegistry.register('ipAddress', new IpAddressGenerator())
-}
-```
-
----
-
-### `string` generator
-
-```typescript
-// generators/string.generator.ts
-
-interface StringOptions {
-  length: number // required
-  alphanumeric?: boolean // default: true
-  numeric?: boolean // mutually exclusive with alphanumeric
-  upper?: boolean // uppercase only — combined with alphanumeric
-  lower?: boolean // lowercase only — combined with alphanumeric
-}
-
-class StringGenerator implements Generator<StringOptions> {
-  run({ length, numeric, upper, lower }: StringOptions): string {
-    if (typeof length !== 'number' || length < 1) {
-      throw new GeneratorOptionError('string', 'length must be a positive number')
-    }
-
-    if (numeric) {
-      // allowLeadingZeros: true preserves OTP/PIN leading zeros e.g. "0042"
-      return faker.string.numeric({ length, allowLeadingZeros: true })
-    }
-
-    const casing: 'upper' | 'lower' | 'mixed' = upper ? 'upper' : lower ? 'lower' : 'mixed'
-
-    return faker.string.alphanumeric({ length, casing })
-  }
-}
-```
-
-**Examples:**
+- **At Object level**: Generates an array of objects.
+- **At Generator level**: Generates an array of primitive values.
 
 ```json
-{ "$gen": "string", "length": 8 }
-→ "aB3xQz9m"
-
-{ "$gen": "string", "length": 6, "numeric": true }
-→ "047832"
-
-{ "$gen": "string", "length": 4, "upper": true }
-→ "KRTX"
+{
+  "$count": 3,
+  "id": { "$gen": "uuid" },
+  "name": { "$gen": "fullName" }
+}
 ```
 
----
-
-### `number` generator
+### Type Guard
 
 ```typescript
-// generators/number.generator.ts
+// utils/is-gen-object.ts
 
-interface NumberOptions {
-  min?: number // default: 0
-  max?: number // default: 1_000_000
-  float?: boolean // default: false
-  precision?: number // decimal places when float: true, default: 2
-}
-
-class NumberGenerator implements Generator<NumberOptions> {
-  run({ min = 0, max = 1_000_000, float = false, precision = 2 }: NumberOptions): number {
-    if (min > max) {
-      throw new GeneratorOptionError('number', `min (${min}) must be <= max (${max})`)
-    }
-    if (float) return faker.number.float({ min, max, fractionDigits: precision })
-    return faker.number.int({ min, max })
-  }
+function isGenObject(value: unknown): value is GeneratorObject {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    '$gen' in value &&
+    typeof (value as Record<string, unknown>)['$gen'] === 'string'
+  )
 }
 ```
-
-**Examples:**
-
-```json
-{ "$gen": "number", "min": 1, "max": 100 }
-→ 47
-
-{ "$gen": "number", "min": 0.0, "max": 1.0, "float": true, "precision": 4 }
-→ 0.7312
-```
-
----
-
-### `boolean` generator
-
-```typescript
-// generators/boolean.generator.ts
-
-interface BooleanOptions {
-  probability?: number // 0.0–1.0, default: 0.5
-}
-
-class BooleanGenerator implements Generator<BooleanOptions> {
-  run({ probability = 0.5 }: BooleanOptions): boolean {
-    if (probability < 0 || probability > 1) {
-      throw new GeneratorOptionError('boolean', 'probability must be between 0 and 1')
-    }
-    return faker.datatype.boolean({ probability })
-  }
-}
-```
-
----
-
-### `date` / `pastDate` / `futureDate` generators
-
-```typescript
-// generators/date.generator.ts
-
-interface DateOptions {
-  within?: string // e.g. "7d", "3M", "1y" — default "30d"
-  format?: 'iso' | 'timestamp' | 'date'
-  //   "iso"       → "2025-04-12T10:30:00.000Z"   (default)
-  //   "timestamp" → 1744450200000
-  //   "date"      → "2025-04-12"
-}
-
-function parseWithin(within: string): {
-  years?: number
-  months?: number
-  days?: number
-} {
-  const match = within.match(/^(\d+)(d|M|y)$/)
-  if (!match) {
-    throw new GeneratorOptionError(
-      'date',
-      `Invalid "within": "${within}". Use e.g. "7d", "3M", "1y"`
-    )
-  }
-  const n = parseInt(match[1])
-  return match[2] === 'd' ? { days: n } : match[2] === 'M' ? { months: n } : { years: n }
-}
-
-function formatDate(date: Date, format: DateOptions['format'] = 'iso'): string | number {
-  if (format === 'timestamp') return date.getTime()
-  if (format === 'date') return date.toISOString().split('T')[0]
-  return date.toISOString()
-}
-
-class DateGenerator implements Generator<DateOptions> {
-  // current date/time
-  run({ format }: DateOptions): string | number {
-    return formatDate(new Date(), format)
-  }
-}
-
-class PastDateGenerator implements Generator<DateOptions> {
-  run({ within = '30d', format }: DateOptions): string | number {
-    return formatDate(faker.date.past({ ...parseWithin(within), refDate: new Date() }), format)
-  }
-}
-
-class FutureDateGenerator implements Generator<DateOptions> {
-  run({ within = '30d', format }: DateOptions): string | number {
-    return formatDate(faker.date.future({ ...parseWithin(within), refDate: new Date() }), format)
-  }
-}
-```
-
-**Examples:**
-
-```json
-{ "$gen": "pastDate", "within": "7d" }
-→ "2025-04-05T14:22:10.000Z"
-
-{ "$gen": "futureDate", "within": "3M", "format": "date" }
-→ "2025-07-12"
-
-{ "$gen": "date", "format": "timestamp" }
-→ 1744450200000
-```
-
----
-
-### Internet generators (`uuid`, `email`, `url`, `ipAddress`)
-
-```typescript
-// generators/internet.generator.ts
-
-class UuidGenerator implements Generator {
-  run(): string {
-    return faker.string.uuid()
-  }
-}
-
-interface EmailOptions {
-  domain?: string // fix the domain — e.g. "example.com" → "abc@example.com"
-  prefix?: string // prefix before @ — e.g. "tester" → "tester_xk92@gmail.com"
-}
-
-class EmailGenerator implements Generator<EmailOptions> {
-  run({ domain, prefix }: EmailOptions): string {
-    const email = faker.internet.email({ provider: domain })
-    if (prefix) {
-      const [, host] = email.split('@')
-      return `${prefix}_${faker.string.alphanumeric(6)}@${host}`
-    }
-    return email
-  }
-}
-
-class UrlGenerator implements Generator {
-  run(): string {
-    return faker.internet.url()
-  }
-}
-
-class IpAddressGenerator implements Generator {
-  run(): string {
-    return faker.internet.ip()
-  }
-}
-```
-
-**Examples:**
-
-```json
-{ "$gen": "email" }
-→ "john.smith@gmail.com"
-
-{ "$gen": "email", "domain": "example.com" }
-→ "jane42@example.com"
-
-{ "$gen": "email", "prefix": "tester" }
-→ "tester_xk92@yahoo.com"
-```
-
----
-
-### Person generators (`fullName`, `firstName`, `lastName`)
-
-```typescript
-// generators/person.generator.ts
-
-interface PersonOptions {
-  sex?: 'male' | 'female'
-}
-
-class FullNameGenerator implements Generator<PersonOptions> {
-  run({ sex }: PersonOptions): string {
-    return faker.person.fullName({ sex })
-  }
-}
-
-class FirstNameGenerator implements Generator<PersonOptions> {
-  run({ sex }: PersonOptions): string {
-    return faker.person.firstName(sex)
-  }
-}
-
-class LastNameGenerator implements Generator {
-  run(): string {
-    return faker.person.lastName()
-  }
-}
-```
-
----
-
-### `phoneNumber` generator
-
-```typescript
-// generators/phone.generator.ts
-
-interface PhoneOptions {
-  // style: "international" → "+1-800-555-0199", "national" → "800-555-0199"
-  // default: "national"
-  style?: 'international' | 'national'
-}
-
-class PhoneNumberGenerator implements Generator<PhoneOptions> {
-  run({ style = 'national' }: PhoneOptions): string {
-    return faker.phone.number({ style })
-  }
-}
-```
-
----
-
-### Generator option errors
-
-Option validation throws before Faker is called:
-
-```typescript
-class GeneratorOptionError extends PlaysonError {
-  readonly code = 'GENERATOR_OPTION_ERROR'
-  constructor(
-    public generator: string,
-    message: string
-  ) {
-    super(`[$gen: ${generator}] ${message}`)
-  }
-}
-```
-
----
-
-### Full `$gen` reference table
-
-| `$gen`        | Options                                     | Returns            | Notes                             |
-| ------------- | ------------------------------------------- | ------------------ | --------------------------------- |
-| `string`      | `length` (req), `numeric`, `upper`, `lower` | `string`           | numeric preserves leading zeros   |
-| `number`      | `min`, `max`, `float`, `precision`          | `number`           |                                   |
-| `boolean`     | `probability`                               | `boolean`          | 0–1 weight                        |
-| `date`        | `format`                                    | `string \| number` | current date/time                 |
-| `pastDate`    | `within`, `format`                          | `string \| number` | `"7d"`, `"3M"`, `"1y"`            |
-| `futureDate`  | `within`, `format`                          | `string \| number` | same as pastDate                  |
-| `uuid`        | —                                           | `string`           | UUID v4                           |
-| `email`       | `domain`, `prefix`                          | `string`           |                                   |
-| `fullName`    | `sex`                                       | `string`           |                                   |
-| `firstName`   | `sex`                                       | `string`           |                                   |
-| `lastName`    | —                                           | `string`           |                                   |
-| `phoneNumber` | `style`                                     | `string`           | `"international"` \| `"national"` |
-| `url`         | —                                           | `string`           |                                   |
-| `ipAddress`   | —                                           | `string`           | IPv4                              |
 
 ---
 
