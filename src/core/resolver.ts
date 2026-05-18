@@ -1,10 +1,43 @@
+import { faker } from '@faker-js/faker'
 import { ResolutionError } from '../errors/index.js'
-import { GeneratorRegistry } from '../generators/registry.js'
 import { GeneratorObject, Req, Variables, VariableValue } from '../types/index.js'
 import { isGenObject } from '../utils/is-gen-object.js'
 import { VariableStore } from './variable-store.js'
 
 const TOKEN_RE = /\{\{\s*(.*?)\s*\}\}/g
+
+/**
+ * Finds a faker method by name, potentially qualified with a module name.
+ */
+function findFakerMethod(methodName: string, moduleHint: string | null = null): Function {
+  // 1. Qualified name: "vehicle.type"
+  if (methodName.includes('.')) {
+    const [mod, fn] = methodName.split('.')
+    const fakerMod = (faker as any)[mod]
+    if (fakerMod && typeof fakerMod[fn] === 'function') {
+      return fakerMod[fn].bind(fakerMod)
+    }
+    throw new Error(`Faker method not found: ${methodName}`)
+  }
+
+  // 2. Module hint: $module: "vehicle"
+  if (moduleHint) {
+    const fakerMod = (faker as any)[moduleHint]
+    if (fakerMod && typeof fakerMod[methodName] === 'function') {
+      return fakerMod[methodName].bind(fakerMod)
+    }
+    throw new Error(`Method "${methodName}" not found in module "${moduleHint}"`)
+  }
+
+  // 3. Auto-discover: search all modules
+  for (const [_modName, mod] of Object.entries(faker)) {
+    if (mod && typeof mod === 'object' && typeof (mod as any)[methodName] === 'function') {
+      return (mod as any)[methodName].bind(mod)
+    }
+  }
+
+  throw new Error(`No faker method found for: "${methodName}"`)
+}
 
 export class Resolver {
   private depth = 0
@@ -23,21 +56,33 @@ export class Resolver {
       return input
     }
 
+    // Generator object detection
     if (isGenObject(input)) {
       return this.executeGenerator(input) as T
+    }
+
+    // Array support (with potential $count at root of object containing $gen)
+    // Wait, isGenObject handles the object with $gen.
+    // But what if it's a plain array?
+    if (Array.isArray(input)) {
+      return input.map((v) => this.resolve(v)) as unknown as T
     }
 
     if (typeof input === 'string') {
       return this.resolveString(input) as T
     }
 
-    if (Array.isArray(input)) {
-      return input.map((v) => this.resolve(v)) as unknown as T
-    }
-
     if (typeof input === 'object') {
+      const obj = input as Record<string, any>
+      const { $count, ...rest } = obj
+
+      // If $count is present but no $gen, it's an array of objects
+      if ($count !== undefined && typeof $count === 'number' && !('$gen' in obj)) {
+        return Array.from({ length: $count }, () => this.resolve(rest)) as unknown as T
+      }
+
       // Plain object
-      const entries = Object.entries(input as object)
+      const entries = Object.entries(obj)
       const resolvedEntries = entries.map(([k, v]) => [k, this.resolve(v)])
       return Object.fromEntries(resolvedEntries) as T
     }
@@ -54,7 +99,6 @@ export class Resolver {
       return input
     }
 
-    // Single-token path — preserve original type if the entire string is just the token
     const trimmedInput = input.trim()
     const singleTokenMatch = trimmedInput.match(/^\{\{\s*(.*?)\s*\}\}$/)
     if (singleTokenMatch) {
@@ -66,7 +110,6 @@ export class Resolver {
       return value
     }
 
-    // Mixed/multi-token — always string
     return input.replace(TOKEN_RE, (_, name) => {
       const trimmed = name.trim()
       const value = this.store.get(trimmed)
@@ -87,10 +130,26 @@ export class Resolver {
 
     this.depth++
     try {
-      const { $gen, ...rawOptions } = gen
-      // Resolve options first (enables nested $gen or tokens in options)
+      const { $gen, $count, $module, ...rawOptions } = gen
       const options = this.resolve(rawOptions)
-      return GeneratorRegistry.run($gen, options)
+
+      try {
+        const method = findFakerMethod($gen, $module || null)
+
+        const generate = () => {
+          // If options is a plain object with keys, pass it to faker.
+          // Otherwise, call with no args.
+          return Object.keys(options).length > 0 ? method(options) : method()
+        }
+
+        if ($count !== undefined && typeof $count === 'number') {
+          return Array.from({ length: $count }, generate)
+        }
+
+        return generate()
+      } catch (err: any) {
+        throw new Error(`[$gen: ${$gen}] ${err.message}`)
+      }
     } finally {
       this.depth--
     }

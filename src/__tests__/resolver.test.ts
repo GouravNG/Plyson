@@ -1,18 +1,8 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { Resolver, resolvePhase1, resolvePhase2 } from '../core/resolver.js'
 import { VariableStore } from '../core/variable-store.js'
-import { GeneratorRegistry } from '../generators/registry.js'
 import { ResolutionError } from '../errors/index.js'
 import { Req } from '../types/index.js'
-
-vi.mock('../generators/registry', () => ({
-  GeneratorRegistry: {
-    run: vi.fn((name, options) => {
-      if (name === 'echo') return options.val
-      return `generated_${name}`
-    }),
-  },
-}))
 
 describe('Resolver', () => {
   it('should interpolate tokens with type preservation', () => {
@@ -59,12 +49,11 @@ describe('Resolver', () => {
 
   it('should execute generators and resolve their options', () => {
     const store = new VariableStore()
-    store.push('global', { prefix: 'test' })
+    store.push('global', { min: 5, max: 5 })
     const resolver = new Resolver(store)
 
-    const genObj = { $gen: 'echo', val: '{{prefix}}_value' }
-    expect(resolver.resolve(genObj)).toBe('test_value')
-    expect(GeneratorRegistry.run).toHaveBeenCalledWith('echo', { val: 'test_value' })
+    const genObj = { $gen: 'int', min: '{{min}}', max: '{{max}}' }
+    expect(resolver.resolve(genObj)).toBe(5)
   })
 
   it('should guard against deeply nested generators', () => {
@@ -72,10 +61,9 @@ describe('Resolver', () => {
     const resolver = new Resolver(store)
 
     // Create a deeply nested generator structure
-    // { $gen: 'echo', val: { $gen: 'echo', val: { ... } } }
-    let deepGen: any = { $gen: 'echo', val: 'root' }
+    let deepGen: any = { $gen: 'fullName' }
     for (let i = 0; i < 11; i++) {
-      deepGen = { $gen: 'echo', val: deepGen }
+      deepGen = { $gen: 'fullName', options: deepGen }
     }
 
     expect(() => resolver.resolve(deepGen)).toThrow(ResolutionError)

@@ -1,7 +1,6 @@
 import { ProjectLoader } from './core/project-loader.js'
 import { registerSuites } from './core/test-runner.js'
 import { VariableStore } from './core/variable-store.js'
-import { registerBuiltins } from './generators/registry.js'
 
 /**
  * Bootstraps the play-son project and registers all suites as Playwright tests.
@@ -16,9 +15,6 @@ export async function bootstrap(test: any, expect: any) {
       'PLAYSON_ENV environment variable is not set. Please specify an environment with --env.'
     )
   }
-
-  // Initialize global state
-  registerBuiltins()
 
   const loader = new ProjectLoader()
   const store = new VariableStore()

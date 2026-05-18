@@ -6,40 +6,52 @@
     "GeneratorObject": {
       "type": "object",
       "title": "Generator Object",
-      "description": "Represents a dynamic data generator object. Used for on-the-fly data creation via Faker.js.",
+      "description": "Represents a dynamic data generator object. Uses the Faker JSON Schema system to delegate to any @faker-js/faker method.",
       "required": ["$gen"],
       "properties": {
         "$gen": {
           "type": "string",
-          "description": "The generator function name to use (e.g., 'firstName', 'email', 'phoneNumber')"
+          "description": "The faker method name (e.g., 'fullName', 'email', 'int'). Can be fully qualified (e.g., 'vehicle.type')."
+        },
+        "$count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "If provided, generates an array of the specified length."
+        },
+        "$module": {
+          "type": "string",
+          "description": "Optional module hint for ambiguous method names (e.g., 'vehicle', 'animal')."
         }
       },
       "additionalProperties": {
-        "description": "Additional configuration parameters for the generator function"
+        "description": "Arguments passed directly to the faker method. Consult fakerjs.dev/api for available parameters."
       },
       "examples": [
         {
-          "$gen": "firstName"
+          "$gen": "fullName"
         },
         {
-          "$gen": "email",
-          "provider": "gmail.com"
+          "$gen": "email"
         },
         {
-          "$gen": "phoneNumber",
-          "format": "+1-###-###-####"
+          "$gen": "int",
+          "min": 18,
+          "max": 65
         },
         {
-          "$gen": "name",
-          "firstName": true,
-          "lastName": true
+          "$gen": "fullName",
+          "$count": 5
+        },
+        {
+          "$gen": "type",
+          "$module": "vehicle"
         }
       ]
     },
     "VariableValue": {
       "type": ["string", "number", "boolean", "null", "array", "object"],
       "title": "Variable Value",
-      "description": "Values in the variable store can be primitives, arrays, objects, or generator objects that need resolution.",
+      "description": "Values in the variable store can be primitives, arrays, objects, or generator objects. Objects can also use $count to generate an array of objects.",
       "examples": [
         "string_value",
         42,
@@ -51,6 +63,11 @@
         },
         {
           "$gen": "email"
+        },
+        {
+          "$count": 3,
+          "id": { "$gen": "uuid" },
+          "name": { "$gen": "fullName" }
         }
       ]
     }

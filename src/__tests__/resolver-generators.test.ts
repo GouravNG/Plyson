@@ -1,13 +1,8 @@
-import { describe, expect, it, beforeEach } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { resolvePhase1 } from '../core/resolver.js'
 import { VariableStore } from '../core/variable-store.js'
-import { registerBuiltins } from '../generators/registry.js'
 
 describe('Resolver + Generators Integration', () => {
-  beforeEach(() => {
-    registerBuiltins()
-  })
-
   it('should resolve variables containing $gen objects', () => {
     const store = new VariableStore()
     /*
@@ -15,13 +10,13 @@ describe('Resolver + Generators Integration', () => {
       {
         "userEmail": { "$gen": "email", "domain": "test.com" },
         "userId": { "$gen": "uuid" },
-        "userAge": { "$gen": "number", "min": 18, "max": 99 }
+        "userAge": { "$gen": "int", "min": 18, "max": 99 }
       }
     */
     const variables = {
-      userEmail: { $gen: 'email', domain: 'test.com' },
+      userEmail: { $gen: 'email', provider: 'test.com' },
       userId: { $gen: 'uuid' },
-      userAge: { $gen: 'number', min: 18, max: 99 },
+      userAge: { $gen: 'int', min: 18, max: 99 },
     }
 
     const resolved = resolvePhase1(variables, store)
@@ -38,16 +33,16 @@ describe('Resolver + Generators Integration', () => {
       Equivalent JSON:
       {
         "randomString": { 
-          "$gen": "string", 
-          "length": { "$gen": "number", "min": 4, "max": 8 } 
+          "$gen": "alphanumeric", 
+          "length": { "$gen": "int", "min": 4, "max": 8 } 
         }
       }
     */
     const variables = {
       // Generate a random length between 4 and 8, then generate a string of that length
       randomString: {
-        $gen: 'string',
-        length: { $gen: 'number', min: 4, max: 8 },
+        $gen: 'alphanumeric',
+        length: { $gen: 'int', min: 4, max: 8 },
       },
     }
 
