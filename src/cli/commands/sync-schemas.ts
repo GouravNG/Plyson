@@ -106,7 +106,10 @@ function rewriteRefs(obj: any) {
   if (!obj || typeof obj !== 'object') return
 
   if (obj.$ref && typeof obj.$ref === 'string') {
-    if (obj.$ref.startsWith('#/components/schemas/') || obj.$ref.startsWith('#/definitions/')) {
+    if (
+      obj.$ref.startsWith('#/components/schemas/') ||
+      obj.$ref.startsWith('#/definitions/')
+    ) {
       const parts = obj.$ref.split('/')
       const name = parts[parts.length - 1]
       obj.$ref = `${name}.schema.json`

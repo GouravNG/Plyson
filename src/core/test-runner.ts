@@ -29,6 +29,7 @@ export function registerSuites(
   test.beforeAll(async ({ request }: { request: APIRequestContext }) => {
     store.push('global', graph.variables)
     store.push('environment', graph.environment.variables ?? {})
+    AssertionEngine.registerSchemas(graph.schemas)
     if (graph.project.beforeAll) {
       await runSteps(graph.project.beforeAll, request, store, graph, test, new ConsoleLogger('project-beforeAll'))
     }
@@ -67,9 +68,10 @@ export function registerSuites(
         const formattedTags = allTags.map((t: string) => (t.startsWith('@') ? t : `@${t}`))
 
         testFn(
-          testCase.title,
+          `[${testCase.id}] ${testCase.title}`,
           { tag: formattedTags },
           async ({ request }: { request: APIRequestContext }) => {
+            test.info().annotations.push({ type: 'id', description: testCase.id })
             if (testCase.testType) {
               test.info().annotations.push({ type: 'testType', description: testCase.testType })
             }
