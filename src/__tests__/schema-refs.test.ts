@@ -6,40 +6,40 @@ describe('Schema Reference Handling', () => {
   describe('SchemaGenerator (AutoFill)', () => {
     it('should follow $ref in properties', () => {
       const schemas = new Map([
-        ['User', { type: 'object', properties: { id: { type: 'string', example: 'user-1' } } }]
+        ['User', { type: 'object', properties: { id: { type: 'string', example: 'user-1' } } }],
       ])
-      
+
       const schemaWithRef = {
         type: 'object',
         properties: {
-          user: { $ref: 'User.schema.json' }
-        }
+          user: { $ref: 'User.schema.json' },
+        },
       }
 
       const generated = generateFromSchema(schemaWithRef, {}, schemas)
       expect(generated).toEqual({
-        user: { id: 'user-1' }
+        user: { id: 'user-1' },
       })
     })
 
     it('should follow top-level $ref', () => {
       const schemas = new Map([
-        ['User', { type: 'object', properties: { id: { type: 'string', example: 'user-1' } } }]
+        ['User', { type: 'object', properties: { id: { type: 'string', example: 'user-1' } } }],
       ])
-      
+
       const schemaWithRef = { $ref: 'User.schema.json' }
 
       const generated = generateFromSchema(schemaWithRef, {}, schemas)
       expect(generated).toEqual({
-        id: 'user-1'
+        id: 'user-1',
       })
     })
 
     it('should handle recursion gracefully', () => {
       const schemas = new Map([
-        ['User', { type: 'object', properties: { friend: { $ref: 'User.schema.json' } } }]
+        ['User', { type: 'object', properties: { friend: { $ref: 'User.schema.json' } } }],
       ])
-      
+
       const schema = { $ref: 'User.schema.json' }
 
       const generated = generateFromSchema(schema, {}, schemas)
@@ -52,7 +52,14 @@ describe('Schema Reference Handling', () => {
     it('should validate against schemas with relative refs', async () => {
       const schemas = new Map([
         ['User', { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] }],
-        ['Profile', { type: 'object', properties: { user: { $ref: 'User.schema.json' } }, required: ['user'] }]
+        [
+          'Profile',
+          {
+            type: 'object',
+            properties: { user: { $ref: 'User.schema.json' } },
+            required: ['user'],
+          },
+        ],
       ])
 
       AssertionEngine.registerSchemas(schemas)
@@ -62,19 +69,26 @@ describe('Schema Reference Handling', () => {
       const softErrors: any[] = []
 
       // Valid
-      await expect(AssertionEngine.validateSchema(validBody, { name: 'Profile' }, schemas, softErrors)).resolves.not.toThrow()
-      
+      await expect(
+        AssertionEngine.validateSchema(validBody, { name: 'Profile' }, schemas, softErrors)
+      ).resolves.not.toThrow()
+
       // Invalid
-      await expect(AssertionEngine.validateSchema(invalidBody, { name: 'Profile' }, schemas, softErrors)).rejects.toThrow()
+      await expect(
+        AssertionEngine.validateSchema(invalidBody, { name: 'Profile' }, schemas, softErrors)
+      ).rejects.toThrow()
     })
 
     it('should ignore unknown keywords like "example" in schemas', async () => {
       const schemas = new Map([
-        ['User', { 
-          type: 'object', 
-          properties: { id: { type: 'string', example: '123' } },
-          example: { id: '123' }
-        }]
+        [
+          'User',
+          {
+            type: 'object',
+            properties: { id: { type: 'string', example: '123' } },
+            example: { id: '123' },
+          },
+        ],
       ])
 
       AssertionEngine.registerSchemas(schemas)
@@ -82,7 +96,9 @@ describe('Schema Reference Handling', () => {
       const body = { id: '123' }
       const softErrors: any[] = []
 
-      await expect(AssertionEngine.validateSchema(body, { name: 'User' }, schemas, softErrors)).resolves.not.toThrow()
+      await expect(
+        AssertionEngine.validateSchema(body, { name: 'User' }, schemas, softErrors)
+      ).resolves.not.toThrow()
     })
   })
 })

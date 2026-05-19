@@ -30,11 +30,7 @@ export function generateFromSchema(
   )
 }
 
-function generateValueForField(
-  schema: any,
-  allSchemas: Map<string, any>,
-  depth = 0
-): unknown {
+function generateValueForField(schema: any, allSchemas: Map<string, any>, depth = 0): unknown {
   if (!schema) return null
   if (depth > 10) return null // Recursion guard
 

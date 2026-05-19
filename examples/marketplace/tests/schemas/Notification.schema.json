@@ -9,12 +9,7 @@
     },
     "type": {
       "type": "string",
-      "enum": [
-        "AUTH",
-        "ORDER",
-        "REVIEW",
-        "BROADCAST"
-      ]
+      "enum": ["AUTH", "ORDER", "REVIEW", "BROADCAST"]
     },
     "title": {
       "type": "string"

@@ -31,13 +31,27 @@ export function registerSuites(
     store.push('environment', graph.environment.variables ?? {})
     AssertionEngine.registerSchemas(graph.schemas)
     if (graph.project.beforeAll) {
-      await runSteps(graph.project.beforeAll, request, store, graph, test, new ConsoleLogger('project-beforeAll'))
+      await runSteps(
+        graph.project.beforeAll,
+        request,
+        store,
+        graph,
+        test,
+        new ConsoleLogger('project-beforeAll')
+      )
     }
   })
 
   test.afterAll(async ({ request }: { request: APIRequestContext }) => {
     if (graph.project.afterAll) {
-      await runSteps(graph.project.afterAll, request, store, graph, test, new ConsoleLogger('project-afterAll'))
+      await runSteps(
+        graph.project.afterAll,
+        request,
+        store,
+        graph,
+        test,
+        new ConsoleLogger('project-afterAll')
+      )
     }
   })
 
@@ -48,13 +62,27 @@ export function registerSuites(
       test.beforeAll(async ({ request }: { request: APIRequestContext }) => {
         store.push('suite', suite.variables ?? {})
         if (suite.beforeAll) {
-          await runSteps(suite.beforeAll, request, store, graph, test, new ConsoleLogger(`${suite.title}-beforeAll`))
+          await runSteps(
+            suite.beforeAll,
+            request,
+            store,
+            graph,
+            test,
+            new ConsoleLogger(`${suite.title}-beforeAll`)
+          )
         }
       })
 
       test.afterAll(async ({ request }: { request: APIRequestContext }) => {
         if (suite.afterAll) {
-          await runSteps(suite.afterAll, request, store, graph, test, new ConsoleLogger(`${suite.title}-afterAll`))
+          await runSteps(
+            suite.afterAll,
+            request,
+            store,
+            graph,
+            test,
+            new ConsoleLogger(`${suite.title}-afterAll`)
+          )
         }
         store.pop('suite')
       })
