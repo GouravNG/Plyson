@@ -13,7 +13,7 @@
       "format": "date-time"
     },
     "service": {
-      "$ref": "#/components/schemas/Service"
+      "$ref": "Service.schema.json"
     }
   }
 }
