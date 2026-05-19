@@ -10,7 +10,7 @@
     "items": {
       "type": "array",
       "items": {
-        "$ref": "#/components/schemas/OrderItem"
+        "$ref": "OrderItem.schema.json"
       }
     },
     "subtotal": {

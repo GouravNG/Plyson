@@ -1,7 +1,7 @@
 {
   "allOf": [
     {
-      "$ref": "#/components/schemas/Error"
+      "$ref": "Error.schema.json"
     },
     {
       "type": "object",
