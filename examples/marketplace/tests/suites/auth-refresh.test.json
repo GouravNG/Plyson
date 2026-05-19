@@ -9,7 +9,14 @@
       "testType": "positive",
       "tags": ["positive", "post", "auth"],
       "variables": {
-        "refreshEmail": "refresh.{{$timestamp}}@example.com"
+        "refreshEmail": {
+          "$gen": "email",
+          "provider": "example.com"
+        },
+        "refreshPassword": {
+          "$gen": "alphanumeric",
+          "length": "{{DEFAULT_PWD_LENGTH}}"
+        }
       },
       "steps": [
         {
@@ -19,9 +26,13 @@
             "endpoint": "{{REGISTER_PATH}}",
             "payload": {
               "email": "{{refreshEmail}}",
-              "password": "Password123",
-              "firstname": "Refresh",
-              "lastname": "Positive"
+              "password": "{{refreshPassword}}",
+              "firstname": {
+                "$gen": "firstName"
+              },
+              "lastname": {
+                "$gen": "lastName"
+              }
             }
           },
           "response": {
@@ -37,7 +48,7 @@
             "endpoint": "{{LOGIN_PATH}}",
             "payload": {
               "email": "{{refreshEmail}}",
-              "password": "Password123"
+              "password": "{{refreshPassword}}"
             }
           },
           "response": {

@@ -103,6 +103,8 @@ export class AssertionEngine {
     switch (operator) {
       case 'equals':
         return e.toEqual(value)
+      case 'equalsIgnoreCase':
+        return expect(String(actual).toLowerCase()).toEqual(String(value).toLowerCase())
       case 'notEquals':
         return e.not.toEqual(value)
       case 'exists':

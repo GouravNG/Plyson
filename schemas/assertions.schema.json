@@ -26,6 +26,7 @@
       "description": "The comparison or validation operator to use",
       "enum": [
         "equals",
+        "equalsIgnoreCase",
         "notEquals",
         "exists",
         "notExists",
@@ -71,6 +72,7 @@
       "type": "string",
       "enum": [
         "equals",
+        "equalsIgnoreCase",
         "notEquals",
         "exists",
         "notExists",

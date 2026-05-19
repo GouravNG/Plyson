@@ -9,7 +9,14 @@
       "testType": "positive",
       "tags": ["positive", "post", "auth"],
       "variables": {
-        "logoutEmail": "logout.{{$timestamp}}@example.com"
+        "logoutEmail": {
+          "$gen": "email",
+          "provider": "example.com"
+        },
+        "logoutPassword": {
+          "$gen": "alphanumeric",
+          "length": "{{DEFAULT_PWD_LENGTH}}"
+        }
       },
       "steps": [
         {
@@ -19,9 +26,13 @@
             "endpoint": "{{REGISTER_PATH}}",
             "payload": {
               "email": "{{logoutEmail}}",
-              "password": "Password123",
-              "firstname": "Logout",
-              "lastname": "Positive"
+              "password": "{{logoutPassword}}",
+              "firstname": {
+                "$gen": "firstName"
+              },
+              "lastname": {
+                "$gen": "lastName"
+              }
             }
           },
           "response": {
@@ -37,7 +48,7 @@
             "endpoint": "{{LOGIN_PATH}}",
             "payload": {
               "email": "{{logoutEmail}}",
-              "password": "Password123"
+              "password": "{{logoutPassword}}"
             }
           },
           "response": {
