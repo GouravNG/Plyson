@@ -9,10 +9,17 @@
         "method": "POST",
         "endpoint": "{{REGISTER_PATH}}",
         "payload": {
-          "email": "playson.{{$timestamp}}@playson.com",
+          "email": {
+            "$gen": "email",
+            "provider": "playson.com"
+          },
           "password": "Password@123",
-          "firstname": "Login",
-          "lastname": "Suite"
+          "firstname": {
+            "$gen": "firstName"
+          },
+          "lastname": {
+            "$gen": "lastName"
+          }
         }
       },
       "response": {

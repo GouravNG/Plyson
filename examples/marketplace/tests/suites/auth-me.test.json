@@ -9,7 +9,20 @@
       "testType": "positive",
       "tags": ["positive", "get", "auth"],
       "variables": {
-        "meEmail": "me.{{$timestamp}}@example.com"
+        "meEmail": {
+          "$gen": "email",
+          "provider": "example.com"
+        },
+        "mePassword": {
+          "$gen": "alphanumeric",
+          "length": "{{DEFAULT_PWD_LENGTH}}"
+        },
+        "meFirstname": {
+          "$gen": "firstName"
+        },
+        "meLastname": {
+          "$gen": "lastName"
+        }
       },
       "steps": [
         {
@@ -19,9 +32,9 @@
             "endpoint": "{{REGISTER_PATH}}",
             "payload": {
               "email": "{{meEmail}}",
-              "password": "Password123",
-              "firstname": "Me",
-              "lastname": "Positive"
+              "password": "{{mePassword}}",
+              "firstname": "{{meFirstname}}",
+              "lastname": "{{meLastname}}"
             }
           },
           "response": {
@@ -37,7 +50,7 @@
             "endpoint": "{{LOGIN_PATH}}",
             "payload": {
               "email": "{{meEmail}}",
-              "password": "Password123"
+              "password": "{{mePassword}}"
             }
           },
           "response": {
@@ -74,7 +87,7 @@
                   "title": "Email matches registered user",
                   "from": "body",
                   "path": "$.user.email",
-                  "operator": "equals",
+                  "operator": "equalsIgnoreCase",
                   "value": "{{meEmail}}"
                 },
                 {
@@ -82,7 +95,7 @@
                   "from": "body",
                   "path": "$.user.firstname",
                   "operator": "equals",
-                  "value": "Me"
+                  "value": "{{meFirstname}}"
                 }
               ]
             }

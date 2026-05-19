@@ -51,6 +51,21 @@ describe('AssertionEngine', () => {
       ).rejects.toThrow(AssertionError)
     })
 
+    it('should pass for case-insensitive string equality', async () => {
+      await AssertionEngine.runAssertion(
+        {
+          title: 'email',
+          from: 'body',
+          path: 'email',
+          operator: 'equalsIgnoreCase',
+          value: 'Erin.Connelly@example.com',
+        },
+        { email: 'erin.connelly@example.com' },
+        mockResponse,
+        []
+      )
+    })
+
     it('should pass for exists/notExists', async () => {
       await AssertionEngine.runAssertion(
         { title: 'ex', from: 'body', path: 'a', operator: 'exists' },

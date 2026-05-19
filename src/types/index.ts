@@ -34,6 +34,7 @@ export type AutoFillType = false | ({ schemaName: string } & AutoFillFields)
 
 export type AssertionOperators =
   | 'equals'
+  | 'equalsIgnoreCase'
   | 'notEquals'
   | 'exists'
   | 'notExists'
@@ -201,6 +202,7 @@ export const AutoFillTypeSchema = z.union([
 
 export const AssertionOperatorsSchema = z.enum([
   'equals',
+  'equalsIgnoreCase',
   'notEquals',
   'exists',
   'notExists',
