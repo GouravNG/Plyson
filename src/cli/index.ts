@@ -4,6 +4,7 @@ import { runCommand } from './commands/run.js'
 import { validateCommand } from './commands/validate.js'
 import { generateCommand } from './commands/generate.js'
 import { syncSchemasCommand } from './commands/sync-schemas.js'
+import { syncProjectSchemasCommand } from './commands/sync-project-schemas.js'
 import { initCommand } from './commands/init.js'
 import { readFileSync } from 'fs'
 import { join, dirname } from 'path'
@@ -26,6 +27,7 @@ program.addCommand(runCommand)
 program.addCommand(validateCommand)
 program.addCommand(generateCommand)
 program.addCommand(syncSchemasCommand)
+program.addCommand(syncProjectSchemasCommand)
 program.addCommand(initCommand)
 
 program.parse(process.argv)

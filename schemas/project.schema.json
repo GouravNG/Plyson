@@ -1,150 +1,699 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Project Configuration",
-  "description": "Root project configuration file (project.json) that defines project-level settings, global setup/teardown steps, and default environment. This file is located at the root of the project.",
+  "title": "Project Schema",
   "type": "object",
-  "required": ["title", "version"],
   "properties": {
+    "$schema": {
+      "type": "string"
+    },
     "title": {
-      "type": "string",
-      "description": "Human-readable title of the test project"
+      "type": "string"
     },
     "description": {
-      "type": "string",
-      "description": "Detailed description of the project's purpose and scope"
+      "type": "string"
     },
     "version": {
-      "type": "string",
-      "description": "Project version (should match the version in package.json)",
-      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+      "type": "string"
     },
     "beforeAll": {
       "type": "array",
-      "title": "Global Setup Steps",
-      "description": "Global level setup steps executed before all test suites and cases",
       "items": {
-        "$ref": "testcase.schema.json#/definitions/TestStep"
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "ref": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "ref"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "wait": {
+                "type": "number"
+              },
+              "flags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "handlers": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "request": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "GET",
+                      "POST",
+                      "PUT",
+                      "DELETE",
+                      "PATCH",
+                      "HEAD",
+                      "OPTIONS"
+                    ]
+                  },
+                  "endpoint": {
+                    "type": "string"
+                  },
+                  "queryParams": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "pathParams": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "headers": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "autoFill": {
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "const": false
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "schemaName": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "schemaName"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "includeFields": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "includeFields"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "excludeFields": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "excludeFields"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {},
+                                "additionalProperties": false
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "payload": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "method",
+                  "endpoint"
+                ],
+                "additionalProperties": false
+              },
+              "response": {
+                "type": "object",
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "validation": {
+                        "anyOf": [
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "const": "warn"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "validations": {
+                    "type": "object",
+                    "properties": {
+                      "statusCode": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "number"
+                            }
+                          }
+                        ]
+                      },
+                      "assertions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "title": {
+                              "type": "string"
+                            },
+                            "from": {
+                              "type": "string",
+                              "enum": [
+                                "body",
+                                "header"
+                              ]
+                            },
+                            "path": {
+                              "type": "string"
+                            },
+                            "operator": {
+                              "type": "string",
+                              "enum": [
+                                "equals",
+                                "equalsIgnoreCase",
+                                "notEquals",
+                                "exists",
+                                "notExists",
+                                "isNull",
+                                "isNotNull",
+                                "isGreaterThan",
+                                "isLessThan",
+                                "isGreaterThanOrEquals",
+                                "isLessThanOrEquals",
+                                "contains",
+                                "notContains",
+                                "matches",
+                                "notMatches",
+                                "hasLength",
+                                "hasMinLength",
+                                "hasMaxLength",
+                                "includes",
+                                "notIncludes",
+                                "isEmpty",
+                                "isNotEmpty",
+                                "containsSubset",
+                                "notContainsSubset",
+                                "isString",
+                                "isNumber",
+                                "isBoolean",
+                                "isArray",
+                                "isObject"
+                              ]
+                            },
+                            "value": {},
+                            "validation": {
+                              "default": "error",
+                              "type": "string",
+                              "enum": [
+                                "warn",
+                                "error"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "title",
+                            "from",
+                            "path",
+                            "operator",
+                            "validation"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "statusCode"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "extract": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "from": {
+                          "type": "string",
+                          "enum": [
+                            "body",
+                            "header"
+                          ]
+                        },
+                        "path": {
+                          "type": "string"
+                        },
+                        "scope": {
+                          "type": "string",
+                          "enum": [
+                            "global",
+                            "environment",
+                            "suite",
+                            "case"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "from",
+                        "path",
+                        "scope"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "validations"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "title",
+              "request",
+              "response"
+            ],
+            "additionalProperties": false
+          }
+        ]
       }
     },
     "afterAll": {
       "type": "array",
-      "title": "Global Teardown Steps",
-      "description": "Global level teardown steps executed after all test suites and cases",
       "items": {
-        "$ref": "testcase.schema.json#/definitions/TestStep"
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "ref": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "ref"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "wait": {
+                "type": "number"
+              },
+              "flags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "handlers": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "request": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "GET",
+                      "POST",
+                      "PUT",
+                      "DELETE",
+                      "PATCH",
+                      "HEAD",
+                      "OPTIONS"
+                    ]
+                  },
+                  "endpoint": {
+                    "type": "string"
+                  },
+                  "queryParams": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "pathParams": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "headers": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "autoFill": {
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "const": false
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "schemaName": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "schemaName"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "includeFields": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "includeFields"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "excludeFields": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "excludeFields"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {},
+                                "additionalProperties": false
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "payload": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "method",
+                  "endpoint"
+                ],
+                "additionalProperties": false
+              },
+              "response": {
+                "type": "object",
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "validation": {
+                        "anyOf": [
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "const": "warn"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "validations": {
+                    "type": "object",
+                    "properties": {
+                      "statusCode": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "number"
+                            }
+                          }
+                        ]
+                      },
+                      "assertions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "title": {
+                              "type": "string"
+                            },
+                            "from": {
+                              "type": "string",
+                              "enum": [
+                                "body",
+                                "header"
+                              ]
+                            },
+                            "path": {
+                              "type": "string"
+                            },
+                            "operator": {
+                              "type": "string",
+                              "enum": [
+                                "equals",
+                                "equalsIgnoreCase",
+                                "notEquals",
+                                "exists",
+                                "notExists",
+                                "isNull",
+                                "isNotNull",
+                                "isGreaterThan",
+                                "isLessThan",
+                                "isGreaterThanOrEquals",
+                                "isLessThanOrEquals",
+                                "contains",
+                                "notContains",
+                                "matches",
+                                "notMatches",
+                                "hasLength",
+                                "hasMinLength",
+                                "hasMaxLength",
+                                "includes",
+                                "notIncludes",
+                                "isEmpty",
+                                "isNotEmpty",
+                                "containsSubset",
+                                "notContainsSubset",
+                                "isString",
+                                "isNumber",
+                                "isBoolean",
+                                "isArray",
+                                "isObject"
+                              ]
+                            },
+                            "value": {},
+                            "validation": {
+                              "default": "error",
+                              "type": "string",
+                              "enum": [
+                                "warn",
+                                "error"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "title",
+                            "from",
+                            "path",
+                            "operator",
+                            "validation"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "statusCode"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "extract": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "from": {
+                          "type": "string",
+                          "enum": [
+                            "body",
+                            "header"
+                          ]
+                        },
+                        "path": {
+                          "type": "string"
+                        },
+                        "scope": {
+                          "type": "string",
+                          "enum": [
+                            "global",
+                            "environment",
+                            "suite",
+                            "case"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "from",
+                        "path",
+                        "scope"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "validations"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "title",
+              "request",
+              "response"
+            ],
+            "additionalProperties": false
+          }
+        ]
       }
     },
     "defaultEnv": {
-      "type": "string",
-      "description": "Default environment name to use when running via CLI (e.g., 'dev', 'staging'). Corresponds to environment JSON files like dev.env.json, staging.env.json in the environments folder."
+      "type": "string"
     }
   },
-  "examples": [
-    {
-      "title": "API Test Suite",
-      "description": "Comprehensive API testing suite for the main application",
-      "version": "1.0.0",
-      "defaultEnv": "dev"
-    },
-    {
-      "title": "E-Commerce Platform Tests",
-      "description": "Complete test suite for e-commerce platform including user management, products, orders, and payments",
-      "version": "2.1.0",
-      "defaultEnv": "dev",
-      "beforeAll": [
-        {
-          "title": "Initialize test environment",
-          "request": {
-            "method": "POST",
-            "endpoint": "/api/v1/setup"
-          },
-          "response": {
-            "validations": [
-              {
-                "statusCode": 200
-              }
-            ]
-          }
-        },
-        {
-          "title": "Load test fixtures",
-          "request": {
-            "method": "POST",
-            "endpoint": "/api/v1/fixtures/load",
-            "payload": {
-              "fixtures": ["users", "products", "categories"]
-            }
-          },
-          "response": {
-            "validations": [
-              {
-                "statusCode": 200
-              }
-            ]
-          }
-        }
-      ],
-      "afterAll": [
-        {
-          "title": "Cleanup test data",
-          "request": {
-            "method": "POST",
-            "endpoint": "/api/v1/cleanup"
-          },
-          "response": {
-            "validations": [
-              {
-                "statusCode": 200
-              }
-            ]
-          }
-        },
-        {
-          "title": "Generate test report",
-          "request": {
-            "method": "POST",
-            "endpoint": "/api/v1/report/generate"
-          },
-          "response": {
-            "validations": [
-              {
-                "statusCode": 200
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "title": "Payment Gateway Tests",
-      "version": "1.5.3",
-      "description": "Tests for payment processing APIs including card validation, transaction processing, and refunds",
-      "defaultEnv": "staging",
-      "beforeAll": [
-        {
-          "title": "Validate payment gateway connectivity",
-          "request": {
-            "method": "GET",
-            "endpoint": "/api/v1/gateway/health"
-          },
-          "response": {
-            "validations": [
-              {
-                "statusCode": 200,
-                "assertions": [
-                  {
-                    "title": "Gateway is healthy",
-                    "from": "body",
-                    "path": "status",
-                    "operator": "isEquals",
-                    "value": "healthy"
-                  }
-                ]
-              }
-            ]
-          }
-        }
-      ]
-    }
-  ]
+  "required": [
+    "title",
+    "version"
+  ],
+  "additionalProperties": false
 }

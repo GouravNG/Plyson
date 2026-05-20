@@ -48,6 +48,7 @@ export class ProjectLoader {
         throw new LoadError(`Invalid project.json: ${result.error.message}`, 'project.json')
       }
       project = result.data
+      this.logger.info(`✓ Project loaded: ${project.title}`)
     } catch (e: any) {
       if (e instanceof LoadError) throw e
       throw new LoadError(`Failed to read project.json: ${e.message}`, 'project.json')
@@ -63,10 +64,12 @@ export class ProjectLoader {
         this.logger.warn('variables.json', `Invalid variables.json: ${result.error.message}`)
       } else {
         variables = result.data
+        this.logger.info(`✓ Variables loaded: ${Object.keys(variables).length} variable(s)`)
       }
     } catch (e: any) {
       // Optional, so just default to {}
       variables = {}
+      this.logger.info('✓ Variables: using defaults (no variables.json found)')
     }
 
     // 3. Environment
@@ -83,6 +86,9 @@ export class ProjectLoader {
         )
       }
       environment = result.data
+      this.logger.info(
+        `✓ Environment loaded: "${env}" with ${Object.keys(environment).length} variable(s)`
+      )
     } catch (e: any) {
       if (e instanceof LoadError) throw e
       throw new LoadError(
@@ -93,7 +99,7 @@ export class ProjectLoader {
 
     // 4. Schemas
     const schemas = new Map<string, any>()
-    const schemaFiles = await glob('schemas/*.schema.json', { cwd: absoluteRootDir })
+    const schemaFiles = await glob('schemas/**/*.schema.json', { cwd: absoluteRootDir })
     for (const file of schemaFiles) {
       try {
         const content = await fs.readFile(path.join(absoluteRootDir, file), 'utf-8')
@@ -103,10 +109,11 @@ export class ProjectLoader {
         this.logger.warn(file, `Failed to parse schema: ${e.message}`)
       }
     }
+    this.logger.info(`✓ Schemas loaded: ${schemas.size} schema(s)`)
 
     // 5. Handlers
     const handlers = new Map<string, HandlerModule>()
-    const handlerFiles = await glob('handlers/*.handler.ts', { cwd: absoluteRootDir })
+    const handlerFiles = await glob('handlers/**/*.handler.ts', { cwd: absoluteRootDir })
     for (const file of handlerFiles) {
       const absoluteHandlerPath = path.join(absoluteRootDir, file)
       try {
@@ -123,10 +130,11 @@ export class ProjectLoader {
         this.logger.warn(file, `Failed to load handler: ${e.message}`)
       }
     }
+    this.logger.info(`✓ Handlers loaded: ${handlers.size} handler(s)`)
 
     // 6. Scripts
     const scripts = new Map<string, Testcase>()
-    const scriptFiles = await glob('scripts/*.script.json', { cwd: absoluteRootDir })
+    const scriptFiles = await glob('scripts/**/*.script.json', { cwd: absoluteRootDir })
     for (const file of scriptFiles) {
       try {
         const content = await fs.readFile(path.join(absoluteRootDir, file), 'utf-8')
@@ -146,6 +154,7 @@ export class ProjectLoader {
         this.logger.warn(file, `Failed to parse script: ${e.message}`)
       }
     }
+    this.logger.info(`✓ Scripts loaded: ${scripts.size} script(s)`)
 
     // 7. Suites
     const suites: TestSuite[] = []
@@ -183,6 +192,7 @@ export class ProjectLoader {
         this.logger.warn(file, `Failed to parse suite: ${e.message}`)
       }
     }
+    this.logger.info(`✓ Suites loaded: ${suites.length} suite(s) with ${suiteIds.size} testcase(s)`)
 
     // 8. Resolve refs
     const resolveRefsInSteps = (steps: TestStep[], sourceFile: string) => {
@@ -215,6 +225,8 @@ export class ProjectLoader {
     for (const [id, tc] of scripts) {
       resolveRefsInSteps(tc.steps, `script ${id}`)
     }
+
+    this.logger.info('✓ References resolved in all test steps')
 
     return {
       project,

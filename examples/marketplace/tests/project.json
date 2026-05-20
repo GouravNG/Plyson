@@ -1,4 +1,5 @@
 {
+  "$schema": "./node_modules/play-son/schemas/project.schema.json",
   "title": "Marketplace API Validation",
   "description": "API testing project created with play-son",
   "version": "1.0.0",
