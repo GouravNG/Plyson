@@ -1,94 +1,14 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Variables",
-  "description": "Holds the values of the variables defined at different levels such as project, suite or case level. Global level variables exist in their own file in root with variable.json file.",
-  "definitions": {
-    "GeneratorObject": {
-      "type": "object",
-      "title": "Generator Object",
-      "description": "Represents a dynamic data generator object. Uses the Faker JSON Schema system to delegate to any @faker-js/faker method.",
-      "required": ["$gen"],
-      "properties": {
-        "$gen": {
-          "type": "string",
-          "description": "The faker method name (e.g., 'fullName', 'email', 'int'). Can be fully qualified (e.g., 'vehicle.type')."
-        },
-        "$count": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "If provided, generates an array of the specified length."
-        },
-        "$module": {
-          "type": "string",
-          "description": "Optional module hint for ambiguous method names (e.g., 'vehicle', 'animal')."
-        }
-      },
-      "additionalProperties": {
-        "description": "Arguments passed directly to the faker method. Consult fakerjs.dev/api for available parameters."
-      },
-      "examples": [
-        {
-          "$gen": "fullName"
-        },
-        {
-          "$gen": "email"
-        },
-        {
-          "$gen": "int",
-          "min": 18,
-          "max": 65
-        },
-        {
-          "$gen": "fullName",
-          "$count": 5
-        },
-        {
-          "$gen": "type",
-          "$module": "vehicle"
-        }
-      ]
-    },
-    "VariableValue": {
-      "type": ["string", "number", "boolean", "null", "array", "object"],
-      "title": "Variable Value",
-      "description": "Values in the variable store can be primitives, arrays, objects, or generator objects. Objects can also use $count to generate an array of objects.",
-      "examples": [
-        "string_value",
-        42,
-        true,
-        null,
-        ["item1", "item2"],
-        {
-          "nested": "object"
-        },
-        {
-          "$gen": "email"
-        },
-        {
-          "$count": 3,
-          "id": { "$gen": "uuid" },
-          "name": { "$gen": "fullName" }
-        }
-      ]
-    }
-  },
+  "title": "Variables Schema",
   "type": "object",
-  "additionalProperties": {
-    "$ref": "#/definitions/VariableValue"
+  "propertyNames": {
+    "type": "string"
   },
-  "examples": [
-    {
-      "username": "john_doe",
-      "password": "secure_pass123",
-      "apiKey": {
-        "$gen": "uuid"
-      },
-      "userEmail": {
-        "$gen": "email"
-      },
-      "retryCount": 3,
-      "isActive": true,
-      "tags": ["admin", "user", "moderator"]
+  "additionalProperties": {},
+  "properties": {
+    "$schema": {
+      "type": "string"
     }
-  ]
+  }
 }

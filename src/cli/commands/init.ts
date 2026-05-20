@@ -29,23 +29,25 @@ export const initCommand = new Command('init')
 
     const placeholders = {
       'project.json': {
+        $schema: './node_modules/play-son/schemas/project.schema.json',
         title: projectName === '.' ? 'New API Project' : projectName,
         description: 'API testing project created with play-son',
         version: '1.0.0',
         defaultEnv: 'dev',
       },
       'variables.json': {
-        '//': 'Global variables available to all suites',
+        $schema: './node_modules/play-son/schemas/variables.schema.json',
         appName: 'MyDemoAPI',
       },
       'environments/dev.env.json': {
-        '//': 'Environment-specific configuration',
+        $schema: '../node_modules/play-son/schemas/environment.schema.json',
         baseUrl: 'http://localhost:3000',
         variables: {
           adminEmail: 'admin@example.com',
         },
       },
       'suites/sample.test.json': {
+        $schema: '../node_modules/play-son/schemas/testsuite.schema.json',
         title: 'Sample Suite',
         description: 'Welcome to play-son! This is a sample test suite.',
         tags: ['smoke'],
