@@ -1,0 +1,6 @@
+.github
+.cli-test
+coverage
+dist
+docs
+schemas

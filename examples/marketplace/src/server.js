@@ -717,17 +717,27 @@ route('POST', '/foundation/inventory', async (req, res, { reqId }) => {
     inv.quantity = body.quantity
     inv.updatedAt = now
   } else {
-    inv = { id: nextId(), productId: body.productId, quantity: body.quantity, createdAt: now, updatedAt: now }
+    inv = {
+      id: nextId(),
+      productId: body.productId,
+      quantity: body.quantity,
+      createdAt: now,
+      updatedAt: now,
+    }
     DB.inventory.push(inv)
   }
   ok(res, { inventory: inv }, reqId)
 })
-route('GET', /^\/foundation\/inventory\/(?<productId>[^/]+)$/, async (req, res, { params, reqId }) => {
-  if (!requireRole(res, req, 'ADMIN', reqId)) return
-  const inv = DB.inventory.find((i) => i.productId === params.productId)
-  if (!inv) return err(res, 'Inventory not found', reqId, 404)
-  ok(res, { inventory: inv }, reqId)
-})
+route(
+  'GET',
+  /^\/foundation\/inventory\/(?<productId>[^/]+)$/,
+  async (req, res, { params, reqId }) => {
+    if (!requireRole(res, req, 'ADMIN', reqId)) return
+    const inv = DB.inventory.find((i) => i.productId === params.productId)
+    if (!inv) return err(res, 'Inventory not found', reqId, 404)
+    ok(res, { inventory: inv }, reqId)
+  }
+)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ██████████████████████████  CART  ████████████████████████████████████████
@@ -791,7 +801,11 @@ route('POST', '/cart', async (req, res, { reqId }) => {
     }
     ex.qty += requestedQty
   } else {
-    cart.items.push({ productId: body.productId, qty: requestedQty, addedAt: new Date().toISOString() })
+    cart.items.push({
+      productId: body.productId,
+      qty: requestedQty,
+      addedAt: new Date().toISOString(),
+    })
   }
   cart.updatedAt = new Date().toISOString()
   ok(res, { cart: enrichCart(cart) }, reqId)
