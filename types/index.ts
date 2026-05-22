@@ -73,7 +73,10 @@ type AutoFillFields =
   | { includeFields: string[] }
   | { excludeFields: string[] }
   | Record<string, never> // empty object — schemaName only
-type AutoFillType = false | ({ schemaName: string } & AutoFillFields)
+type AutoFillType =
+  | { schemaName: string; includeFields: string[] }
+  | { schemaName: string; excludeFields: string[] }
+  | { schemaName: string }
 
 type Req = {
   method: HTTPMethod

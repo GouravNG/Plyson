@@ -1,19 +1,23 @@
 {
   "type": "object",
   "properties": {
+    "id": {
+      "type": "string"
+    },
     "productId": {
       "type": "string"
     },
-    "qty": {
+    "quantity": {
       "type": "integer",
-      "minimum": 1
+      "minimum": 0
     },
-    "addedAt": {
+    "createdAt": {
       "type": "string",
       "format": "date-time"
     },
-    "product": {
-      "$ref": "Product.schema.json"
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
     }
   }
 }

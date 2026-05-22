@@ -69,12 +69,23 @@ export const AutoFillFieldsSchema = z.union([
 export type AutoFillFields = z.infer<typeof AutoFillFieldsSchema>
 
 export const AutoFillTypeSchema = z.union([
-  z.literal(false),
+  z
+    .object({
+      schemaName: z.string(),
+      includeFields: z.array(z.string()),
+    })
+    .strict(),
+  z
+    .object({
+      schemaName: z.string(),
+      excludeFields: z.array(z.string()),
+    })
+    .strict(),
   z
     .object({
       schemaName: z.string(),
     })
-    .and(AutoFillFieldsSchema),
+    .strict(),
 ])
 export type AutoFillType = z.infer<typeof AutoFillTypeSchema>
 
@@ -84,7 +95,7 @@ export const AssertionSchema = z.object({
   path: z.string(),
   operator: AssertionOperatorsSchema,
   value: z.any().optional(),
-  validation: z.enum(['warn', 'error']).default('error'),
+  validation: z.enum(['warn', 'error']).default('error').optional(),
 })
 export type Assertions = z.infer<typeof AssertionSchema>
 

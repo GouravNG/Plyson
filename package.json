@@ -27,7 +27,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "build": "tsc",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "schema-update": "node dist/cli/index.js sync-project-schemas"
   },
   "dependencies": {
     "@faker-js/faker": "^10.4.0",

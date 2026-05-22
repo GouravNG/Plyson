@@ -1,4 +1,5 @@
 {
+  "$schema": "../../node_modules/play-son/schemas/testsuite.schema.json",
   "title": "Auth Me",
   "description": "Tests for the /auth/me endpoint",
   "tags": ["automated", "auth", "me"],
@@ -7,7 +8,7 @@
       "id": "auth-me-pos-001",
       "title": "Get own profile with valid token",
       "testType": "positive",
-      "tags": ["positive", "get", "auth"],
+      "tags": ["positive", "get", "auth", "p1", "smoke", "regression", "e2e"],
       "variables": {
         "meEmail": {
           "$gen": "email",
@@ -29,7 +30,7 @@
           "title": "Register a new user",
           "request": {
             "method": "POST",
-            "endpoint": "{{REGISTER_PATH}}",
+            "endpoint": "/auth/register",
             "payload": {
               "email": "{{meEmail}}",
               "password": "{{mePassword}}",
@@ -47,7 +48,7 @@
           "title": "Login to get token",
           "request": {
             "method": "POST",
-            "endpoint": "{{LOGIN_PATH}}",
+            "endpoint": "/auth/login",
             "payload": {
               "email": "{{meEmail}}",
               "password": "{{mePassword}}"
@@ -71,7 +72,7 @@
           "title": "Get own profile",
           "request": {
             "method": "GET",
-            "endpoint": "{{ME_PATH}}",
+            "endpoint": "/auth/me",
             "headers": {
               "Authorization": "Bearer {{meToken}}"
             }
@@ -107,13 +108,13 @@
       "id": "auth-me-neg-unauthorized",
       "title": "Fail to get profile without valid token",
       "testType": "negative",
-      "tags": ["negative", "get", "auth"],
+      "tags": ["negative", "get", "auth", "p2", "regression"],
       "steps": [
         {
           "title": "Get profile without token",
           "request": {
             "method": "GET",
-            "endpoint": "{{ME_PATH}}"
+            "endpoint": "/auth/me"
           },
           "response": {
             "schema": {
@@ -128,7 +129,7 @@
           "title": "Get profile with invalid token",
           "request": {
             "method": "GET",
-            "endpoint": "{{ME_PATH}}",
+            "endpoint": "/auth/me",
             "headers": {
               "Authorization": "Bearer invalid-token"
             }

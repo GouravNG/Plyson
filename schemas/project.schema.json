@@ -103,63 +103,54 @@
                   "autoFill": {
                     "anyOf": [
                       {
-                        "type": "boolean",
-                        "const": false
+                        "type": "object",
+                        "properties": {
+                          "schemaName": {
+                            "type": "string"
+                          },
+                          "includeFields": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [
+                          "schemaName",
+                          "includeFields"
+                        ],
+                        "additionalProperties": false
                       },
                       {
-                        "allOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "schemaName": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "schemaName"
-                            ],
-                            "additionalProperties": false
+                        "type": "object",
+                        "properties": {
+                          "schemaName": {
+                            "type": "string"
                           },
-                          {
-                            "anyOf": [
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "includeFields": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  }
-                                },
-                                "required": [
-                                  "includeFields"
-                                ],
-                                "additionalProperties": false
-                              },
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "excludeFields": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  }
-                                },
-                                "required": [
-                                  "excludeFields"
-                                ],
-                                "additionalProperties": false
-                              },
-                              {
-                                "type": "object",
-                                "properties": {},
-                                "additionalProperties": false
-                              }
-                            ]
+                          "excludeFields": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           }
-                        ]
+                        },
+                        "required": [
+                          "schemaName",
+                          "excludeFields"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "schemaName": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "schemaName"
+                        ],
+                        "additionalProperties": false
                       }
                     ]
                   },
@@ -285,8 +276,7 @@
                             "title",
                             "from",
                             "path",
-                            "operator",
-                            "validation"
+                            "operator"
                           ],
                           "additionalProperties": false
                         }
@@ -439,63 +429,54 @@
                   "autoFill": {
                     "anyOf": [
                       {
-                        "type": "boolean",
-                        "const": false
+                        "type": "object",
+                        "properties": {
+                          "schemaName": {
+                            "type": "string"
+                          },
+                          "includeFields": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [
+                          "schemaName",
+                          "includeFields"
+                        ],
+                        "additionalProperties": false
                       },
                       {
-                        "allOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "schemaName": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "schemaName"
-                            ],
-                            "additionalProperties": false
+                        "type": "object",
+                        "properties": {
+                          "schemaName": {
+                            "type": "string"
                           },
-                          {
-                            "anyOf": [
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "includeFields": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  }
-                                },
-                                "required": [
-                                  "includeFields"
-                                ],
-                                "additionalProperties": false
-                              },
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "excludeFields": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  }
-                                },
-                                "required": [
-                                  "excludeFields"
-                                ],
-                                "additionalProperties": false
-                              },
-                              {
-                                "type": "object",
-                                "properties": {},
-                                "additionalProperties": false
-                              }
-                            ]
+                          "excludeFields": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           }
-                        ]
+                        },
+                        "required": [
+                          "schemaName",
+                          "excludeFields"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "schemaName": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "schemaName"
+                        ],
+                        "additionalProperties": false
                       }
                     ]
                   },
@@ -621,8 +602,7 @@
                             "title",
                             "from",
                             "path",
-                            "operator",
-                            "validation"
+                            "operator"
                           ],
                           "additionalProperties": false
                         }
