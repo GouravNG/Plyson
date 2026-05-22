@@ -246,7 +246,10 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
     tags: [
       { name: 'Auth', description: 'Registration, login, session management' },
       { name: 'User', description: 'Own profile management (USER role)' },
-      { name: 'Foundation', description: 'Business, store, catalog, product, inventory (ADMIN role)' },
+      {
+        name: 'Foundation',
+        description: 'Business, store, catalog, product, inventory (ADMIN role)',
+      },
       { name: 'Cart', description: 'Shopping cart (USER role)' },
       { name: 'Orders', description: 'Order lifecycle' },
       { name: 'Reviews', description: 'Product reviews with moderation' },
