@@ -1,0 +1,148 @@
+{
+  "title": "Auth Me",
+  "description": "Tests for the /auth/me endpoint",
+  "tags": ["automated", "auth", "me"],
+  "testCases": [
+    {
+      "id": "auth-me-pos-001",
+      "title": "Get own profile with valid token",
+      "testType": "positive",
+      "tags": ["positive", "get", "auth"],
+      "variables": {
+        "meEmail": {
+          "$gen": "email",
+          "provider": "example.com"
+        },
+        "mePassword": {
+          "$gen": "alphanumeric",
+          "length": "{{DEFAULT_PWD_LENGTH}}"
+        },
+        "meFirstname": {
+          "$gen": "firstName"
+        },
+        "meLastname": {
+          "$gen": "lastName"
+        }
+      },
+      "steps": [
+        {
+          "title": "Register a new user",
+          "request": {
+            "method": "POST",
+            "endpoint": "{{REGISTER_PATH}}",
+            "payload": {
+              "email": "{{meEmail}}",
+              "password": "{{mePassword}}",
+              "firstname": "{{meFirstname}}",
+              "lastname": "{{meLastname}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201
+            }
+          }
+        },
+        {
+          "title": "Login to get token",
+          "request": {
+            "method": "POST",
+            "endpoint": "{{LOGIN_PATH}}",
+            "payload": {
+              "email": "{{meEmail}}",
+              "password": "{{mePassword}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200
+            },
+            "extract": [
+              {
+                "name": "meToken",
+                "from": "body",
+                "path": "$.token",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Get own profile",
+          "request": {
+            "method": "GET",
+            "endpoint": "{{ME_PATH}}",
+            "headers": {
+              "Authorization": "Bearer {{meToken}}"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "User"
+            },
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Email matches registered user",
+                  "from": "body",
+                  "path": "$.user.email",
+                  "operator": "equalsIgnoreCase",
+                  "value": "{{meEmail}}"
+                },
+                {
+                  "title": "Firstname matches registered user",
+                  "from": "body",
+                  "path": "$.user.firstname",
+                  "operator": "equals",
+                  "value": "{{meFirstname}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "auth-me-neg-unauthorized",
+      "title": "Fail to get profile without valid token",
+      "testType": "negative",
+      "tags": ["negative", "get", "auth"],
+      "steps": [
+        {
+          "title": "Get profile without token",
+          "request": {
+            "method": "GET",
+            "endpoint": "{{ME_PATH}}"
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 401
+            }
+          }
+        },
+        {
+          "title": "Get profile with invalid token",
+          "request": {
+            "method": "GET",
+            "endpoint": "{{ME_PATH}}",
+            "headers": {
+              "Authorization": "Bearer invalid-token"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 401
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
