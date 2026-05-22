@@ -6,10 +6,10 @@
   "defaultEnv": "local",
   "beforeAll": [
     {
-      "ref": "TC-ADMIN-AUTH"
+      "ref": "TC_ADMIN_AUTH"
     },
     {
-      "ref": "TC-USER-AUTH"
+      "ref": "TC_USER_AUTH"
     }
   ]
 }

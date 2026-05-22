@@ -1,9 +1,4 @@
 {
-  "REGISTER_PATH": "/auth/register",
-  "LOGIN_PATH": "/auth/login",
-  "LOGOUT_PATH": "/auth/logout",
-  "ME_PATH": "/auth/me",
-  "REFRESH_PATH": "/auth/refresh",
   "DEFAULT_PWD_LENGTH": 10,
   "MIN_PWD_LENGTH": 6,
   "MAX_NAME_LENGTH": 64,

@@ -4,17 +4,18 @@
     "id": {
       "type": "string"
     },
-    "userId": {
+    "name": {
       "type": "string"
     },
-    "items": {
-      "type": "array",
-      "items": {
-        "$ref": "CartItem.schema.json"
-      }
+    "description": {
+      "type": "string",
+      "nullable": true
     },
-    "subtotal": {
+    "price": {
       "type": "number"
+    },
+    "catalogId": {
+      "type": "string"
     },
     "createdAt": {
       "type": "string",
@@ -23,6 +24,10 @@
     "updatedAt": {
       "type": "string",
       "format": "date-time"
+    },
+    "deletedAt": {
+      "type": "string",
+      "nullable": true
     }
   }
 }

@@ -1,0 +1,178 @@
+{
+  "$schema": "../../node_modules/play-son/schemas/testsuite.schema.json",
+  "title": "User Controller - Delete",
+  "description": "Tests for soft-deleting own account (/user) via DELETE",
+  "tags": ["automated", "user", "profile", "delete", "regression"],
+  "beforeAll": [
+    {
+      "title": "Register test USER",
+      "request": {
+        "method": "POST",
+        "endpoint": "/auth/register",
+        "payload": {
+          "email": { "$gen": "email", "provider": "delete-test.com" },
+          "password": "Password123",
+          "firstname": "Delete",
+          "lastname": "Me",
+          "role": "USER"
+        }
+      },
+      "response": {
+        "validations": { "statusCode": 201 },
+        "extract": [
+          { "name": "suiteUserEmail", "from": "body", "path": "$.user.email", "scope": "suite" }
+        ]
+      }
+    },
+    {
+      "title": "Login test USER",
+      "request": {
+        "method": "POST",
+        "endpoint": "/auth/login",
+        "payload": {
+          "email": "{{suiteUserEmail}}",
+          "password": "Password123"
+        }
+      },
+      "response": {
+        "validations": { "statusCode": 200 },
+        "extract": [
+          { "name": "suiteUserToken", "from": "body", "path": "$.token", "scope": "suite" }
+        ]
+      }
+    },
+    {
+      "title": "Register test ADMIN",
+      "request": {
+        "method": "POST",
+        "endpoint": "/auth/register",
+        "payload": {
+          "email": { "$gen": "email", "provider": "admin-delete-test.com" },
+          "password": "Password123",
+          "firstname": "Admin",
+          "lastname": "Delete",
+          "role": "ADMIN"
+        }
+      },
+      "response": {
+        "validations": { "statusCode": 201 },
+        "extract": [
+          { "name": "suiteAdminEmail", "from": "body", "path": "$.user.email", "scope": "suite" }
+        ]
+      }
+    },
+    {
+      "title": "Login test ADMIN",
+      "request": {
+        "method": "POST",
+        "endpoint": "/auth/login",
+        "payload": {
+          "email": "{{suiteAdminEmail}}",
+          "password": "Password123"
+        }
+      },
+      "response": {
+        "validations": { "statusCode": 200 },
+        "extract": [
+          { "name": "suiteAdminToken", "from": "body", "path": "$.token", "scope": "suite" }
+        ]
+      }
+    }
+  ],
+  "testCases": [
+    {
+      "id": "user-delete-neg-unauthorized",
+      "title": "Fail to delete account without valid token",
+      "testType": "negative",
+      "tags": ["negative", "delete", "user", "unauthorized", "p2"],
+      "steps": [
+        {
+          "title": "No token provided for delete",
+          "request": { "method": "DELETE", "endpoint": "/user" },
+          "response": { "validations": { "statusCode": 403 } }
+        }
+      ]
+    },
+    {
+      "id": "user-delete-neg-forbidden",
+      "title": "Fail to delete account with ADMIN role",
+      "testType": "negative",
+      "tags": ["negative", "delete", "user", "forbidden", "p2"],
+      "steps": [
+        {
+          "title": "ADMIN token attempt to delete via /user",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/user",
+            "headers": { "Authorization": "Bearer {{suiteAdminToken}}" }
+          },
+          "response": { "validations": { "statusCode": 403 } }
+        }
+      ]
+    },
+    {
+      "id": "user-delete-pos-001",
+      "title": "Successfully deactivate own account",
+      "testType": "positive",
+      "tags": ["positive", "delete", "user", "deactivate", "p1", "smoke"],
+      "steps": [
+        {
+          "title": "Deactivate account",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/user",
+            "headers": { "Authorization": "Bearer {{suiteUserToken}}" }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Deactivation message",
+                  "from": "body",
+                  "path": "$.message",
+                  "operator": "equals",
+                  "value": "Account deactivated"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Verify session is invalidated",
+          "request": {
+            "method": "GET",
+            "endpoint": "/auth/me",
+            "headers": { "Authorization": "Bearer {{suiteUserToken}}" }
+          },
+          "response": { "validations": { "statusCode": 401 } }
+        },
+        {
+          "title": "Verify login fails for deactivated account",
+          "request": {
+            "method": "POST",
+            "endpoint": "/auth/login",
+            "payload": {
+              "email": "{{suiteUserEmail}}",
+              "password": "Password123"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 401,
+              "assertions": [
+                {
+                  "title": "Invalid credentials error",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "equals",
+                  "value": "Invalid email or password"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

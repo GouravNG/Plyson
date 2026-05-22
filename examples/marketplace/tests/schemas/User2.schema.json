@@ -1,39 +1,63 @@
 {
   "type": "object",
+  "required": ["success", "message", "user"],
+  "additionalProperties": false,
   "properties": {
-    "id": {
-      "type": "string"
-    },
-    "email": {
-      "type": "string",
-      "format": "email"
-    },
-    "firstname": {
+    "success": {
       "type": "boolean"
     },
-    "lastname": {
+    "message": {
       "type": "string"
     },
-    "role": {
-      "type": "string",
-      "enum": ["ADMIN", "USER"]
-    },
-    "status": {
-      "type": "string",
-      "enum": ["ACTIVE", "INACTIVE"]
-    },
-    "createdAt": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "updatedAt": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "deletedAt": {
-      "type": "string",
-      "format": "date-time",
-      "nullable": true
+    "user": {
+      "type": "object",
+      "required": [
+        "id",
+        "email",
+        "firstname",
+        "lastname",
+        "role",
+        "status",
+        "createdAt",
+        "updatedAt",
+        "deletedAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "firstname": {
+          "type": "array"
+        },
+        "lastname": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["ADMIN", "USER"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["ACTIVE", "INACTIVE"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
     }
   }
 }
