@@ -5,8 +5,8 @@
  * ╠═════════════════════════════════════════════════════════════════════╣
  * ║  CONTROLLERS                                                        ║
  * ║   AUTH         /auth/*                                              ║
- * ║   USER         /user                                                ║
- * ║   FOUNDATION   /foundation/*  (business, store, services, assoc)    ║
+ * ║   USER         /user (PATCH/DELETE)                                  ║
+ * ║   FOUNDATION   /foundation/*  (business, store, catalog, product, inv)║
  * ║   CART         /cart                                                ║
  * ║   ORDER        /orders  /orders/:id  /orders/:id/cancel             ║
  * ║                /orders/:id/status  (admin)                          ║
@@ -49,7 +49,7 @@ import { buildOpenAPISpec } from './openapi.js'
 const CONFIG = {
   PORT: Number(process.env.PORT) || 3000,
   TOKEN_TTL_MS: Number(process.env.TOKEN_TTL_MS) || 2 * 60 * 60 * 1000,
-  RATE_LIMIT: Number(process.env.RATE_LIMIT) || 120,
+  RATE_LIMIT: Number(process.env.RATE_LIMIT) || 240,
   RATE_WINDOW_MS: 60_000,
   HASH_SALT: process.env.HASH_SALT || 'mock_salt_change_in_prod',
   VERSION: '3.0.0',
@@ -64,11 +64,12 @@ const DB = {
   sessions: {}, // token → { userId, expiresAt, createdAt }
   businesses: [], // { id, name, email, phone, address, createdAt, updatedAt, deletedAt }
   stores: [], // { id, name, businessId, location, createdAt, updatedAt, deletedAt }
-  services: [], // { id, name, description, price, createdAt, updatedAt, deletedAt }
-  associations: [], // { storeId, serviceId, createdAt }
-  carts: [], // { id, userId, items:[{serviceId,qty,addedAt}], createdAt, updatedAt }
+  catalogs: [], // { id, name, storeId, createdAt, updatedAt, deletedAt }
+  products: [], // { id, name, description, price, catalogId, createdAt, updatedAt, deletedAt }
+  inventory: [], // { id, productId, quantity, createdAt, updatedAt }
+  carts: [], // { id, userId, items:[{productId,qty,addedAt}], createdAt, updatedAt }
   orders: [], // { id, userId, items, subtotal, status, statusHistory, cancelReason, createdAt, updatedAt }
-  reviews: [], // { id, userId, serviceId, orderId, rating, comment, status, moderationNote, createdAt, updatedAt }
+  reviews: [], // { id, userId, productId, orderId, rating, comment, status, moderationNote, createdAt, updatedAt }
   notifications: [], // { id, userId, type, title, body, read, createdAt }
 }
 
@@ -157,8 +158,8 @@ function validate(data, schema) {
   const errors = []
   for (const [field, rules] of Object.entries(schema)) {
     const val = data[field]
-    const missing = val === undefined || val === null || val === ''
-    if (rules.required && missing) {
+    const missing = val === undefined || val === null
+    if (rules.required && (missing || val === '')) {
       errors.push(`'${field}' is required`)
       continue
     }
@@ -441,51 +442,13 @@ route('POST', '/auth/refresh', async (req, res, { reqId }) => {
 // ██████████████████████████  USER  ████████████████████████████████████████
 // ═══════════════════════════════════════════════════════════════════════════
 
-route('GET', '/user', async (req, res, { reqId }) => {
-  const user = requireRole(res, req, 'USER', reqId)
-  if (!user) return
-  ok(res, { user: safeUser(user) }, reqId)
-})
-
-route('POST', '/user', async (req, res, { reqId }) => {
-  if (!requireRole(res, req, 'USER', reqId)) return
-  const body = await parseBody(req)
-  const { valid, errors } = validate(body, {
-    email: { required: true, type: 'string', match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
-    password: { required: true, type: 'string', minLength: 6 },
-    firstname: { required: true, type: 'string', minLength: 1 },
-    lastname: { required: true, type: 'string', minLength: 1 },
-  })
-  if (!valid) return err(res, 'Validation failed', reqId, 422, { errors })
-
-  const email = body.email.toLowerCase().trim()
-  if (DB.users.find((u) => u.email === email && !u.deletedAt))
-    return err(res, 'Email already in use', reqId, 409)
-
-  const now = new Date().toISOString()
-  const nu = {
-    id: nextId(),
-    email,
-    passwordHash: hashPassword(body.password),
-    firstname: body.firstname.trim(),
-    lastname: body.lastname.trim(),
-    role: 'USER',
-    status: 'INACTIVE',
-    createdAt: now,
-    updatedAt: now,
-    deletedAt: null,
-  }
-  DB.users.push(nu)
-  ok(res, { user: safeUser(nu) }, reqId, 201)
-})
-
 route('PATCH', '/user', async (req, res, { reqId }) => {
   const user = requireRole(res, req, 'USER', reqId)
   if (!user) return
   const body = await parseBody(req)
   const { valid, errors } = validate(body, {
-    firstname: { type: 'string', minLength: 1, maxLength: 64 },
-    lastname: { type: 'string', minLength: 1, maxLength: 64 },
+    firstname: { type: 'string', minLength: 1, maxLength: 64, example: 'Jane' },
+    lastname: { type: 'string', minLength: 1, maxLength: 64, example: 'Smith' },
     password: { type: 'string', minLength: 6, maxLength: 128 },
   })
   if (!valid) return err(res, 'Validation failed', reqId, 422, { errors })
@@ -507,7 +470,7 @@ route('DELETE', '/user', async (req, res, { reqId }) => {
 })
 
 // ═══════════════════════════════════════════════════════════════════════════
-// █████████████████████  FOUNDATION  ███████████████████████████████████████
+// █████████████████████  FOUNDATION  ██████████═════════════════════════════
 // ═══════════════════════════════════════════════════════════════════════════
 
 // ── BUSINESS ────────────────────────────────────────────────────────────────
@@ -618,120 +581,161 @@ route('DELETE', /^\/foundation\/store\/(?<id>[^/]+)$/, async (req, res, { params
   ok(res, { message: 'Store deleted', store }, reqId)
 })
 
-// ── SERVICES ──────────────────────────────────────────────────────────────────
+// ── CATALOG ──────────────────────────────────────────────────────────────────
 
-route('GET', '/foundation/services', async (req, res, { query, reqId }) => {
+route('GET', '/foundation/catalog', async (req, res, { query, reqId }) => {
   if (!requireRole(res, req, 'ADMIN', reqId)) return
-  const { data, meta } = paginate(liveList(DB.services, query), query)
-  ok(res, { services: data, meta }, reqId)
+  const { data, meta } = paginate(liveList(DB.catalogs, query), query)
+  ok(res, { catalogs: data, meta }, reqId)
 })
-route('POST', '/foundation/services', async (req, res, { reqId }) => {
+route('POST', '/foundation/catalog', async (req, res, { reqId }) => {
   if (!requireRole(res, req, 'ADMIN', reqId)) return
   const body = await parseBody(req)
   const { valid, errors } = validate(body, {
     name: { required: true, type: 'string', minLength: 1, maxLength: 120 },
-    description: { type: 'string', maxLength: 500 },
-    price: { type: 'number', min: 0 },
+    storeId: { required: true, type: 'string' },
   })
   if (!valid) return err(res, 'Validation failed', reqId, 422, { errors })
+  if (!DB.stores.find((s) => s.id === body.storeId && !s.deletedAt))
+    return err(res, `Store '${body.storeId}' not found`, reqId, 404)
   const now = new Date().toISOString()
-  const svc = {
+  const cat = {
     id: nextId(),
     name: body.name.trim(),
-    description: body.description || null,
-    price: body.price ?? null,
+    storeId: body.storeId,
     createdAt: now,
     updatedAt: now,
     deletedAt: null,
   }
-  DB.services.push(svc)
-  ok(res, { service: svc }, reqId, 201)
+  DB.catalogs.push(cat)
+  ok(res, { catalog: cat }, reqId, 201)
 })
-route('GET', /^\/foundation\/services\/(?<id>[^/]+)$/, async (req, res, { params, reqId }) => {
+route('GET', /^\/foundation\/catalog\/(?<id>[^/]+)$/, async (req, res, { params, reqId }) => {
   if (!requireRole(res, req, 'ADMIN', reqId)) return
-  const svc = DB.services.find((s) => s.id === params.id && !s.deletedAt)
-  if (!svc) return err(res, 'Service not found', reqId, 404)
-  ok(res, { service: svc }, reqId)
+  const cat = DB.catalogs.find((c) => c.id === params.id && !c.deletedAt)
+  if (!cat) return err(res, 'Catalog not found', reqId, 404)
+  ok(res, { catalog: cat }, reqId)
 })
-route('PATCH', /^\/foundation\/services\/(?<id>[^/]+)$/, async (req, res, { params, reqId }) => {
+route('PATCH', /^\/foundation\/catalog\/(?<id>[^/]+)$/, async (req, res, { params, reqId }) => {
   if (!requireRole(res, req, 'ADMIN', reqId)) return
-  const svc = DB.services.find((s) => s.id === params.id && !s.deletedAt)
-  if (!svc) return err(res, 'Service not found', reqId, 404)
+  const cat = DB.catalogs.find((c) => c.id === params.id && !c.deletedAt)
+  if (!cat) return err(res, 'Catalog not found', reqId, 404)
   const body = await parseBody(req)
-  for (const k of ['name', 'description', 'price']) if (body[k] !== undefined) svc[k] = body[k]
-  svc.updatedAt = new Date().toISOString()
-  ok(res, { service: svc }, reqId)
+  if (body.storeId && !DB.stores.find((s) => s.id === body.storeId && !s.deletedAt))
+    return err(res, `Store '${body.storeId}' not found`, reqId, 404)
+  for (const k of ['name', 'storeId']) if (body[k] !== undefined) cat[k] = body[k]
+  cat.updatedAt = new Date().toISOString()
+  ok(res, { catalog: cat }, reqId)
 })
-route('DELETE', /^\/foundation\/services\/(?<id>[^/]+)$/, async (req, res, { params, reqId }) => {
+route('DELETE', /^\/foundation\/catalog\/(?<id>[^/]+)$/, async (req, res, { params, reqId }) => {
   if (!requireRole(res, req, 'ADMIN', reqId)) return
-  const svc = DB.services.find((s) => s.id === params.id && !s.deletedAt)
-  if (!svc) return err(res, 'Service not found', reqId, 404)
-  softDel(svc)
-  ok(res, { message: 'Service deleted', service: svc }, reqId)
+  const cat = DB.catalogs.find((c) => c.id === params.id && !c.deletedAt)
+  if (!cat) return err(res, 'Catalog not found', reqId, 404)
+  softDel(cat)
+  ok(res, { message: 'Catalog deleted', catalog: cat }, reqId)
 })
 
-// ── ASSOCIATION ───────────────────────────────────────────────────────────────
+// ── PRODUCT ──────────────────────────────────────────────────────────────────
 
+route('GET', '/foundation/product', async (req, res, { query, reqId }) => {
+  if (!requireRole(res, req, 'ADMIN', reqId)) return
+  const { data, meta } = paginate(liveList(DB.products, query), query)
+  ok(res, { products: data, meta }, reqId)
+})
+route('POST', '/foundation/product', async (req, res, { reqId }) => {
+  if (!requireRole(res, req, 'ADMIN', reqId)) return
+  const body = await parseBody(req)
+  const { valid, errors } = validate(body, {
+    name: { required: true, type: 'string', minLength: 1, maxLength: 120 },
+    catalogId: { required: true, type: 'string' },
+    price: { required: true, type: 'number', min: 0 },
+    description: { type: 'string', maxLength: 500 },
+  })
+  if (!valid) return err(res, 'Validation failed', reqId, 422, { errors })
+  if (!DB.catalogs.find((c) => c.id === body.catalogId && !c.deletedAt))
+    return err(res, `Catalog '${body.catalogId}' not found`, reqId, 404)
+  const now = new Date().toISOString()
+  const prod = {
+    id: nextId(),
+    name: body.name.trim(),
+    description: body.description || null,
+    price: body.price,
+    catalogId: body.catalogId,
+    createdAt: now,
+    updatedAt: now,
+    deletedAt: null,
+  }
+  DB.products.push(prod)
+  ok(res, { product: prod }, reqId, 201)
+})
+route('GET', /^\/foundation\/product\/(?<id>[^/]+)$/, async (req, res, { params, reqId }) => {
+  if (!requireRole(res, req, 'ADMIN', reqId)) return
+  const prod = DB.products.find((p) => p.id === params.id && !p.deletedAt)
+  if (!prod) return err(res, 'Product not found', reqId, 404)
+  ok(res, { product: prod }, reqId)
+})
+route('PATCH', /^\/foundation\/product\/(?<id>[^/]+)$/, async (req, res, { params, reqId }) => {
+  if (!requireRole(res, req, 'ADMIN', reqId)) return
+  const prod = DB.products.find((p) => p.id === params.id && !p.deletedAt)
+  if (!prod) return err(res, 'Product not found', reqId, 404)
+  const body = await parseBody(req)
+  if (body.catalogId && !DB.catalogs.find((c) => c.id === body.catalogId && !c.deletedAt))
+    return err(res, `Catalog '${body.catalogId}' not found`, reqId, 404)
+  for (const k of ['name', 'description', 'price', 'catalogId'])
+    if (body[k] !== undefined) prod[k] = body[k]
+  prod.updatedAt = new Date().toISOString()
+  ok(res, { product: prod }, reqId)
+})
+route('DELETE', /^\/foundation\/product\/(?<id>[^/]+)$/, async (req, res, { params, reqId }) => {
+  if (!requireRole(res, req, 'ADMIN', reqId)) return
+  const prod = DB.products.find((p) => p.id === params.id && !p.deletedAt)
+  if (!prod) return err(res, 'Product not found', reqId, 404)
+  softDel(prod)
+  ok(res, { message: 'Product deleted', product: prod }, reqId)
+})
+
+// ── INVENTORY ────────────────────────────────────────────────────────────────
+
+route('GET', '/foundation/inventory', async (req, res, { query, reqId }) => {
+  if (!requireRole(res, req, 'ADMIN', reqId)) return
+  const { data, meta } = paginate(DB.inventory, query)
+  ok(res, { inventory: data, meta }, reqId)
+})
+route('POST', '/foundation/inventory', async (req, res, { reqId }) => {
+  if (!requireRole(res, req, 'ADMIN', reqId)) return
+  const body = await parseBody(req)
+  const { valid, errors } = validate(body, {
+    productId: { required: true, type: 'string' },
+    quantity: { required: true, type: 'number', min: 0 },
+  })
+  if (!valid) return err(res, 'Validation failed', reqId, 422, { errors })
+  if (!DB.products.find((p) => p.id === body.productId && !p.deletedAt))
+    return err(res, `Product '${body.productId}' not found`, reqId, 404)
+  const now = new Date().toISOString()
+  let inv = DB.inventory.find((i) => i.productId === body.productId)
+  if (inv) {
+    inv.quantity = body.quantity
+    inv.updatedAt = now
+  } else {
+    inv = {
+      id: nextId(),
+      productId: body.productId,
+      quantity: body.quantity,
+      createdAt: now,
+      updatedAt: now,
+    }
+    DB.inventory.push(inv)
+  }
+  ok(res, { inventory: inv }, reqId)
+})
 route(
   'GET',
-  /^\/foundation\/association\/(?<storeId>[^/]+)$/,
+  /^\/foundation\/inventory\/(?<productId>[^/]+)$/,
   async (req, res, { params, reqId }) => {
     if (!requireRole(res, req, 'ADMIN', reqId)) return
-    if (!DB.stores.find((s) => s.id === params.storeId && !s.deletedAt))
-      return err(res, 'Store not found', reqId, 404)
-    const services = DB.associations
-      .filter((a) => a.storeId === params.storeId)
-      .map((a) => DB.services.find((s) => s.id === a.serviceId && !s.deletedAt))
-      .filter(Boolean)
-    ok(res, { storeId: params.storeId, services }, reqId)
-  }
-)
-route(
-  'POST',
-  /^\/foundation\/association\/(?<storeId>[^/]+)$/,
-  async (req, res, { params, reqId }) => {
-    if (!requireRole(res, req, 'ADMIN', reqId)) return
-    if (!DB.stores.find((s) => s.id === params.storeId && !s.deletedAt))
-      return err(res, 'Store not found', reqId, 404)
-    const body = await parseBody(req)
-    let svc = body.serviceId
-      ? DB.services.find((s) => s.id === body.serviceId && !s.deletedAt)
-      : null
-    if (!svc && body.name) {
-      const now = new Date().toISOString()
-      svc = {
-        id: nextId(),
-        name: body.name.trim(),
-        description: body.description || null,
-        price: body.price ?? null,
-        createdAt: now,
-        updatedAt: now,
-        deletedAt: null,
-      }
-      DB.services.push(svc)
-    }
-    if (!svc) return err(res, "Provide 'serviceId' or 'name' to create inline", reqId, 422)
-    if (DB.associations.find((a) => a.storeId === params.storeId && a.serviceId === svc.id))
-      return err(res, 'Already associated', reqId, 409)
-    DB.associations.push({
-      storeId: params.storeId,
-      serviceId: svc.id,
-      createdAt: new Date().toISOString(),
-    })
-    ok(res, { message: 'Service associated', storeId: params.storeId, service: svc }, reqId, 201)
-  }
-)
-route(
-  'DELETE',
-  /^\/foundation\/association\/(?<storeId>[^/]+)\/(?<serviceId>[^/]+)$/,
-  async (req, res, { params, reqId }) => {
-    if (!requireRole(res, req, 'ADMIN', reqId)) return
-    const idx = DB.associations.findIndex(
-      (a) => a.storeId === params.storeId && a.serviceId === params.serviceId
-    )
-    if (idx === -1) return err(res, 'Association not found', reqId, 404)
-    DB.associations.splice(idx, 1)
-    ok(res, { message: 'Association removed' }, reqId)
+    const inv = DB.inventory.find((i) => i.productId === params.productId)
+    if (!inv) return err(res, 'Inventory not found', reqId, 404)
+    ok(res, { inventory: inv }, reqId)
   }
 )
 
@@ -752,9 +756,9 @@ function getUserCart(userId) {
 function enrichCart(cart) {
   const items = cart.items.map((i) => ({
     ...i,
-    service: DB.services.find((s) => s.id === i.serviceId && !s.deletedAt) || null,
+    product: DB.products.find((p) => p.id === i.productId && !p.deletedAt) || null,
   }))
-  const subtotal = items.reduce((sum, i) => sum + (i.service?.price || 0) * i.qty, 0)
+  const subtotal = items.reduce((sum, i) => sum + (i.product?.price || 0) * i.qty, 0)
   return { ...cart, items, subtotal }
 }
 
@@ -768,19 +772,40 @@ route('POST', '/cart', async (req, res, { reqId }) => {
   if (!user) return
   const body = await parseBody(req)
   const { valid, errors } = validate(body, {
-    serviceId: { required: true, type: 'string' },
+    productId: { required: true, type: 'string' },
     qty: { type: 'number', min: 1 },
   })
   if (!valid) return err(res, 'Validation failed', reqId, 422, { errors })
-  if (!DB.services.find((s) => s.id === body.serviceId && !s.deletedAt))
-    return err(res, 'Service not found', reqId, 404)
+
+  const product = DB.products.find((p) => p.id === body.productId && !p.deletedAt)
+  if (!product) return err(res, 'Product not found', reqId, 404)
+
+  // Verify product is in a catalog that belongs to a store
+  const catalog = DB.catalogs.find((c) => c.id === product.catalogId && !c.deletedAt)
+  if (!catalog || !DB.stores.find((s) => s.id === catalog.storeId && !s.deletedAt)) {
+    return err(res, 'Product is not associated with any active store catalog', reqId, 409)
+  }
+
+  // Check inventory
+  const inv = DB.inventory.find((i) => i.productId === body.productId)
+  const requestedQty = Math.max(1, Math.round(body.qty || 1))
+  if (!inv || inv.quantity < requestedQty) {
+    return err(res, `Insufficient inventory. Available: ${inv?.quantity || 0}`, reqId, 409)
+  }
+
   const cart = getUserCart(user.id)
-  const qty = Math.max(1, Math.round(body.qty || 1))
-  const ex = cart.items.find((i) => i.serviceId === body.serviceId)
+  const ex = cart.items.find((i) => i.productId === body.productId)
   if (ex) {
-    ex.qty += qty
+    if (inv.quantity < ex.qty + requestedQty) {
+      return err(res, `Insufficient inventory to add more. Available: ${inv.quantity}`, reqId, 409)
+    }
+    ex.qty += requestedQty
   } else {
-    cart.items.push({ serviceId: body.serviceId, qty, addedAt: new Date().toISOString() })
+    cart.items.push({
+      productId: body.productId,
+      qty: requestedQty,
+      addedAt: new Date().toISOString(),
+    })
   }
   cart.updatedAt = new Date().toISOString()
   ok(res, { cart: enrichCart(cart) }, reqId)
@@ -790,18 +815,25 @@ route('PATCH', '/cart', async (req, res, { reqId }) => {
   if (!user) return
   const body = await parseBody(req)
   const { valid, errors } = validate(body, {
-    serviceId: { required: true, type: 'string' },
+    productId: { required: true, type: 'string' },
     qty: { required: true, type: 'number', min: 0 },
   })
   if (!valid) return err(res, 'Validation failed', reqId, 422, { errors })
+
   const cart = getUserCart(user.id)
-  const item = cart.items.find((i) => i.serviceId === body.serviceId)
+  const item = cart.items.find((i) => i.productId === body.productId)
   if (!item) return err(res, 'Item not in cart', reqId, 404)
-  if (body.qty === 0) {
-    cart.items = cart.items.filter((i) => i.serviceId !== body.serviceId)
-  } else {
+
+  if (body.qty > 0) {
+    const inv = DB.inventory.find((i) => i.productId === body.productId)
+    if (!inv || inv.quantity < body.qty) {
+      return err(res, `Insufficient inventory. Available: ${inv?.quantity || 0}`, reqId, 409)
+    }
     item.qty = Math.round(body.qty)
+  } else {
+    cart.items = cart.items.filter((i) => i.productId !== body.productId)
   }
+
   cart.updatedAt = new Date().toISOString()
   ok(res, { cart: enrichCart(cart) }, reqId)
 })
@@ -810,10 +842,10 @@ route('DELETE', '/cart', async (req, res, { reqId }) => {
   if (!user) return
   const body = await parseBody(req)
   const cart = getUserCart(user.id)
-  if (body.serviceId) {
-    if (!cart.items.find((i) => i.serviceId === body.serviceId))
+  if (body.productId) {
+    if (!cart.items.find((i) => i.productId === body.productId))
       return err(res, 'Item not in cart', reqId, 404)
-    cart.items = cart.items.filter((i) => i.serviceId !== body.serviceId)
+    cart.items = cart.items.filter((i) => i.productId !== body.productId)
     ok(res, { message: 'Item removed', cart: enrichCart(cart) }, reqId)
   } else {
     cart.items = []
@@ -983,7 +1015,7 @@ route('PATCH', /^\/orders\/(?<id>[^/]+)\/status$/, async (req, res, { params, re
 // █████████████████████████  REVIEW  ███████████████████████████████████████
 // ═══════════════════════════════════════════════════════════════════════════
 //
-//  POST   /reviews               — USER: submit a review for a service
+//  POST   /reviews               — USER: submit a review for a product
 //  GET    /reviews               — PUBLIC: list APPROVED reviews
 //                                  ADMIN: all reviews + ?status= filter
 //  GET    /reviews/:id           — any
@@ -992,8 +1024,8 @@ route('PATCH', /^\/orders\/(?<id>[^/]+)\/status$/, async (req, res, { params, re
 //  PATCH  /reviews/:id/moderate  — ADMIN: approve or reject
 //
 //  Rules:
-//   - One review per user per service
-//   - User must have a DELIVERED order containing the service
+//   - One review per user per product
+//   - User must have a DELIVERED order containing the product
 //   - New reviews start as PENDING (require admin approval)
 //
 
@@ -1003,34 +1035,34 @@ route('POST', '/reviews', async (req, res, { reqId }) => {
   const body = await parseBody(req)
 
   const { valid, errors } = validate(body, {
-    serviceId: { required: true, type: 'string' },
+    productId: { required: true, type: 'string' },
     orderId: { required: true, type: 'string' },
     rating: { required: true, type: 'number', min: 1, max: 5 },
     comment: { type: 'string', minLength: 3, maxLength: 1000 },
   })
   if (!valid) return err(res, 'Validation failed', reqId, 422, { errors })
 
-  // Service must exist
-  if (!DB.services.find((s) => s.id === body.serviceId && !s.deletedAt))
-    return err(res, 'Service not found', reqId, 404)
+  // Product must exist
+  if (!DB.products.find((p) => p.id === body.productId && !p.deletedAt))
+    return err(res, 'Product not found', reqId, 404)
 
-  // Order must belong to user, be DELIVERED, and contain the service
+  // Order must belong to user, be DELIVERED, and contain the product
   const order = DB.orders.find((o) => o.id === body.orderId && o.userId === user.id)
   if (!order) return err(res, 'Order not found', reqId, 404)
   if (order.status !== 'DELIVERED')
-    return err(res, 'You can only review services from DELIVERED orders', reqId, 409)
-  if (!order.items.find((i) => i.serviceId === body.serviceId))
-    return err(res, 'Service was not part of that order', reqId, 409)
+    return err(res, 'You can only review products from DELIVERED orders', reqId, 409)
+  if (!order.items.find((i) => i.productId === body.productId))
+    return err(res, 'Product was not part of that order', reqId, 409)
 
-  // One review per user per service
-  if (DB.reviews.find((r) => r.userId === user.id && r.serviceId === body.serviceId))
-    return err(res, 'You have already reviewed this service', reqId, 409)
+  // One review per user per product
+  if (DB.reviews.find((r) => r.userId === user.id && r.productId === body.productId))
+    return err(res, 'You have already reviewed this product', reqId, 409)
 
   const now = new Date().toISOString()
   const review = {
     id: nextId(),
     userId: user.id,
-    serviceId: body.serviceId,
+    productId: body.productId,
     orderId: body.orderId,
     rating: Math.round(body.rating),
     comment: body.comment || null,
@@ -1049,17 +1081,17 @@ route('GET', '/reviews', async (req, res, { query, reqId }) => {
 
   if (user?.role === 'ADMIN') {
     if (query.status) list = list.filter((r) => r.status === query.status.toUpperCase())
-    if (query.serviceId) list = list.filter((r) => r.serviceId === query.serviceId)
+    if (query.productId) list = list.filter((r) => r.productId === query.productId)
   } else {
     // Public only sees approved reviews
     list = list.filter((r) => r.status === 'APPROVED')
-    if (query.serviceId) list = list.filter((r) => r.serviceId === query.serviceId)
+    if (query.productId) list = list.filter((r) => r.productId === query.productId)
   }
 
-  // Attach service name for context
+  // Attach product name for context
   const enriched = list.map((r) => ({
     ...r,
-    serviceName: DB.services.find((s) => s.id === r.serviceId)?.name || null,
+    productName: DB.products.find((p) => p.id === r.productId)?.name || null,
   }))
 
   const { data, meta } = paginate(enriched, query)
@@ -1206,7 +1238,7 @@ route('POST', '/notifications/broadcast', async (req, res, { reqId }) => {
 })
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ████████████████████████  UTILITY  ███████████████████████████████████████
+// ████████████████████████  UTILITY  ██████████═════════════════════════════
 // ═══════════════════════════════════════════════════════════════════════════
 
 route('GET', '/', async (req, res, { reqId }) => {
@@ -1226,13 +1258,13 @@ route('GET', '/', async (req, res, { reqId }) => {
           'GET /auth/me',
           'POST /auth/refresh',
         ],
-        USER: ['GET|POST|PATCH|DELETE /user'],
+        USER: ['PATCH|DELETE /user'],
         FOUNDATION: [
           'CRUD /foundation/business[/:id]',
           'CRUD /foundation/store[/:id]',
-          'CRUD /foundation/services[/:id]',
-          'GET|POST /foundation/association/:storeId',
-          'DELETE /foundation/association/:s/:svcId',
+          'CRUD /foundation/catalog[/:id]',
+          'CRUD /foundation/product[/:id]',
+          'CRUD /foundation/inventory[/:productId]',
         ],
         CART: ['GET|POST|PATCH|DELETE /cart'],
         ORDER: [
@@ -1290,8 +1322,9 @@ route('GET', '/health', async (req, res, { reqId }) => {
         activeSessions: Object.keys(DB.sessions).length,
         businesses: DB.businesses.filter(isAlive).length,
         stores: DB.stores.filter(isAlive).length,
-        services: DB.services.filter(isAlive).length,
-        associations: DB.associations.length,
+        catalogs: DB.catalogs.filter(isAlive).length,
+        products: DB.products.filter(isAlive).length,
+        inventory: DB.inventory.length,
         carts: DB.carts.length,
         orders: DB.orders.length,
         reviews: DB.reviews.length,
@@ -1334,8 +1367,9 @@ route('GET', '/db-snapshot', async (req, res, { reqId }) => {
         })),
         businesses: DB.businesses,
         stores: DB.stores,
-        services: DB.services,
-        associations: DB.associations,
+        catalogs: DB.catalogs,
+        products: DB.products,
+        inventory: DB.inventory,
         carts: DB.carts,
         orders: DB.orders,
         reviews: DB.reviews,

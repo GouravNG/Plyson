@@ -1,273 +1,376 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Test Case",
-  "description": "Defines a test case with multiple steps, metadata, and assertions",
+  "title": "Testcase Schema",
   "type": "object",
-  "required": ["id", "title", "tags", "steps"],
   "properties": {
+    "$schema": {
+      "type": "string"
+    },
     "id": {
-      "type": "string",
-      "description": "Unique identifier for the test case"
+      "type": "string"
     },
     "title": {
-      "type": "string",
-      "description": "Human-readable title of the test case"
+      "type": "string"
     },
     "description": {
-      "type": "string",
-      "description": "Detailed description of what the test case validates"
+      "type": "string"
     },
     "disabled": {
-      "type": "boolean",
-      "default": false,
-      "description": "Whether to skip this test case during execution"
+      "type": "boolean"
     },
     "testType": {
       "type": "string",
-      "enum": ["positive", "negative"],
-      "description": "Classification of test type. Positive tests validate expected behavior, negative tests validate error handling."
+      "enum": [
+        "positive",
+        "negative",
+        "edge"
+      ]
     },
     "variables": {
       "type": "object",
-      "title": "Test Case Variables",
-      "description": "Variables scoped to this test case, overriding suite and project level variables",
-      "additionalProperties": true
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
     },
     "tags": {
       "type": "array",
-      "description": "Playwright tags for organizing and filtering test cases",
       "items": {
         "type": "string"
       }
     },
     "steps": {
       "type": "array",
-      "title": "Test Steps",
-      "description": "Array of test steps to execute in order",
-      "minItems": 1,
       "items": {
-        "$ref": "#/definitions/TestStep"
-      }
-    }
-  },
-  "definitions": {
-    "TestStep": {
-      "oneOf": [
-        {
-          "$ref": "#/definitions/ReferencedTestStep"
-        },
-        {
-          "$ref": "#/definitions/InlineTestStep"
-        }
-      ]
-    },
-    "ReferencedTestStep": {
-      "type": "object",
-      "title": "Referenced Test Step",
-      "description": "References a test step defined in an external *.handlers.ts or *.scripts.ts file",
-      "required": ["ref"],
-      "properties": {
-        "ref": {
-          "type": "string",
-          "description": "Reference to external test step file (e.g., 'handlers/login.handlers' or 'scripts/setupUser.scripts')"
-        },
-        "description": {
-          "type": "string",
-          "description": "Optional description that overrides the description in the referenced step"
-        }
-      }
-    },
-    "InlineTestStep": {
-      "type": "object",
-      "title": "Inline Test Step",
-      "description": "Complete test step definition inline without external reference",
-      "required": ["title", "request", "response"],
-      "properties": {
-        "title": {
-          "type": "string",
-          "description": "Name of the test step used in reports"
-        },
-        "description": {
-          "type": "string",
-          "description": "Detailed description of what this step validates"
-        },
-        "disabled": {
-          "type": "boolean",
-          "default": false,
-          "description": "Whether to skip this step"
-        },
-        "wait": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Wait time in milliseconds before executing the step"
-        },
-        "flags": {
-          "type": "array",
-          "description": "Feature flags to enable/disable functionalities (e.g., 'skip_auth' to remove Authorization header)",
-          "items": {
-            "type": "string"
-          }
-        },
-        "handlers": {
-          "type": "array",
-          "description": "TypeScript handler files for custom operations on request/response. Files must follow *.handlers.ts convention in handlers directory.",
-          "items": {
-            "type": "string"
-          }
-        },
-        "request": {
-          "$ref": "request.schema.json"
-        },
-        "response": {
-          "$ref": "response.schema.json"
-        }
-      }
-    }
-  },
-  "examples": [
-    {
-      "id": "create-user-success",
-      "title": "Create user with valid data",
-      "description": "Tests successful user creation with all required fields",
-      "testType": "positive",
-      "tags": ["user", "create", "smoke"],
-      "variables": {
-        "userName": "john_doe",
-        "userEmail": {
-          "$gen": "email"
-        }
-      },
-      "steps": [
-        {
-          "title": "Create new user",
-          "description": "POST request to create a new user account",
-          "request": {
-            "method": "POST",
-            "endpoint": "/api/v1/users",
-            "headers": {
-              "Content-Type": "application/json"
-            },
-            "payload": {
-              "name": "John Doe",
-              "email": "john@example.com",
-              "password": "SecurePass123!"
-            }
-          },
-          "response": {
-            "schema": {
-              "name": "CreateUserResponse"
-            },
-            "validations": [
-              {
-                "statusCode": 201,
-                "assertions": [
-                  {
-                    "title": "User ID is present",
-                    "from": "body",
-                    "path": "id",
-                    "operator": "exists"
-                  },
-                  {
-                    "title": "Email matches",
-                    "from": "body",
-                    "path": "email",
-                    "operator": "isEquals",
-                    "value": "john@example.com"
-                  }
-                ]
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "ref": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
               }
+            },
+            "required": [
+              "ref"
             ],
-            "extract": [
-              {
-                "name": "userId",
-                "from": "body",
-                "path": "id",
-                "scope": "case"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "create-user-duplicate",
-      "title": "Create user with duplicate email",
-      "description": "Tests error handling when email already exists",
-      "testType": "negative",
-      "tags": ["user", "create", "error"],
-      "steps": [
-        {
-          "ref": "handlers/createUser.handlers",
-          "description": "Create first user"
-        },
-        {
-          "title": "Attempt duplicate user creation",
-          "request": {
-            "method": "POST",
-            "endpoint": "/api/v1/users",
-            "payload": {
-              "name": "John Doe",
-              "email": "existing@example.com"
-            }
+            "additionalProperties": false
           },
-          "response": {
-            "validations": [
-              {
-                "statusCode": [400, 409],
-                "assertions": [
-                  {
-                    "title": "Error code indicates conflict",
-                    "from": "body",
-                    "path": "errorCode",
-                    "operator": "isEquals",
-                    "value": "DUPLICATE_EMAIL"
-                  }
-                ]
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "get-user-by-id",
-      "title": "Retrieve user by ID",
-      "testType": "positive",
-      "tags": ["user", "get", "read"],
-      "steps": [
-        {
-          "title": "Get user details",
-          "request": {
-            "method": "GET",
-            "endpoint": "/api/v1/users/{userId}",
-            "pathParams": {
-              "userId": "123"
-            }
-          },
-          "response": {
-            "validations": [
-              {
-                "statusCode": 200,
-                "assertions": [
-                  {
-                    "title": "Response is object",
-                    "from": "body",
-                    "path": "$",
-                    "operator": "isObject"
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "wait": {
+                "type": "number"
+              },
+              "flags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "handlers": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "request": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "GET",
+                      "POST",
+                      "PUT",
+                      "DELETE",
+                      "PATCH",
+                      "HEAD",
+                      "OPTIONS"
+                    ]
                   },
-                  {
-                    "title": "User ID matches request",
-                    "from": "body",
-                    "path": "id",
-                    "operator": "isEquals",
-                    "value": "123"
+                  "endpoint": {
+                    "type": "string"
+                  },
+                  "queryParams": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "pathParams": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "headers": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "autoFill": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "schemaName": {
+                            "type": "string"
+                          },
+                          "includeFields": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [
+                          "schemaName",
+                          "includeFields"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "schemaName": {
+                            "type": "string"
+                          },
+                          "excludeFields": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [
+                          "schemaName",
+                          "excludeFields"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "schemaName": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "schemaName"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "payload": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
                   }
-                ]
+                },
+                "required": [
+                  "method",
+                  "endpoint"
+                ],
+                "additionalProperties": false
+              },
+              "response": {
+                "type": "object",
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "validation": {
+                        "anyOf": [
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "const": "warn"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "validations": {
+                    "type": "object",
+                    "properties": {
+                      "statusCode": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "number"
+                            }
+                          }
+                        ]
+                      },
+                      "assertions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "title": {
+                              "type": "string"
+                            },
+                            "from": {
+                              "type": "string",
+                              "enum": [
+                                "body",
+                                "header"
+                              ]
+                            },
+                            "path": {
+                              "type": "string"
+                            },
+                            "operator": {
+                              "type": "string",
+                              "enum": [
+                                "equals",
+                                "equalsIgnoreCase",
+                                "notEquals",
+                                "exists",
+                                "notExists",
+                                "isNull",
+                                "isNotNull",
+                                "isGreaterThan",
+                                "isLessThan",
+                                "isGreaterThanOrEquals",
+                                "isLessThanOrEquals",
+                                "contains",
+                                "notContains",
+                                "matches",
+                                "notMatches",
+                                "hasLength",
+                                "hasMinLength",
+                                "hasMaxLength",
+                                "includes",
+                                "notIncludes",
+                                "isEmpty",
+                                "isNotEmpty",
+                                "containsSubset",
+                                "notContainsSubset",
+                                "isString",
+                                "isNumber",
+                                "isBoolean",
+                                "isArray",
+                                "isObject"
+                              ]
+                            },
+                            "value": {},
+                            "validation": {
+                              "default": "error",
+                              "type": "string",
+                              "enum": [
+                                "warn",
+                                "error"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "title",
+                            "from",
+                            "path",
+                            "operator"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "statusCode"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "extract": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "from": {
+                          "type": "string",
+                          "enum": [
+                            "body",
+                            "header"
+                          ]
+                        },
+                        "path": {
+                          "type": "string"
+                        },
+                        "scope": {
+                          "type": "string",
+                          "enum": [
+                            "global",
+                            "environment",
+                            "suite",
+                            "case"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "from",
+                        "path",
+                        "scope"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "validations"
+                ],
+                "additionalProperties": false
               }
-            ]
+            },
+            "required": [
+              "title",
+              "request",
+              "response"
+            ],
+            "additionalProperties": false
           }
-        }
-      ]
+        ]
+      }
     }
-  ]
+  },
+  "required": [
+    "id",
+    "title",
+    "tags",
+    "steps"
+  ],
+  "additionalProperties": false
 }

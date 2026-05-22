@@ -1,7 +1,7 @@
 {
   "type": "object",
   "properties": {
-    "serviceId": {
+    "productId": {
       "type": "string"
     },
     "qty": {
@@ -12,8 +12,8 @@
       "type": "string",
       "format": "date-time"
     },
-    "service": {
-      "$ref": "Service.schema.json"
+    "product": {
+      "$ref": "Product.schema.json"
     }
   }
 }

@@ -3,202 +3,14 @@ import { HandlerContext } from '../core/handler-runner.js'
 import { ResolvedRequest } from '../core/http-executor.js'
 
 // =========================================================================================================
-// Foundation types
+// Foundation Enums & Types
 // =========================================================================================================
 
-export type Variables = Record<string, any>
-export type Scope = 'global' | 'environment' | 'suite' | 'case'
-export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS'
+export const ScopeSchema = z.enum(['global', 'environment', 'suite', 'case'])
+export type Scope = z.infer<typeof ScopeSchema>
 
-export type GeneratorObject = {
-  $gen: string
-  $count?: number
-  $module?: string
-  [key: string]: any
-}
-
-export type VariableValue =
-  | string
-  | number
-  | boolean
-  | null
-  | any[]
-  | Record<string, any>
-  | GeneratorObject
-
-export type AutoFillFields =
-  | { includeFields: string[] }
-  | { excludeFields: string[] }
-  | Record<string, never>
-export type AutoFillType = false | ({ schemaName: string } & AutoFillFields)
-
-export type AssertionOperators =
-  | 'equals'
-  | 'equalsIgnoreCase'
-  | 'notEquals'
-  | 'exists'
-  | 'notExists'
-  | 'isNull'
-  | 'isNotNull'
-  | 'isGreaterThan'
-  | 'isLessThan'
-  | 'isGreaterThanOrEquals'
-  | 'isLessThanOrEquals'
-  | 'contains'
-  | 'notContains'
-  | 'matches'
-  | 'notMatches'
-  | 'hasLength'
-  | 'hasMinLength'
-  | 'hasMaxLength'
-  | 'includes'
-  | 'notIncludes'
-  | 'isEmpty'
-  | 'isNotEmpty'
-  | 'containsSubset'
-  | 'notContainsSubset'
-  | 'isString'
-  | 'isNumber'
-  | 'isBoolean'
-  | 'isArray'
-  | 'isObject'
-
-export type Assertions = {
-  title: string
-  from: 'body' | 'header'
-  path: string
-  operator: AssertionOperators
-  value?: any
-  validation?: 'warn' | 'error'
-}
-
-export type ExtractedValue = {
-  name: string
-  from: 'body' | 'header'
-  path: string
-  scope: Scope
-}
-
-export type Req = {
-  method: HTTPMethod
-  endpoint: string
-  queryParams?: Record<string, any>
-  pathParams?: Record<string, any>
-  headers?: Record<string, any>
-  autoFill?: AutoFillType
-  payload?: Record<string, any>
-}
-
-export type Res = {
-  schema?: {
-    name: string
-    validation?: boolean | 'warn'
-  }
-  validations: {
-    statusCode: number | number[]
-    assertions?: Assertions[]
-  }
-  extract?: ExtractedValue[]
-}
-
-export type CommonTestStep = {
-  title: string
-  description?: string
-  disabled?: boolean
-  wait?: number
-  flags?: string[]
-  handlers?: string[]
-  request: Req
-  response: Res
-}
-
-export type ReferencedTestStep = {
-  ref: string
-  description?: string
-}
-
-export type InlineTestStep = CommonTestStep & { ref?: never }
-
-export type TestStep = ReferencedTestStep | InlineTestStep
-
-export type Testcase = {
-  id: string
-  title: string
-  description?: string
-  disabled?: boolean
-  testType?: 'positive' | 'negative'
-  variables?: Variables
-  tags: string[]
-  steps: TestStep[]
-}
-
-export type TestSuite = {
-  title: string
-  description?: string
-  disabled?: boolean
-  tags: string[]
-  variables?: Variables
-  beforeAll?: TestStep[]
-  afterAll?: TestStep[]
-  testCases: Testcase[]
-}
-
-export type Project = {
-  title: string
-  description?: string
-  version: string
-  beforeAll?: TestStep[]
-  afterAll?: TestStep[]
-  defaultEnv?: string
-}
-
-export type EnvironmentVariables = {
-  baseUrl: string
-  specUrl?: string
-  variables?: Variables
-}
-
-export type SoftError = {
-  title: string
-  error: unknown
-}
-
-export type HandlerModule = {
-  run: (ctx: HandlerContext) => Promise<void>
-}
-
-export type ResolvedStep = Omit<CommonTestStep, 'request'> & {
-  request: ResolvedRequest
-}
-
-// =========================================================================================================
-// ZOD SCHEMAS
-// =========================================================================================================
-
-export const VariablesSchema = z.record(z.string(), z.any())
-
-export const GeneratorObjectSchema = z
-  .object({
-    $gen: z.string(),
-    $count: z.number().optional(),
-    $module: z.string().optional(),
-  })
-  .catchall(z.any())
-
-export const AutoFillFieldsSchema = z.union([
-  z.object({ includeFields: z.array(z.string()) }),
-  z.object({ excludeFields: z.array(z.string()) }),
-  z.object({}).strict(),
-])
-
-export const AutoFillTypeSchema = z.union([
-  z.literal(false),
-  z
-    .object({
-      schemaName: z.string(),
-    })
-    .and(AutoFillFieldsSchema),
-])
+export const HTTPMethodSchema = z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'])
+export type HTTPMethod = z.infer<typeof HTTPMethodSchema>
 
 export const AssertionOperatorsSchema = z.enum([
   'equals',
@@ -231,6 +43,51 @@ export const AssertionOperatorsSchema = z.enum([
   'isArray',
   'isObject',
 ])
+export type AssertionOperators = z.infer<typeof AssertionOperatorsSchema>
+
+// =========================================================================================================
+// Foundation Object Schemas & Types
+// =========================================================================================================
+
+export const VariablesSchema = z.record(z.string(), z.any())
+export type Variables = z.infer<typeof VariablesSchema>
+
+export const GeneratorObjectSchema = z
+  .object({
+    $gen: z.string(),
+    $count: z.number().optional(),
+    $module: z.string().optional(),
+  })
+  .catchall(z.any())
+export type GeneratorObject = z.infer<typeof GeneratorObjectSchema>
+
+export const AutoFillFieldsSchema = z.union([
+  z.object({ includeFields: z.array(z.string()) }),
+  z.object({ excludeFields: z.array(z.string()) }),
+  z.object({}).strict(),
+])
+export type AutoFillFields = z.infer<typeof AutoFillFieldsSchema>
+
+export const AutoFillTypeSchema = z.union([
+  z
+    .object({
+      schemaName: z.string(),
+      includeFields: z.array(z.string()),
+    })
+    .strict(),
+  z
+    .object({
+      schemaName: z.string(),
+      excludeFields: z.array(z.string()),
+    })
+    .strict(),
+  z
+    .object({
+      schemaName: z.string(),
+    })
+    .strict(),
+])
+export type AutoFillType = z.infer<typeof AutoFillTypeSchema>
 
 export const AssertionSchema = z.object({
   title: z.string(),
@@ -238,18 +95,24 @@ export const AssertionSchema = z.object({
   path: z.string(),
   operator: AssertionOperatorsSchema,
   value: z.any().optional(),
-  validation: z.enum(['warn', 'error']).default('error'),
+  validation: z.enum(['warn', 'error']).default('error').optional(),
 })
+export type Assertions = z.infer<typeof AssertionSchema>
 
 export const ExtractedValueSchema = z.object({
   name: z.string(),
   from: z.enum(['body', 'header']),
   path: z.string(),
-  scope: z.enum(['global', 'environment', 'suite', 'case']),
+  scope: ScopeSchema,
 })
+export type ExtractedValue = z.infer<typeof ExtractedValueSchema>
+
+// =========================================================================================================
+// Core Request/Response Schemas & Types
+// =========================================================================================================
 
 export const ReqSchema = z.object({
-  method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS']),
+  method: HTTPMethodSchema,
   endpoint: z.string(),
   queryParams: z.record(z.string(), z.any()).optional(),
   pathParams: z.record(z.string(), z.any()).optional(),
@@ -257,6 +120,7 @@ export const ReqSchema = z.object({
   autoFill: AutoFillTypeSchema.optional(),
   payload: z.record(z.string(), z.any()).optional(),
 })
+export type Req = z.infer<typeof ReqSchema>
 
 export const ResSchema = z.object({
   schema: z
@@ -271,6 +135,11 @@ export const ResSchema = z.object({
   }),
   extract: z.array(ExtractedValueSchema).optional(),
 })
+export type Res = z.infer<typeof ResSchema>
+
+// =========================================================================================================
+// Test Step, Case & Suite Schemas & Types
+// =========================================================================================================
 
 export const CommonTestStepSchema = z.object({
   title: z.string(),
@@ -282,24 +151,28 @@ export const CommonTestStepSchema = z.object({
   request: ReqSchema,
   response: ResSchema,
 })
+export type CommonTestStep = z.infer<typeof CommonTestStepSchema>
 
 export const ReferencedTestStepSchema = z.object({
   ref: z.string(),
   description: z.string().optional(),
 })
+export type ReferencedTestStep = z.infer<typeof ReferencedTestStepSchema>
 
 export const TestStepSchema = z.union([ReferencedTestStepSchema, CommonTestStepSchema])
+export type TestStep = z.infer<typeof TestStepSchema>
 
 export const TestcaseSchema = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string().optional(),
   disabled: z.boolean().optional(),
-  testType: z.enum(['positive', 'negative']).optional(),
+  testType: z.enum(['positive', 'negative', 'edge']).optional(),
   variables: VariablesSchema.optional(),
   tags: z.array(z.string()),
   steps: z.array(TestStepSchema),
 })
+export type Testcase = z.infer<typeof TestcaseSchema>
 
 export const TestSuiteSchema = z.object({
   title: z.string(),
@@ -311,6 +184,11 @@ export const TestSuiteSchema = z.object({
   afterAll: z.array(TestStepSchema).optional(),
   testCases: z.array(TestcaseSchema),
 })
+export type TestSuite = z.infer<typeof TestSuiteSchema>
+
+// =========================================================================================================
+// Project & Environment Schemas & Types
+// =========================================================================================================
 
 export const ProjectSchema = z.object({
   title: z.string(),
@@ -320,9 +198,39 @@ export const ProjectSchema = z.object({
   afterAll: z.array(TestStepSchema).optional(),
   defaultEnv: z.string().optional(),
 })
+export type Project = z.infer<typeof ProjectSchema>
 
 export const EnvironmentVariablesSchema = z.object({
-  baseUrl: z.string().url(),
-  specUrl: z.string().url().optional(),
+  baseUrl: z.url(),
+  specUrl: z.url().optional(),
   variables: VariablesSchema.optional(),
 })
+export type EnvironmentVariables = z.infer<typeof EnvironmentVariablesSchema>
+
+// =========================================================================================================
+// Utility & Manual Types
+// =========================================================================================================
+
+export type VariableValue =
+  | string
+  | number
+  | boolean
+  | null
+  | any[]
+  | Record<string, any>
+  | GeneratorObject
+
+export type InlineTestStep = CommonTestStep & { ref?: never }
+
+export type SoftError = {
+  title: string
+  error: unknown
+}
+
+export type HandlerModule = {
+  run: (ctx: HandlerContext) => Promise<void>
+}
+
+export type ResolvedStep = Omit<CommonTestStep, 'request'> & {
+  request: ResolvedRequest
+}

@@ -7,7 +7,7 @@
     "userId": {
       "type": "string"
     },
-    "serviceId": {
+    "productId": {
       "type": "string"
     },
     "orderId": {
@@ -24,7 +24,11 @@
     },
     "status": {
       "type": "string",
-      "enum": ["PENDING", "APPROVED", "REJECTED"]
+      "enum": [
+        "PENDING",
+        "APPROVED",
+        "REJECTED"
+      ]
     },
     "moderationNote": {
       "type": "string",

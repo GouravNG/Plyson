@@ -1,10 +1,10 @@
 {
   "type": "object",
   "properties": {
-    "serviceId": {
+    "productId": {
       "type": "string"
     },
-    "serviceName": {
+    "productName": {
       "type": "string"
     },
     "price": {

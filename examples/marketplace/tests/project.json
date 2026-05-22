@@ -1,14 +1,15 @@
 {
+  "$schema": "./node_modules/play-son/schemas/project.schema.json",
   "title": "Marketplace API Validation",
   "description": "API testing project created with play-son",
   "version": "1.0.0",
   "defaultEnv": "local",
   "beforeAll": [
     {
-      "ref": "TC-ADMIN-AUTH"
+      "ref": "TC_ADMIN_AUTH"
     },
     {
-      "ref": "TC-USER-AUTH"
+      "ref": "TC_USER_AUTH"
     }
   ]
 }

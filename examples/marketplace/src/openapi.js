@@ -24,8 +24,8 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
       properties: {
         id: { type: 'string' },
         email: { type: 'string', format: 'email' },
-        firstname: { type: 'string' },
-        lastname: { type: 'string' },
+        firstname: { type: 'string', example: 'Jane' },
+        lastname: { type: 'string', example: 'Smith' },
         role: { type: 'string', enum: ['ADMIN', 'USER'] },
         status: { type: 'string', enum: ['ACTIVE', 'INACTIVE'] },
         createdAt: { type: 'string', format: 'date-time' },
@@ -68,25 +68,47 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
         deletedAt: { type: 'string', nullable: true },
       },
     },
-    Service: {
+    Catalog: {
       type: 'object',
       properties: {
         id: { type: 'string' },
         name: { type: 'string' },
-        description: { type: 'string', nullable: true },
-        price: { type: 'number', nullable: true },
+        storeId: { type: 'string' },
         createdAt: { type: 'string', format: 'date-time' },
         updatedAt: { type: 'string', format: 'date-time' },
         deletedAt: { type: 'string', nullable: true },
       },
     },
+    Product: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        name: { type: 'string' },
+        description: { type: 'string', nullable: true },
+        price: { type: 'number' },
+        catalogId: { type: 'string' },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' },
+        deletedAt: { type: 'string', nullable: true },
+      },
+    },
+    Inventory: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        productId: { type: 'string' },
+        quantity: { type: 'integer', minimum: 0 },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' },
+      },
+    },
     CartItem: {
       type: 'object',
       properties: {
-        serviceId: { type: 'string' },
+        productId: { type: 'string' },
         qty: { type: 'integer', minimum: 1 },
         addedAt: { type: 'string', format: 'date-time' },
-        service: { $ref: '#/components/schemas/Service' },
+        product: { $ref: '#/components/schemas/Product' },
       },
     },
     Cart: {
@@ -103,8 +125,8 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
     OrderItem: {
       type: 'object',
       properties: {
-        serviceId: { type: 'string' },
-        serviceName: { type: 'string' },
+        productId: { type: 'string' },
+        productName: { type: 'string' },
         price: { type: 'number' },
         qty: { type: 'integer' },
         lineTotal: { type: 'number' },
@@ -134,7 +156,7 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
       properties: {
         id: { type: 'string' },
         userId: { type: 'string' },
-        serviceId: { type: 'string' },
+        productId: { type: 'string' },
         orderId: { type: 'string' },
         rating: { type: 'integer', minimum: 1, maximum: 5 },
         comment: { type: 'string', nullable: true },
@@ -180,6 +202,10 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
     description: 'Not found',
     content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
   }
+  const p409 = {
+    description: 'Conflict',
+    content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+  }
   const p422 = {
     description: 'Validation error',
     content: { 'application/json': { schema: { $ref: '#/components/schemas/ValidationError' } } },
@@ -220,10 +246,13 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
     tags: [
       { name: 'Auth', description: 'Registration, login, session management' },
       { name: 'User', description: 'Own profile management (USER role)' },
-      { name: 'Foundation', description: 'Business, store, service catalogue (ADMIN role)' },
+      {
+        name: 'Foundation',
+        description: 'Business, store, catalog, product, inventory (ADMIN role)',
+      },
       { name: 'Cart', description: 'Shopping cart (USER role)' },
       { name: 'Orders', description: 'Order lifecycle' },
-      { name: 'Reviews', description: 'Service reviews with moderation' },
+      { name: 'Reviews', description: 'Product reviews with moderation' },
       { name: 'Notification', description: 'In-app notification inbox' },
       { name: 'Utility', description: 'Health, diagnostics, API spec' },
     ],
@@ -243,8 +272,8 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
                   properties: {
                     email: { type: 'string', format: 'email' },
                     password: { type: 'string', minLength: 6 },
-                    firstname: { type: 'string' },
-                    lastname: { type: 'string' },
+                    firstname: { type: 'string', example: 'Jane' },
+                    lastname: { type: 'string', example: 'Smith' },
                     role: { type: 'string', enum: ['ADMIN', 'USER'], default: 'USER' },
                   },
                 },
@@ -310,28 +339,6 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
       },
       // ── USER ──────────────────────────────────────────────────────────────
       '/user': {
-        get: {
-          tags: ['User'],
-          summary: 'Get own profile',
-          security: [bearer],
-          responses: { 200: jsonOk('Profile', '#/components/schemas/User'), 401: p401, 403: p403 },
-        },
-        post: {
-          tags: ['User'],
-          summary: 'Create a user account',
-          security: [bearer],
-          requestBody: {
-            required: true,
-            content: { 'application/json': { schema: { $ref: '#/components/schemas/User' } } },
-          },
-          responses: {
-            201: jsonOk('Created', '#/components/schemas/User'),
-            401: p401,
-            403: p403,
-            409: { description: 'Email taken' },
-            422: p422,
-          },
-        },
         patch: {
           tags: ['User'],
           summary: 'Update own profile',
@@ -512,17 +519,17 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
           responses: { 200: jsonOk('Deleted'), 401: p401, 403: p403, 404: p404 },
         },
       },
-      '/foundation/services': {
+      '/foundation/catalog': {
         get: {
           tags: ['Foundation'],
-          summary: 'List services',
+          summary: 'List catalogs',
           security: [bearer],
           parameters: pageQP,
           responses: { 200: jsonOk('List'), 401: p401, 403: p403 },
         },
         post: {
           tags: ['Foundation'],
-          summary: 'Create service',
+          summary: 'Create catalog',
           security: [bearer],
           requestBody: {
             required: true,
@@ -530,32 +537,31 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
               'application/json': {
                 schema: {
                   type: 'object',
-                  required: ['name'],
+                  required: ['name', 'storeId'],
                   properties: {
                     name: { type: 'string' },
-                    description: { type: 'string' },
-                    price: { type: 'number' },
+                    storeId: { type: 'string' },
                   },
                 },
               },
             },
           },
           responses: {
-            201: jsonOk('Created', '#/components/schemas/Service'),
+            201: jsonOk('Created', '#/components/schemas/Catalog'),
             401: p401,
             403: p403,
             422: p422,
           },
         },
       },
-      '/foundation/services/{id}': {
+      '/foundation/catalog/{id}': {
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         get: {
           tags: ['Foundation'],
-          summary: 'Get service',
+          summary: 'Get catalog',
           security: [bearer],
           responses: {
-            200: jsonOk('Service', '#/components/schemas/Service'),
+            200: jsonOk('Catalog', '#/components/schemas/Catalog'),
             401: p401,
             403: p403,
             404: p404,
@@ -563,14 +569,14 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
         },
         patch: {
           tags: ['Foundation'],
-          summary: 'Update service',
+          summary: 'Update catalog',
           security: [bearer],
           requestBody: {
             required: true,
-            content: { 'application/json': { schema: { $ref: '#/components/schemas/Service' } } },
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Catalog' } } },
           },
           responses: {
-            200: jsonOk('Updated', '#/components/schemas/Service'),
+            200: jsonOk('Updated', '#/components/schemas/Catalog'),
             401: p401,
             403: p403,
             404: p404,
@@ -578,22 +584,22 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
         },
         delete: {
           tags: ['Foundation'],
-          summary: 'Soft-delete service',
+          summary: 'Soft-delete catalog',
           security: [bearer],
           responses: { 200: jsonOk('Deleted'), 401: p401, 403: p403, 404: p404 },
         },
       },
-      '/foundation/association/{storeId}': {
-        parameters: [{ name: 'storeId', in: 'path', required: true, schema: { type: 'string' } }],
+      '/foundation/product': {
         get: {
           tags: ['Foundation'],
-          summary: 'List services for a store',
+          summary: 'List products',
           security: [bearer],
-          responses: { 200: jsonOk('Services list'), 401: p401, 403: p403, 404: p404 },
+          parameters: pageQP,
+          responses: { 200: jsonOk('List'), 401: p401, 403: p403 },
         },
         post: {
           tags: ['Foundation'],
-          summary: 'Associate a service with a store (or create inline)',
+          summary: 'Create product',
           security: [bearer],
           requestBody: {
             required: true,
@@ -601,36 +607,108 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
               'application/json': {
                 schema: {
                   type: 'object',
+                  required: ['name', 'catalogId', 'price'],
                   properties: {
-                    serviceId: { type: 'string' },
                     name: { type: 'string' },
                     description: { type: 'string' },
                     price: { type: 'number' },
+                    catalogId: { type: 'string' },
                   },
                 },
               },
             },
           },
           responses: {
-            201: jsonOk('Associated'),
+            201: jsonOk('Created', '#/components/schemas/Product'),
             401: p401,
             403: p403,
-            404: p404,
-            409: { description: 'Already associated' },
             422: p422,
           },
         },
       },
-      '/foundation/association/{storeId}/{serviceId}': {
-        parameters: [
-          { name: 'storeId', in: 'path', required: true, schema: { type: 'string' } },
-          { name: 'serviceId', in: 'path', required: true, schema: { type: 'string' } },
-        ],
+      '/foundation/product/{id}': {
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        get: {
+          tags: ['Foundation'],
+          summary: 'Get product',
+          security: [bearer],
+          responses: {
+            200: jsonOk('Product', '#/components/schemas/Product'),
+            401: p401,
+            403: p403,
+            404: p404,
+          },
+        },
+        patch: {
+          tags: ['Foundation'],
+          summary: 'Update product',
+          security: [bearer],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Product' } } },
+          },
+          responses: {
+            200: jsonOk('Updated', '#/components/schemas/Product'),
+            401: p401,
+            403: p403,
+            404: p404,
+          },
+        },
         delete: {
           tags: ['Foundation'],
-          summary: 'Remove association',
+          summary: 'Soft-delete product',
           security: [bearer],
-          responses: { 200: jsonOk('Removed'), 401: p401, 403: p403, 404: p404 },
+          responses: { 200: jsonOk('Deleted'), 401: p401, 403: p403, 404: p404 },
+        },
+      },
+      '/foundation/inventory': {
+        get: {
+          tags: ['Foundation'],
+          summary: 'List inventory',
+          security: [bearer],
+          parameters: pageQP,
+          responses: { 200: jsonOk('List'), 401: p401, 403: p403 },
+        },
+        post: {
+          tags: ['Foundation'],
+          summary: 'Set/Update product inventory',
+          security: [bearer],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['productId', 'quantity'],
+                  properties: {
+                    productId: { type: 'string' },
+                    quantity: { type: 'integer', minimum: 0 },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            200: jsonOk('Inventory set', '#/components/schemas/Inventory'),
+            401: p401,
+            403: p403,
+            404: p404,
+            422: p422,
+          },
+        },
+      },
+      '/foundation/inventory/{productId}': {
+        parameters: [{ name: 'productId', in: 'path', required: true, schema: { type: 'string' } }],
+        get: {
+          tags: ['Foundation'],
+          summary: 'Get product inventory',
+          security: [bearer],
+          responses: {
+            200: jsonOk('Inventory', '#/components/schemas/Inventory'),
+            401: p401,
+            403: p403,
+            404: p404,
+          },
         },
       },
       // ── CART ──────────────────────────────────────────────────────────────
@@ -651,9 +729,9 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
               'application/json': {
                 schema: {
                   type: 'object',
-                  required: ['serviceId'],
+                  required: ['productId'],
                   properties: {
-                    serviceId: { type: 'string' },
+                    productId: { type: 'string' },
                     qty: { type: 'integer', default: 1 },
                   },
                 },
@@ -665,6 +743,7 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
             401: p401,
             403: p403,
             404: p404,
+            409: { description: 'Insufficient inventory / store association conflict' },
             422: p422,
           },
         },
@@ -678,9 +757,9 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
               'application/json': {
                 schema: {
                   type: 'object',
-                  required: ['serviceId', 'qty'],
+                  required: ['productId', 'qty'],
                   properties: {
-                    serviceId: { type: 'string' },
+                    productId: { type: 'string' },
                     qty: { type: 'integer', minimum: 0 },
                   },
                 },
@@ -692,6 +771,7 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
             401: p401,
             403: p403,
             404: p404,
+            409: { description: 'Insufficient inventory' },
             422: p422,
           },
         },
@@ -705,7 +785,7 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
                 schema: {
                   type: 'object',
                   properties: {
-                    serviceId: { type: 'string', description: 'Omit to clear entire cart' },
+                    productId: { type: 'string', description: 'Omit to clear entire cart' },
                   },
                 },
               },
@@ -735,6 +815,7 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
             400: { description: 'Cart empty' },
             401: p401,
             403: p403,
+            409: { description: 'Inventory changed' },
           },
         },
         get: {
@@ -830,7 +911,7 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
       '/reviews': {
         post: {
           tags: ['Reviews'],
-          summary: 'Submit a review (USER — must have a DELIVERED order with that service)',
+          summary: 'Submit a review (USER — must have a DELIVERED order with that product)',
           security: [bearer],
           requestBody: {
             required: true,
@@ -838,9 +919,9 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
               'application/json': {
                 schema: {
                   type: 'object',
-                  required: ['serviceId', 'orderId', 'rating'],
+                  required: ['productId', 'orderId', 'rating'],
                   properties: {
-                    serviceId: { type: 'string' },
+                    productId: { type: 'string' },
                     orderId: { type: 'string' },
                     rating: { type: 'integer', minimum: 1, maximum: 5 },
                     comment: { type: 'string' },
@@ -854,7 +935,7 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
             401: p401,
             403: p403,
             404: p404,
-            409: { description: 'Already reviewed / wrong order status / service not in order' },
+            409: { description: 'Already reviewed / wrong order status / product not in order' },
             422: p422,
           },
         },
@@ -863,7 +944,7 @@ export function buildOpenAPISpec(host, version = '3.0.0') {
           summary: 'List reviews — APPROVED only (public/USER); all for ADMIN',
           parameters: [
             ...pageQP,
-            { name: 'serviceId', in: 'query', schema: { type: 'string' } },
+            { name: 'productId', in: 'query', schema: { type: 'string' } },
             {
               name: 'status',
               in: 'query',

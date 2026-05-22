@@ -37,9 +37,9 @@ describe('Bug Regressions (Issue #7, #5, #6)', () => {
 
       vi.mock('glob', () => ({
         glob: vi.fn().mockImplementation(async (pattern) => {
-          if (pattern === 'schemas/*.schema.json') return []
-          if (pattern === 'handlers/*.handler.ts') return []
-          if (pattern === 'scripts/*.script.json') return ['scripts/setup-db.script.json']
+          if (pattern === 'schemas/**/*.schema.json') return []
+          if (pattern === 'handlers/**/*.handler.ts') return []
+          if (pattern === 'scripts/**/*.script.json') return ['scripts/setup-db.script.json']
           if (pattern === 'suites/**/*.test.json') return []
           return []
         }),

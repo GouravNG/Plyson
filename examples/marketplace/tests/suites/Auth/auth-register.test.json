@@ -1,19 +1,20 @@
 {
+  "$schema": "../../node_modules/play-son/schemas/testsuite.schema.json",
   "title": "auth-controller",
   "description": "Comprehensive tests for the /auth/register endpoint",
-  "tags": ["automated", "auth"],
+  "tags": ["auth", "register", "user-onboarding", "critical"],
   "testCases": [
     {
       "id": "auth-register-pos-001",
       "title": "Register a new user with valid data (default role USER)",
       "testType": "positive",
-      "tags": ["positive", "post", "auth", "validation"],
+      "tags": ["positive", "validation", "p1", "smoke", "regression", "e2e"],
       "steps": [
         {
           "title": "Register as USER",
           "request": {
             "method": "POST",
-            "endpoint": "{{REGISTER_PATH}}",
+            "endpoint": "/auth/register",
             "payload": {
               "email": {
                 "$gen": "email"
@@ -32,8 +33,8 @@
           },
           "response": {
             "schema": {
-              "name": "User22",
-              "validation": false
+              "name": "User2",
+              "validation": "warn"
             },
             "validations": {
               "statusCode": 201,
@@ -70,13 +71,13 @@
       "id": "auth-register-pos-002",
       "title": "Register a new user explicitly as ADMIN",
       "testType": "positive",
-      "tags": ["positive", "post", "auth"],
+      "tags": ["positive", "auth", "p1", "regression"],
       "steps": [
         {
           "title": "Register as ADMIN",
           "request": {
             "method": "POST",
-            "endpoint": "{{REGISTER_PATH}}",
+            "endpoint": "/auth/register",
             "payload": {
               "email": {
                 "$gen": "email"
@@ -115,13 +116,13 @@
       "id": "auth-register-neg-missing-email",
       "title": "Fail to register without email",
       "testType": "negative",
-      "tags": ["negative", "post", "auth", "validation"],
+      "tags": ["negative", "validation", "p2", "regression"],
       "steps": [
         {
           "title": "Missing email",
           "request": {
             "method": "POST",
-            "endpoint": "{{REGISTER_PATH}}",
+            "endpoint": "/auth/register",
             "payload": {
               "password": {
                 "$gen": "alphanumeric",
@@ -156,13 +157,13 @@
       "id": "auth-register-neg-invalid-email",
       "title": "Fail to register with invalid email format",
       "testType": "negative",
-      "tags": ["negative", "post", "auth", "validation"],
+      "tags": ["negative", "validation", "p2", "regression"],
       "steps": [
         {
           "title": "Invalid email format",
           "request": {
             "method": "POST",
-            "endpoint": "{{REGISTER_PATH}}",
+            "endpoint": "/auth/register",
             "payload": {
               "email": "not-an-email",
               "password": {
@@ -198,13 +199,13 @@
       "id": "auth-register-neg-short-password",
       "title": "Fail to register with short password",
       "testType": "negative",
-      "tags": ["negative", "post", "auth", "validation"],
+      "tags": ["negative", "validation", "p2", "regression"],
       "steps": [
         {
           "title": "Short password",
           "request": {
             "method": "POST",
-            "endpoint": "{{REGISTER_PATH}}",
+            "endpoint": "/auth/register",
             "payload": {
               "email": {
                 "$gen": "email"
@@ -239,13 +240,13 @@
       "id": "auth-register-neg-missing-firstname",
       "title": "Fail to register without firstname",
       "testType": "negative",
-      "tags": ["negative", "post", "auth", "validation"],
+      "tags": ["negative", "validation", "p2", "regression"],
       "steps": [
         {
           "title": "Missing firstname",
           "request": {
             "method": "POST",
-            "endpoint": "{{REGISTER_PATH}}",
+            "endpoint": "/auth/register",
             "payload": {
               "email": {
                 "$gen": "email"
@@ -280,13 +281,13 @@
       "id": "auth-register-neg-missing-lastname",
       "title": "Fail to register without lastname",
       "testType": "negative",
-      "tags": ["negative", "post", "auth", "validation"],
+      "tags": ["negative", "validation", "p2", "regression"],
       "steps": [
         {
           "title": "Missing lastname",
           "request": {
             "method": "POST",
-            "endpoint": "{{REGISTER_PATH}}",
+            "endpoint": "/auth/register",
             "payload": {
               "email": {
                 "$gen": "email"
@@ -321,13 +322,13 @@
       "id": "auth-register-neg-invalid-role",
       "title": "Fail to register with invalid role",
       "testType": "negative",
-      "tags": ["negative", "post", "auth", "validation"],
+      "tags": ["negative", "validation", "p2", "regression"],
       "steps": [
         {
           "title": "Invalid role",
           "request": {
             "method": "POST",
-            "endpoint": "{{REGISTER_PATH}}",
+            "endpoint": "/auth/register",
             "payload": {
               "email": {
                 "$gen": "email"
@@ -366,13 +367,13 @@
       "id": "auth-register-neg-duplicate-email",
       "title": "Fail to register with duplicate email",
       "testType": "negative",
-      "tags": ["negative", "post", "auth", "data-state"],
+      "tags": ["negative", "data-state", "p1", "regression", "e2e"],
       "steps": [
         {
           "title": "Register first user",
           "request": {
             "method": "POST",
-            "endpoint": "{{REGISTER_PATH}}",
+            "endpoint": "/auth/register",
             "payload": {
               "email": {
                 "$gen": "email"
@@ -407,7 +408,7 @@
           "title": "Register second user with same email",
           "request": {
             "method": "POST",
-            "endpoint": "{{REGISTER_PATH}}",
+            "endpoint": "/auth/register",
             "payload": {
               "email": "{{duplicateEmail}}",
               "password": {
@@ -450,13 +451,13 @@
       "id": "auth-register-edge-max-lengths",
       "title": "Register with maximum field lengths",
       "testType": "positive",
-      "tags": ["edge", "post", "auth", "boundary"],
+      "tags": ["edge", "boundary", "p3", "regression"],
       "steps": [
         {
           "title": "Max length validation",
           "request": {
             "method": "POST",
-            "endpoint": "{{REGISTER_PATH}}",
+            "endpoint": "/auth/register",
             "payload": {
               "email": {
                 "$gen": "email"

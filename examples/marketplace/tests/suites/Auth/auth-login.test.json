@@ -1,4 +1,5 @@
 {
+  "$schema": "../../node_modules/play-son/schemas/testsuite.schema.json",
   "title": "Auth Login",
   "description": "Tests for the /auth/login endpoint",
   "tags": ["automated", "auth", "login"],
@@ -7,7 +8,7 @@
       "title": "Register suite login user",
       "request": {
         "method": "POST",
-        "endpoint": "{{REGISTER_PATH}}",
+        "endpoint": "/auth/register",
         "payload": {
           "email": {
             "$gen": "email",
@@ -43,7 +44,7 @@
       "title": "Login suite user for cleanup",
       "request": {
         "method": "POST",
-        "endpoint": "{{LOGIN_PATH}}",
+        "endpoint": "/auth/login",
         "payload": {
           "email": "{{loginEmail}}",
           "password": "Password@123"
@@ -92,13 +93,13 @@
       "id": "auth-login-pos-001",
       "title": "Login with valid credentials",
       "testType": "positive",
-      "tags": ["positive", "post", "auth"],
+      "tags": ["positive", "post", "auth", "p1", "smoke", "regression", "e2e"],
       "steps": [
         {
           "title": "Login with registered credentials",
           "request": {
             "method": "POST",
-            "endpoint": "{{LOGIN_PATH}}",
+            "endpoint": "/auth/login",
             "payload": {
               "email": "{{loginEmail}}",
               "password": "Password@123"
@@ -133,13 +134,13 @@
       "id": "auth-login-neg-invalid-creds",
       "title": "Fail to login with wrong credentials",
       "testType": "negative",
-      "tags": ["negative", "post", "auth"],
+      "tags": ["negative", "post", "auth", "p2", "regression"],
       "steps": [
         {
           "title": "Login with wrong password",
           "request": {
             "method": "POST",
-            "endpoint": "{{LOGIN_PATH}}",
+            "endpoint": "/auth/login",
             "payload": {
               "email": "{{loginEmail}}",
               "password": "WrongPassword"
@@ -169,13 +170,13 @@
       "id": "auth-login-neg-validation",
       "title": "Fail to login with invalid data",
       "testType": "negative",
-      "tags": ["negative", "post", "auth", "validation"],
+      "tags": ["negative", "post", "auth", "validation", "p2", "regression"],
       "steps": [
         {
           "title": "Invalid email format",
           "request": {
             "method": "POST",
-            "endpoint": "{{LOGIN_PATH}}",
+            "endpoint": "/auth/login",
             "payload": {
               "email": "not-an-email",
               "password": "Password123"
@@ -192,7 +193,7 @@
           "title": "Missing fields",
           "request": {
             "method": "POST",
-            "endpoint": "{{LOGIN_PATH}}",
+            "endpoint": "/auth/login",
             "payload": {}
           },
           "response": {

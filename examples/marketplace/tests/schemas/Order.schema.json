@@ -18,7 +18,14 @@
     },
     "status": {
       "type": "string",
-      "enum": ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"]
+      "enum": [
+        "PENDING",
+        "CONFIRMED",
+        "PROCESSING",
+        "SHIPPED",
+        "DELIVERED",
+        "CANCELLED"
+      ]
     },
     "statusHistory": {
       "type": "array",

@@ -1,5 +1,6 @@
 {
-  "id": "TC-ADMIN-AUTH",
+  "$schema": "../../node_modules/play-son/schemas/testcase.schema.json",
+  "id": "TC_ADMIN_AUTH",
   "title": "Auth Login Admin",
   "tags": ["auth", "admin", "setup"],
   "description": "Register (if not exists) and login as an ADMIN, extracting the token to global scope",
@@ -8,7 +9,7 @@
       "title": "Register ADMIN if needed",
       "request": {
         "method": "POST",
-        "endpoint": "{{REGISTER_PATH}}",
+        "endpoint": "/auth/register",
         "payload": {
           "email": "{{ADMIN_EMAIL}}",
           "password": "{{ADMIN_PASSWORD}}",
@@ -27,7 +28,7 @@
       "title": "Login as ADMIN",
       "request": {
         "method": "POST",
-        "endpoint": "{{LOGIN_PATH}}",
+        "endpoint": "/auth/login",
         "payload": {
           "email": "{{ADMIN_EMAIL}}",
           "password": "{{ADMIN_PASSWORD}}"

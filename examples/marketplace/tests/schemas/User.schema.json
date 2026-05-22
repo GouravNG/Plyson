@@ -9,18 +9,26 @@
       "format": "email"
     },
     "firstname": {
-      "type": "string"
+      "type": "string",
+      "example": "Jane"
     },
     "lastname": {
-      "type": "string"
+      "type": "string",
+      "example": "Smith"
     },
     "role": {
       "type": "string",
-      "enum": ["ADMIN", "USER"]
+      "enum": [
+        "ADMIN",
+        "USER"
+      ]
     },
     "status": {
       "type": "string",
-      "enum": ["ACTIVE", "INACTIVE"]
+      "enum": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
     },
     "createdAt": {
       "type": "string",

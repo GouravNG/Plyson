@@ -1,5 +1,6 @@
 {
-  "id": "TC-USER-AUTH",
+  "$schema": "../../node_modules/play-son/schemas/testcase.schema.json",
+  "id": "TC_USER_AUTH",
   "title": "Auth Login User",
   "tags": ["auth", "user", "setup"],
   "description": "Register (if not exists) and login as a USER, extracting the token to global scope",
@@ -8,7 +9,7 @@
       "title": "Register USER if needed",
       "request": {
         "method": "POST",
-        "endpoint": "{{REGISTER_PATH}}",
+        "endpoint": "/auth/register",
         "payload": {
           "email": "{{USER_EMAIL}}",
           "password": "{{USER_PASSWORD}}",
@@ -27,7 +28,7 @@
       "title": "Login as USER",
       "request": {
         "method": "POST",
-        "endpoint": "{{LOGIN_PATH}}",
+        "endpoint": "/auth/login",
         "payload": {
           "email": "{{USER_EMAIL}}",
           "password": "{{USER_PASSWORD}}"

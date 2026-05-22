@@ -1,7 +1,7 @@
 {
   "name": "play-son",
   "description": "A declarative API testing framework built on Playwright",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,7 +27,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "build": "tsc",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "schema-update": "node dist/cli/index.js sync-project-schemas"
   },
   "dependencies": {
     "@faker-js/faker": "^10.4.0",
@@ -49,6 +50,7 @@
     "@playwright/test": "^1.60.0",
     "@types/jmespath": "^0.15.2",
     "@types/node": "^25.6.2",
+    "@vitest/coverage-v8": "^4.1.5",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3",
     "vitest": "^4.1.5"

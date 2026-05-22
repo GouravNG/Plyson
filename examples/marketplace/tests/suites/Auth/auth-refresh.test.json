@@ -1,19 +1,20 @@
 {
-  "title": "Auth Logout",
-  "description": "Tests for the /auth/logout endpoint",
-  "tags": ["automated", "auth", "logout"],
+  "$schema": "../../node_modules/play-son/schemas/testsuite.schema.json",
+  "title": "Auth Refresh",
+  "description": "Tests for the /auth/refresh endpoint",
+  "tags": ["automated", "auth", "refresh"],
   "testCases": [
     {
-      "id": "auth-logout-pos-001",
-      "title": "Logout successfully with valid token",
+      "id": "auth-refresh-pos-001",
+      "title": "Refresh token successfully with valid token",
       "testType": "positive",
-      "tags": ["positive", "post", "auth"],
+      "tags": ["positive", "post", "auth", "p1", "smoke", "regression", "e2e"],
       "variables": {
-        "logoutEmail": {
+        "refreshEmail": {
           "$gen": "email",
           "provider": "example.com"
         },
-        "logoutPassword": {
+        "refreshPassword": {
           "$gen": "alphanumeric",
           "length": "{{DEFAULT_PWD_LENGTH}}"
         }
@@ -23,10 +24,10 @@
           "title": "Register a new user",
           "request": {
             "method": "POST",
-            "endpoint": "{{REGISTER_PATH}}",
+            "endpoint": "/auth/register",
             "payload": {
-              "email": "{{logoutEmail}}",
-              "password": "{{logoutPassword}}",
+              "email": "{{refreshEmail}}",
+              "password": "{{refreshPassword}}",
               "firstname": {
                 "$gen": "firstName"
               },
@@ -45,10 +46,10 @@
           "title": "Login to get token",
           "request": {
             "method": "POST",
-            "endpoint": "{{LOGIN_PATH}}",
+            "endpoint": "/auth/login",
             "payload": {
-              "email": "{{logoutEmail}}",
-              "password": "{{logoutPassword}}"
+              "email": "{{refreshEmail}}",
+              "password": "{{refreshPassword}}"
             }
           },
           "response": {
@@ -57,7 +58,7 @@
             },
             "extract": [
               {
-                "name": "logoutToken",
+                "name": "refreshToken",
                 "from": "body",
                 "path": "$.token",
                 "scope": "case"
@@ -66,12 +67,12 @@
           }
         },
         {
-          "title": "Logout",
+          "title": "Refresh token",
           "request": {
             "method": "POST",
-            "endpoint": "{{LOGOUT_PATH}}",
+            "endpoint": "/auth/refresh",
             "headers": {
-              "Authorization": "Bearer {{logoutToken}}"
+              "Authorization": "Bearer {{refreshToken}}"
             }
           },
           "response": {
@@ -95,16 +96,16 @@
       ]
     },
     {
-      "id": "auth-logout-neg-unauthorized",
-      "title": "Fail to logout without valid token",
+      "id": "auth-refresh-neg-unauthorized",
+      "title": "Fail to refresh token without valid token",
       "testType": "negative",
-      "tags": ["negative", "post", "auth"],
+      "tags": ["negative", "post", "auth", "p2", "regression"],
       "steps": [
         {
-          "title": "Logout attempt without token",
+          "title": "Refresh attempt without token",
           "request": {
             "method": "POST",
-            "endpoint": "{{LOGOUT_PATH}}"
+            "endpoint": "/auth/refresh"
           },
           "response": {
             "schema": {
@@ -116,10 +117,10 @@
           }
         },
         {
-          "title": "Logout attempt with invalid token",
+          "title": "Refresh attempt with invalid token",
           "request": {
             "method": "POST",
-            "endpoint": "{{LOGOUT_PATH}}",
+            "endpoint": "/auth/refresh",
             "headers": {
               "Authorization": "Bearer invalid-token"
             }
