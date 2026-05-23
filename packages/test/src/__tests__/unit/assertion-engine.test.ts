@@ -1,7 +1,7 @@
 import type { APIResponse } from '@playwright/test'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { AssertionEngine } from '../core/assertion-engine.js'
-import { AssertionError } from '../errors/index.js'
+import { AssertionEngine } from '../../core/assertion-engine.js'
+import { AssertionError } from '../../errors/index.js'
 
 describe('AssertionEngine', () => {
   beforeAll(() => {
@@ -256,3 +256,4 @@ describe('AssertionEngine', () => {
     })
   })
 })
+

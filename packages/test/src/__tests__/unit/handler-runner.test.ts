@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { HandlerContext, HandlerRunner } from '../core/handler-runner.js'
-import { LoadError } from '../errors/index.js'
-import { HandlerModule } from '../types/index.js'
+import { HandlerContext, HandlerRunner } from '../../core/handler-runner.js'
+import { LoadError } from '../../errors/index.js'
+import { HandlerModule } from '../../types/index.js'
 
 describe('HandlerRunner', () => {
   it('should execute handlers in order', async () => {
@@ -57,3 +57,4 @@ describe('HandlerRunner', () => {
     expect(log).toEqual([])
   })
 })
+

@@ -1,6 +1,6 @@
 import type { APIResponse } from '@playwright/test'
 import { describe, expect, it } from 'vitest'
-import { pathEngine } from '../path/index.js'
+import { pathEngine } from '../../path/index.js'
 
 describe('PathEngine', () => {
   it('should extract single value using JSONPath', () => {
@@ -40,3 +40,4 @@ describe('PathEngine', () => {
     expect(pathEngine.extractHeader(mockResponse, 'Content-Type')).toBe('application/json')
   })
 })
+

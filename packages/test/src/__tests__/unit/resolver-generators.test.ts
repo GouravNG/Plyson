@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { resolvePhase1 } from '../core/resolver.js'
-import { VariableStore } from '../core/variable-store.js'
+import { resolvePhase1 } from '../../core/resolver.js'
+import { VariableStore } from '../../core/variable-store.js'
 
 describe('Resolver + Generators Integration', () => {
   it('should resolve variables containing $gen objects', () => {
@@ -76,3 +76,4 @@ describe('Resolver + Generators Integration', () => {
     expect(resolvedDependent.username).toBe(`user_${resolvedInitial.firstName}`)
   })
 })
+

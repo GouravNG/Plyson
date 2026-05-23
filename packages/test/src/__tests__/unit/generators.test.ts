@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { Resolver } from '../core/resolver.js'
-import { VariableStore } from '../core/variable-store.js'
+import { Resolver } from '../../core/resolver.js'
+import { VariableStore } from '../../core/variable-store.js'
 
 describe('Faker JSON Schema System', () => {
   const store = new VariableStore()
@@ -106,3 +106,4 @@ describe('Faker JSON Schema System', () => {
     })
   })
 })
+

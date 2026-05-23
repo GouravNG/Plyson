@@ -1,10 +1,10 @@
 import * as path from 'path'
 import { describe, expect, it } from 'vitest'
-import { ProjectLoader } from '../core/project-loader.js'
-import { LoadError } from '../errors/index.js'
+import { ProjectLoader } from '../../core/project-loader.js'
+import { LoadError } from '../../errors/index.js'
 
 describe('ProjectLoader', () => {
-  const fixtureDir = path.resolve(__dirname, 'fixtures/valid-project')
+  const fixtureDir = path.resolve(__dirname, '../fixtures/valid-project')
 
   it('should load a valid project correctly', async () => {
     const loader = new ProjectLoader()
@@ -37,3 +37,4 @@ describe('ProjectLoader', () => {
     await expect(loader.load('non-existent', 'dev')).rejects.toThrow()
   })
 })
+

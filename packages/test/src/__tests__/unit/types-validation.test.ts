@@ -1,7 +1,23 @@
 import { describe, expect, it } from 'vitest'
-import { AssertionOperatorsSchema, AssertionSchema, TestSuiteSchema } from '../types/index.js'
+import {
+  AssertionOperatorsSchema,
+  AssertionSchema,
+  EnvironmentVariablesSchema,
+  TestSuiteSchema,
+} from '../../types/index.js'
 
 describe('Phase 1: Zod Schema Validation', () => {
+  it('should parse a valid EnvironmentVariables fixture', () => {
+    const validEnv = {
+      baseUrl: 'http://localhost:3000',
+      variables: {
+        foo: 'bar',
+      },
+    }
+    const result = EnvironmentVariablesSchema.safeParse(validEnv)
+    expect(result.success).toBe(true)
+  })
+
   it('should parse a valid TestSuite fixture without errors', () => {
     const validTestSuite = {
       title: 'Sample Suite',
@@ -90,3 +106,4 @@ describe('Phase 1: Zod Schema Validation', () => {
     }
   })
 })
+

@@ -1,3 +1,4 @@
+import type { Expect, TestType } from '@playwright/test'
 import { ProjectLoader } from './core/project-loader.js'
 import { registerSuites } from './core/test-runner.js'
 import { VariableStore } from './core/variable-store.js'
@@ -12,7 +13,7 @@ export * from './errors/index.js'
  * Bootstraps the playson project and registers all suites as Playwright tests.
  * This should be called from a Playwright test file (e.g., suites/playson.spec.ts).
  */
-export async function bootstrap(test: any, expect: any) {
+export async function bootstrap(test: TestType<any, any>, expect: Expect) {
   const rootDir = process.env.PLAYSON_ROOT || process.cwd()
   const env = process.env.PLAYSON_ENV
 

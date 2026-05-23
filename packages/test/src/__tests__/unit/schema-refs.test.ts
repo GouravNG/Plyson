@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { generateFromSchema } from '../autofill/schema-generator.js'
-import { AssertionEngine } from '../core/assertion-engine.js'
+import { generateFromSchema } from '../../autofill/schema-generator.js'
+import { AssertionEngine } from '../../core/assertion-engine.js'
 
 describe('Schema Reference Handling', () => {
   describe('SchemaGenerator (AutoFill)', () => {
@@ -102,3 +102,4 @@ describe('Schema Reference Handling', () => {
     })
   })
 })
+

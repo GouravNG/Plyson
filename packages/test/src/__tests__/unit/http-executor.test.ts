@@ -1,7 +1,7 @@
 import type { APIRequestContext, APIResponse } from '@playwright/test'
 import { describe, expect, it, vi } from 'vitest'
-import { HttpExecutor } from '../core/http-executor.js'
-import type { ResolvedStep } from '../types/index.js'
+import { HttpExecutor } from '../../core/http-executor.js'
+import type { ResolvedStep } from '../../types/index.js'
 
 describe('HttpExecutor', () => {
   const mockContext = {
@@ -87,3 +87,4 @@ describe('HttpExecutor', () => {
     })
   })
 })
+

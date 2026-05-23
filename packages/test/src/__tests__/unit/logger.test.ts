@@ -1,6 +1,6 @@
 import pc from 'picocolors'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ConsoleLogger } from '../core/logger'
+import { ConsoleLogger } from '../../core/logger'
 
 describe('ConsoleLogger', () => {
   let logSpy: any
@@ -60,3 +60,4 @@ describe('ConsoleLogger', () => {
     expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('at '))
   })
 })
+

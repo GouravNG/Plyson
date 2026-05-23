@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { VariableStore } from '../core/variable-store.js'
+import { VariableStore } from '../../core/variable-store.js'
 
 describe('VariableStore', () => {
   it('should handle scope priority (case > suite > environment > global)', () => {
@@ -70,3 +70,4 @@ describe('VariableStore', () => {
     expect(store.get('key')).toBeUndefined()
   })
 })
+

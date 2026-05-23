@@ -1,4 +1,4 @@
-import type { APIRequestContext } from '@playwright/test'
+import type { APIRequestContext, Expect, TestType } from '@playwright/test'
 import { ResolvedStep, SoftError, TestStep } from '../types/index.js'
 import { safeParseJson } from '../utils/safe-parse-json.js'
 import { sleep } from '../utils/sleep.js'
@@ -17,8 +17,8 @@ import { VariableStore } from './variable-store.js'
 export function registerSuites(
   graph: ProjectGraph,
   store: VariableStore,
-  test: any,
-  expect: any,
+  test: TestType<any, any>,
+  expect: Expect,
 ): void {
   if (!test || !expect) {
     throw new Error('registerSuites requires the active Playwright test and expect instances.')
@@ -134,7 +134,7 @@ async function runSteps(
   request: APIRequestContext,
   store: VariableStore,
   graph: ProjectGraph,
-  test: any,
+  test: TestType<any, any>,
   logger: Logger,
 ): Promise<void> {
   const executor = new HttpExecutor(request, graph.environment.baseUrl, graph.schemas)

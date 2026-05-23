@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { Resolver, resolvePhase1, resolvePhase2 } from '../core/resolver.js'
-import { VariableStore } from '../core/variable-store.js'
-import { ResolutionError } from '../errors/index.js'
-import { Req } from '../types/index.js'
+import { Resolver, resolvePhase1, resolvePhase2 } from '../../core/resolver.js'
+import { VariableStore } from '../../core/variable-store.js'
+import { ResolutionError } from '../../errors/index.js'
+import { Req } from '../../types/index.js'
 
 describe('Resolver', () => {
   it('should interpolate tokens with type preservation', () => {
@@ -103,3 +103,4 @@ describe('Resolver', () => {
     expect(resolved.headers?.Host).toBe('api.example.com')
   })
 })
+

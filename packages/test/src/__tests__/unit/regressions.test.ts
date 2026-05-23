@@ -1,14 +1,19 @@
 import * as fs from 'fs/promises'
 import { describe, expect, it, vi } from 'vitest'
-import { ProjectLoader } from '../core/project-loader.js'
-import { registerSuites } from '../core/test-runner.js'
-import { VariableStore } from '../core/variable-store.js'
+import { ProjectLoader } from '../../core/project-loader.js'
+import { registerSuites } from '../../core/test-runner.js'
+import { VariableStore } from '../../core/variable-store.js'
+
+vi.mock('fs/promises')
+vi.mock('glob', () => ({
+  glob: vi.fn(),
+}))
 
 describe('Bug Regressions (Issue #7, #5, #6)', () => {
   describe('Issue #7: Ref style testcase not working at Global scope', () => {
     it('should resolve refs in project beforeAll/afterAll', async () => {
-      vi.mock('fs/promises')
       const mockedFs = fs as any
+      const mockedGlob = await import('glob')
 
       mockedFs.readFile.mockImplementation((p: string) => {
         if (p.endsWith('project.json'))
@@ -35,23 +40,19 @@ describe('Bug Regressions (Issue #7, #5, #6)', () => {
         return '[]'
       })
 
-      vi.mock('glob', () => ({
-        glob: vi.fn().mockImplementation(async (pattern) => {
-          if (pattern === 'schemas/**/*.schema.json') return []
-          if (pattern === 'handlers/**/*.handler.ts') return []
-          if (pattern === 'scripts/**/*.script.json') return ['scripts/setup-db.script.json']
-          if (pattern === 'suites/**/*.test.json') return []
-          return []
-        }),
-      }))
+      vi.mocked(mockedGlob.glob).mockImplementation(async (pattern) => {
+        if (pattern === 'schemas/**/*.schema.json') return []
+        if (pattern === 'handlers/**/*.handler.ts') return []
+        if (pattern === 'scripts/**/*.script.json') return ['scripts/setup-db.script.json']
+        if (pattern === 'suites/**/*.test.json') return []
+        return []
+      })
 
       const loader = new ProjectLoader()
       const graph = await loader.load('.', 'dev')
 
       expect(graph.project.beforeAll?.[0]).not.toHaveProperty('ref')
       expect(graph.project.beforeAll?.[0].title).toBe('Init')
-
-      vi.restoreAllMocks()
     })
   })
 
@@ -97,3 +98,4 @@ describe('Bug Regressions (Issue #7, #5, #6)', () => {
     })
   })
 })
+

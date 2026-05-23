@@ -1,8 +1,8 @@
 import type { APIResponse } from '@playwright/test'
 import { describe, expect, it } from 'vitest'
-import { ExtractionEngine } from '../core/extraction-engine.js'
-import { VariableStore } from '../core/variable-store.js'
-import { ExtractionError } from '../errors/index.js'
+import { ExtractionEngine } from '../../core/extraction-engine.js'
+import { VariableStore } from '../../core/variable-store.js'
+import { ExtractionError } from '../../errors/index.js'
 
 describe('ExtractionEngine', () => {
   const mockResponse = {
@@ -57,3 +57,4 @@ describe('ExtractionEngine', () => {
     expect(store.get('glob')).toBeUndefined()
   })
 })
+
