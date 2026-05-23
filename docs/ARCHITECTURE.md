@@ -1,6 +1,6 @@
-# play-son Architecture
+# playson Architecture
 
-`play-son` is a declarative API testing framework built on top of Playwright. Test authors write JSON — the framework handles discovery, resolution, execution, assertion, and reporting.
+`playson` is a declarative API testing framework built on top of Playwright. Test authors write JSON — the framework handles discovery, resolution, execution, assertion, and reporting.
 
 ---
 
@@ -58,7 +58,7 @@ Entry point for all user interaction. Responsibilities:
 - Parses flags (`--env`, `--grep`, `--workers`, etc.)
 - Validates that a matching `*.env.json` exists for the selected environment
 - Passes native Playwright flags through unchanged to `playwright test`
-- Injects `play-son`-specific config (env variables, project root) into the Playwright context before test discovery begins
+- Injects `playson`-specific config (env variables, project root) into the Playwright context before test discovery begins
 
 The CLI does not execute tests directly — it boots the runner and hands off control to Playwright.
 

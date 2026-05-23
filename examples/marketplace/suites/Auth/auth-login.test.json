@@ -1,0 +1,217 @@
+{
+  "$schema": "../../node_modules/playson/schemas/testsuite.schema.json",
+  "title": "Auth Login",
+  "description": "Tests for the /auth/login endpoint",
+  "tags": ["automated", "auth", "login"],
+  "beforeAll": [
+    {
+      "title": "Register suite login user",
+      "request": {
+        "method": "POST",
+        "endpoint": "/auth/register",
+        "payload": {
+          "email": {
+            "$gen": "email",
+            "provider": "playson.com"
+          },
+          "password": "Password@123",
+          "firstname": {
+            "$gen": "firstName"
+          },
+          "lastname": {
+            "$gen": "lastName"
+          }
+        }
+      },
+      "response": {
+        "schema": {
+          "name": "User"
+        },
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "loginEmail",
+            "from": "body",
+            "path": "$.user.email",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Login suite user for cleanup",
+      "request": {
+        "method": "POST",
+        "endpoint": "/auth/login",
+        "payload": {
+          "email": "{{loginEmail}}",
+          "password": "Password@123"
+        }
+      },
+      "response": {
+        "schema": {
+          "name": "LoginResponse"
+        },
+        "validations": {
+          "statusCode": 200
+        },
+        "extract": [
+          {
+            "name": "loginToken",
+            "from": "body",
+            "path": "$.token",
+            "scope": "suite"
+          }
+        ]
+      }
+    }
+  ],
+  "afterAll": [
+    {
+      "title": "Delete suite login user",
+      "request": {
+        "method": "DELETE",
+        "endpoint": "/user",
+        "headers": {
+          "Authorization": "Bearer {{loginToken}}"
+        }
+      },
+      "response": {
+        "schema": {
+          "name": "Error"
+        },
+        "validations": {
+          "statusCode": 200
+        }
+      }
+    }
+  ],
+  "testCases": [
+    {
+      "id": "auth-login-pos-001",
+      "title": "Login with valid credentials",
+      "testType": "positive",
+      "tags": ["positive", "post", "auth", "p1", "smoke", "regression", "e2e"],
+      "steps": [
+        {
+          "title": "Login with registered credentials",
+          "request": {
+            "method": "POST",
+            "endpoint": "/auth/login",
+            "payload": {
+              "email": "{{loginEmail}}",
+              "password": "Password@123"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "LoginResponse"
+            },
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Token is present",
+                  "from": "body",
+                  "path": "$.token",
+                  "operator": "exists"
+                },
+                {
+                  "title": "User info is returned",
+                  "from": "body",
+                  "path": "$.user",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "auth-login-neg-invalid-creds",
+      "title": "Fail to login with wrong credentials",
+      "testType": "negative",
+      "tags": ["negative", "post", "auth", "p2", "regression"],
+      "steps": [
+        {
+          "title": "Login with wrong password",
+          "request": {
+            "method": "POST",
+            "endpoint": "/auth/login",
+            "payload": {
+              "email": "{{loginEmail}}",
+              "password": "WrongPassword"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "Error"
+            },
+            "validations": {
+              "statusCode": 401,
+              "assertions": [
+                {
+                  "title": "Error message matches",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "equals",
+                  "value": "Invalid email or password"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "auth-login-neg-validation",
+      "title": "Fail to login with invalid data",
+      "testType": "negative",
+      "tags": ["negative", "post", "auth", "validation", "p2", "regression"],
+      "steps": [
+        {
+          "title": "Invalid email format",
+          "request": {
+            "method": "POST",
+            "endpoint": "/auth/login",
+            "payload": {
+              "email": "not-an-email",
+              "password": "Password123"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": [401, 422],
+              "assertions": []
+            }
+          }
+        },
+        {
+          "title": "Missing fields",
+          "request": {
+            "method": "POST",
+            "endpoint": "/auth/login",
+            "payload": {}
+          },
+          "response": {
+            "validations": {
+              "statusCode": 422,
+              "assertions": [
+                {
+                  "title": "Error list includes required messages",
+                  "from": "body",
+                  "path": "$.errors",
+                  "operator": "includes",
+                  "value": "'email' is required"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

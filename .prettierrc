@@ -2,8 +2,11 @@
   "semi": false,
   "singleQuote": true,
   "tabWidth": 2,
-  "trailingComma": "es5",
+  "trailingComma": "all",
   "printWidth": 100,
   "bracketSpacing": true,
-  "arrowParens": "always"
+  "arrowParens": "always",
+  "useTabs": false,
+  "singleAttributePerLine": false,
+  "plugins": ["prettier-plugin-organize-imports"]
 }

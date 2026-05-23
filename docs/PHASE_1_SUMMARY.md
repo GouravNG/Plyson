@@ -3,7 +3,7 @@
 **Date:** Monday, 11 May 2026
 **Status:** Completed ✅
 
-Phase 1 focused on setting up the foundational infrastructure for the `play-son` framework, including the project configuration, directory structure, core type system, and runtime validation schemas.
+Phase 1 focused on setting up the foundational infrastructure for the `playson` framework, including the project configuration, directory structure, core type system, and runtime validation schemas.
 
 ---
 

@@ -1,4 +1,4 @@
-# play-son — Phase-wise Implementation Plan
+# playson — Phase-wise Implementation Plan
 
 Each phase ends with working, tested code. Later phases build on earlier ones without breaking them. IDE prompts are written to be pasted directly into Cursor, Copilot Chat, or any context-aware IDE tool.
 
@@ -27,7 +27,7 @@ Each phase ends with working, tested code. Later phases build on earlier ones wi
 ### Phase 1 IDE Prompt
 
 ```
-You are scaffolding a new TypeScript library called play-son — a declarative API testing framework built on Playwright.
+You are scaffolding a new TypeScript library called playson — a declarative API testing framework built on Playwright.
 
 Create the full project structure and type system. Do not implement any runtime logic yet.
 
@@ -183,7 +183,7 @@ All tests must pass with `npx vitest run`.
 ### Phase 2 IDE Prompt
 
 ```
-Implement the VariableStore and Resolver for the play-son framework.
+Implement the VariableStore and Resolver for the playson framework.
 These are in src/core/variable-store.ts and src/core/resolver.ts.
 All types and error classes are already defined in src/types and src/errors.
 
@@ -344,7 +344,7 @@ All tests pass with npx vitest run.
 ### Phase 3 IDE Prompt
 
 ```
-Implement the GeneratorRegistry and all built-in generators for play-son.
+Implement the GeneratorRegistry and all built-in generators for playson.
 Files: src/generators/registry.ts and src/generators/*.generator.ts
 Types and errors are in src/types and src/errors. Resolver is already done.
 
@@ -502,7 +502,7 @@ All tests pass with npx vitest run — no regressions on phase 1 or 2 tests.
 ### Phase 4 IDE Prompt
 
 ```
-Implement the ProjectLoader and HttpExecutor for play-son.
+Implement the ProjectLoader and HttpExecutor for playson.
 Files: src/core/project-loader.ts, src/core/http-executor.ts, src/autofill/
 
 All types, errors, and schemas from phase 1 are available.
@@ -682,7 +682,7 @@ All tests pass with npx vitest run — no regressions.
 ### Phase 5 IDE Prompt
 
 ```
-Implement the PathEngine, AssertionEngine, ExtractionEngine, and HandlerRunner for play-son.
+Implement the PathEngine, AssertionEngine, ExtractionEngine, and HandlerRunner for playson.
 All previous phases are complete. Import expect from @playwright/test.
 
 --- PATH ENGINE (src/path/index.ts) ---
@@ -870,7 +870,7 @@ All tests pass with npx vitest run — no regressions on any previous phase.
 ### Phase 6 IDE Prompt
 
 ```
-Implement the TestRunner and CLI for play-son.
+Implement the TestRunner and CLI for playson.
 All previous phases are complete and tested. This phase wires everything together.
 
 --- UTILITIES ---
@@ -984,7 +984,7 @@ playson init [project-name]
 --- E2E TESTS (src/__tests__/e2e/full-run.test.ts) ---
 
 Strategy: start a real local HTTP server (use express or msw node adapter) before tests.
-Create a minimal valid play-son project in a temp directory pointing at the local server.
+Create a minimal valid playson project in a temp directory pointing at the local server.
 Use PlaywrightRunner or spawn a child process running `playson run --env test`.
 
 Scenarios to cover:

@@ -171,7 +171,7 @@ A handler file receives the full response context and the current variable store
 
 ```ts
 // assert-pagination.handler.ts
-import type { HandlerContext } from 'playson'
+import type { HandlerContext } from '@playson/test'
 
 export async function run({ response, body, status, store }: HandlerContext) {
   const { total, page, limit, items } = body

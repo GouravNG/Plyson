@@ -1,0 +1,55 @@
+{
+  "$schema": "../../node_modules/playson/schemas/testcase.schema.json",
+  "id": "TC_USER_AUTH",
+  "title": "Auth Login User",
+  "tags": ["auth", "user", "setup"],
+  "description": "Register (if not exists) and login as a USER, extracting the token to global scope",
+  "steps": [
+    {
+      "title": "Register USER if needed",
+      "request": {
+        "method": "POST",
+        "endpoint": "/auth/register",
+        "payload": {
+          "email": "{{USER_EMAIL}}",
+          "password": "{{USER_PASSWORD}}",
+          "firstname": "System",
+          "lastname": "User",
+          "role": "USER"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": [201, 409]
+        }
+      }
+    },
+    {
+      "title": "Login as USER",
+      "request": {
+        "method": "POST",
+        "endpoint": "/auth/login",
+        "payload": {
+          "email": "{{USER_EMAIL}}",
+          "password": "{{USER_PASSWORD}}"
+        }
+      },
+      "response": {
+        "schema": {
+          "name": "User"
+        },
+        "validations": {
+          "statusCode": 200
+        },
+        "extract": [
+          {
+            "name": "userToken",
+            "from": "body",
+            "path": "$.token",
+            "scope": "global"
+          }
+        ]
+      }
+    }
+  ]
+}

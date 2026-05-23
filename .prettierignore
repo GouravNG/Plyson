@@ -1,6 +1,20 @@
-.github
-.cli-test
-coverage
+# Dependencies
+node_modules
+pnpm-lock.yaml
+
+# Build artifacts
 dist
+.turbo
+
+# Test results and reports
+test-results
+playwright-report
+coverage
+
+# Documentation and Schemas (User specified)
 docs
 schemas
+
+# Configuration and secrets
+.env*
+.github

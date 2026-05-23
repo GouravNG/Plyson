@@ -1,0 +1,293 @@
+{
+  "title": "Comprehensive Feature Test",
+  "tags": ["e2e", "features"],
+  "variables": {
+    "suiteVar": "suiteValue"
+  },
+  "testCases": [
+    {
+      "id": "full-feature-demo",
+      "title": "Should exercise all framework features",
+      "tags": ["comprehensive"],
+      "variables": {
+        "caseVar": "caseValue",
+        "nestedGen": {
+          "$gen": "alphanumeric",
+          "length": { "$gen": "int", "min": 10, "max": 10 }
+        }
+      },
+      "steps": [
+        {
+          "title": "Complex Request with PathParams and $gen",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/users/:userId",
+            "pathParams": {
+              "userId": 123
+            },
+            "payload": {
+              "suiteVal": "{{suiteVar}}",
+              "caseVal": "{{caseVar}}",
+              "genVal": "{{nestedGen}}",
+              "freshGen": { "$gen": "uuid" },
+              "numericGen": { "$gen": "numeric", "length": 4 }
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Path param substitution worked",
+                  "from": "body",
+                  "path": "$.id",
+                  "operator": "equals",
+                  "value": "123"
+                },
+                {
+                  "title": "Nested $gen length",
+                  "from": "body",
+                  "path": "$.genVal",
+                  "operator": "hasLength",
+                  "value": 10
+                },
+                {
+                  "title": "Numeric $gen pattern",
+                  "from": "body",
+                  "path": "$.numericGen",
+                  "operator": "matches",
+                  "value": "^\\d{4}$"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "AutoFill and Schema Verification",
+          "request": {
+            "method": "POST",
+            "endpoint": "/echo",
+            "autoFill": {
+              "schemaName": "user",
+              "includeFields": ["name", "email", "role"]
+            },
+            "payload": {
+              "role": "admin"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "AutoFill example used",
+                  "from": "body",
+                  "path": "$.name",
+                  "operator": "equals",
+                  "value": "Autofilled Name"
+                },
+                {
+                  "title": "Explicit payload wins",
+                  "from": "body",
+                  "path": "$.role",
+                  "operator": "equals",
+                  "value": "admin"
+                },
+                {
+                  "title": "Header extraction possible",
+                  "from": "header",
+                  "path": "X-Custom-Header",
+                  "operator": "equals",
+                  "value": "playson-rocks"
+                }
+              ]
+            },
+            "extract": [
+              {
+                "name": "extractedHeader",
+                "from": "header",
+                "path": "X-Custom-Header",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "JSONPath Filters and Handlers",
+          "request": {
+            "method": "GET",
+            "endpoint": "/users"
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Filter finds disabled user",
+                  "from": "body",
+                  "path": "$.data[?(@.status=='disabled')]",
+                  "operator": "isNotEmpty"
+                },
+                {
+                  "title": "Filter finds no unknown status",
+                  "from": "body",
+                  "path": "$.data[?(@.status=='unknown')]",
+                  "operator": "isEmpty"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Auth, Handler, and Case Variable Usage",
+          "request": {
+            "method": "POST",
+            "endpoint": "/auth"
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200
+            },
+            "extract": [
+              {
+                "name": "token",
+                "from": "body",
+                "path": "$.access_token",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Profile with Handler Assertion",
+          "request": {
+            "method": "GET",
+            "endpoint": "/profile",
+            "headers": {
+              "Authorization": "Bearer {{token}}"
+            }
+          },
+          "handlers": ["profile"],
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Previously extracted header used",
+                  "from": "body",
+                  "path": "$.id",
+                  "operator": "isNumber"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Verify Handler Extraction",
+          "request": {
+            "method": "POST",
+            "endpoint": "/echo",
+            "payload": {
+              "check": "{{handler_extracted}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Handler extraction worked",
+                  "from": "body",
+                  "path": "$.check",
+                  "operator": "equals",
+                  "value": "success"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ref-and-global-test",
+      "title": "Should resolve refs and global variables",
+      "tags": ["ref", "global"],
+      "steps": [
+        {
+          "title": "Use Global Variable directly",
+          "request": {
+            "method": "POST",
+            "endpoint": "/echo",
+            "payload": {
+              "app": "{{appName}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Global appName resolved",
+                  "from": "body",
+                  "path": "$.app",
+                  "operator": "equals",
+                  "value": "playson-e2e"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "ref": "echo-script"
+        }
+      ]
+    },
+    {
+      "id": "flags-test",
+      "title": "Should respect request flags",
+      "tags": ["flags"],
+      "steps": [
+        {
+          "title": "Public request with skip_auth flag",
+          "flags": ["skip_auth"],
+          "request": {
+            "method": "GET",
+            "endpoint": "/public",
+            "headers": {
+              "Authorization": "{{defaultToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Public access allowed",
+                  "from": "body",
+                  "path": "$.message",
+                  "operator": "equals",
+                  "value": "Public success"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Public request WITHOUT skip_auth flag (should fail)",
+          "request": {
+            "method": "GET",
+            "endpoint": "/public",
+            "headers": {
+              "Authorization": "{{defaultToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 403
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

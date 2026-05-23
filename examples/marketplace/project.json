@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/playson/schemas/project.schema.json",
+  "title": "Marketplace API Validation",
+  "description": "API testing project created with playson",
+  "version": "1.0.0",
+  "defaultEnv": "local",
+  "beforeAll": [
+    {
+      "ref": "TC_ADMIN_AUTH"
+    },
+    {
+      "ref": "TC_USER_AUTH"
+    }
+  ]
+}

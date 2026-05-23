@@ -1,4 +1,4 @@
-# play-son
+# playson
 
 A declarative, JSON-driven API testing framework built on top of [Playwright](https://playwright.dev/).
 
@@ -16,7 +16,7 @@ A declarative, JSON-driven API testing framework built on top of [Playwright](ht
 ## Installation
 
 ```bash
-npm install play-son
+npm install playson
 ```
 
 ## Quick Start
