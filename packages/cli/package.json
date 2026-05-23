@@ -12,9 +12,10 @@
   },
   "types": "dist/index.d.ts",
   "bin": {
-    "playson": "dist/index.js"
+    "playson": "bin/playson.js"
   },
   "files": [
+    "bin",
     "dist"
   ],
   "engines": {
