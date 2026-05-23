@@ -30,6 +30,14 @@ jobs:
       - name: Check Formatting
         run: pnpm format
 
+      - name: Start Marketplace Server
+        run: |
+          cd examples/marketplace
+          node src/server.js &
+          cd ../..
+          sleep 3
+        timeout-minutes: 1
+
       - name: Run Tests (Unit & E2E)
         run: pnpm test
 
