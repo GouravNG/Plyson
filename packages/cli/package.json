@@ -1,6 +1,6 @@
 {
   "name": "@playson/cli",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Command-line interface for the Playson declarative API testing framework",
   "type": "module",
   "main": "dist/index.js",
