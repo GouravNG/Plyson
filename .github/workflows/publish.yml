@@ -24,6 +24,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Start Marketplace Server
+        run: |
+          cd examples/marketplace
+          node src/server.js &
+          cd ../..
+          sleep 3
+        timeout-minutes: 1
+
       - name: Run tests
         run: pnpm test
 
@@ -34,3 +42,11 @@ jobs:
         run: pnpm -r publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH }}
+
+      - name: Upload Playwright Report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-publish
+          path: '**/playwright-report/'
+          retention-days: 7
