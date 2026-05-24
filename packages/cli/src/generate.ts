@@ -2,6 +2,7 @@ import { Command } from 'commander'
 import { randomUUID } from 'crypto'
 import fs from 'fs'
 import path from 'path'
+import { getHandlerTemplate, getScriptTemplate, getSuiteTemplate } from './templates/index.js'
 
 export const generateCommand = new Command('generate')
   .alias('g')
@@ -57,19 +58,7 @@ generateCommand
       fs.mkdirSync(dirPath, { recursive: true })
     }
     const filePath = path.join(dirPath, `${name}.handler.ts`)
-    const content = `import { HandlerContext } from '@playson/test';
-
-/**
- * Custom handler: ${name}
- */
-export const run = async (ctx: HandlerContext) => {
-  // Access request, response, store, etc.
-  // Example: const token = ctx.store.get('token');
-  // Example: if (ctx.status !== 200) throw new Error('Failed');
-  
-  console.log('Running handler: ${name}');
-};
-`
+    const content = getHandlerTemplate(name)
     if (!fs.existsSync(filePath)) {
       fs.writeFileSync(filePath, content)
       console.log(`Created handler: ${filePath}`)
@@ -88,25 +77,7 @@ generateCommand
     }
     const filePath = path.join(dirPath, `${name}.script.json`)
     const id = randomUUID()
-    const content = {
-      id: id,
-      title: name,
-      description: `Reusable script: ${name}`,
-      steps: [
-        {
-          title: 'Example step',
-          request: {
-            method: 'GET',
-            endpoint: '/health',
-          },
-          response: {
-            validations: {
-              statusCode: 200,
-            },
-          },
-        },
-      ],
-    }
+    const content = getScriptTemplate(name, id)
     if (!fs.existsSync(filePath)) {
       fs.writeFileSync(filePath, JSON.stringify(content, null, 2))
       console.log(`Created script: ${filePath} (id: ${id})`)
@@ -124,33 +95,7 @@ generateCommand
       fs.mkdirSync(dirPath, { recursive: true })
     }
     const filePath = path.join(dirPath, `${name}.test.json`)
-    const content = {
-      title: name,
-      description: `Test suite: ${name}`,
-      tags: ['automated'],
-      variables: {},
-      testCases: [
-        {
-          id: `${name.toLowerCase().replace(/\s+/g, '-')}-1`,
-          title: 'First test case',
-          tags: ['smoke'],
-          steps: [
-            {
-              title: 'Health check',
-              request: {
-                method: 'GET',
-                endpoint: '/health',
-              },
-              response: {
-                validations: {
-                  statusCode: 200,
-                },
-              },
-            },
-          ],
-        },
-      ],
-    }
+    const content = getSuiteTemplate(name)
     if (!fs.existsSync(filePath)) {
       fs.writeFileSync(filePath, JSON.stringify(content, null, 2))
       console.log(`Created suite: ${filePath}`)
