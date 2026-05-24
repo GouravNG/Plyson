@@ -40,4 +40,3 @@ describe('PathEngine', () => {
     expect(pathEngine.extractHeader(mockResponse, 'Content-Type')).toBe('application/json')
   })
 })
-

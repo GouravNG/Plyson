@@ -70,4 +70,3 @@ describe('VariableStore', () => {
     expect(store.get('key')).toBeUndefined()
   })
 })
-

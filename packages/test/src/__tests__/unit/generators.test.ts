@@ -106,4 +106,3 @@ describe('Faker JSON Schema System', () => {
     })
   })
 })
-

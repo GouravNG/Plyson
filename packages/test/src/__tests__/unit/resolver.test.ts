@@ -103,4 +103,3 @@ describe('Resolver', () => {
     expect(resolved.headers?.Host).toBe('api.example.com')
   })
 })
-

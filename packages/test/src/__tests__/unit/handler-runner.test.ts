@@ -57,4 +57,3 @@ describe('HandlerRunner', () => {
     expect(log).toEqual([])
   })
 })
-

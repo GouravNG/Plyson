@@ -57,4 +57,3 @@ describe('ExtractionEngine', () => {
     expect(store.get('glob')).toBeUndefined()
   })
 })
-

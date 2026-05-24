@@ -51,7 +51,11 @@ export const initCommand = new Command('init')
       console.log('1. npm install')
       console.log('2. playson sync-project-schemas')
     }
-    console.log(`${projectName !== '.' ? '4' : '3'}. Edit project.json and environments/dev.env.json`)
-    console.log(`${projectName !== '.' ? '5' : '4'}. Add your first test in suites/sample.test.json`)
+    console.log(
+      `${projectName !== '.' ? '4' : '3'}. Edit project.json and environments/dev.env.json`,
+    )
+    console.log(
+      `${projectName !== '.' ? '5' : '4'}. Add your first test in suites/sample.test.json`,
+    )
     console.log(`${projectName !== '.' ? '6' : '5'}. Run tests with: playson run --env dev`)
   })

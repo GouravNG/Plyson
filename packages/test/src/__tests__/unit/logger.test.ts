@@ -60,4 +60,3 @@ describe('ConsoleLogger', () => {
     expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('at '))
   })
 })
-

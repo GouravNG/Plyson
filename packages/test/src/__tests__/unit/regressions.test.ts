@@ -98,4 +98,3 @@ describe('Bug Regressions (Issue #7, #5, #6)', () => {
     })
   })
 })
-

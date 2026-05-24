@@ -102,4 +102,3 @@ describe('Schema Reference Handling', () => {
     })
   })
 })
-

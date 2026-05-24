@@ -37,4 +37,3 @@ describe('ProjectLoader', () => {
     await expect(loader.load('non-existent', 'dev')).rejects.toThrow()
   })
 })
-

@@ -76,4 +76,3 @@ describe('Resolver + Generators Integration', () => {
     expect(resolvedDependent.username).toBe(`user_${resolvedInitial.firstName}`)
   })
 })
-
