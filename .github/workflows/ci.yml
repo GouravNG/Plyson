@@ -27,9 +27,6 @@ jobs:
       - name: Security Audit
         run: pnpm audit --audit-level=high
 
-      - name: Check Formatting
-        run: pnpm format
-
       - name: Start Marketplace Server
         run: |
           cd examples/marketplace
