@@ -13,10 +13,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get version from package.json
+      - name: Get version from core package
         id: package_version
         run: |
-          VERSION=$(node -p "require('./package.json').version")
+          VERSION=$(node -p "require('./packages/test/package.json').version")
           echo "version=v$VERSION" >> $GITHUB_OUTPUT
 
       - name: Check if tag exists

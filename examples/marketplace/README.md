@@ -1,6 +1,6 @@
-# play-son Validation Backend
+# playson Validation Backend
 
-Deterministic backend for validating the `play-son` library against a real HTTP API.
+Deterministic backend for validating the `playson` library against a real HTTP API.
 
 ## Run
 

@@ -11,44 +11,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
-
-      - name: Security Audit
-        run: npm audit --audit-level=high
-
-      - name: Check Formatting
-        run: npx prettier --check .
+        run: pnpm install
 
       - name: Run tests
-        run: npm test
-
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-
-      - name: Run E2E tests
-        run: npm run test:e2e
-
-      - name: Upload Playwright Report
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-publish
-          path: playwright-report/
-          retention-days: 30
+        run: pnpm test
 
       - name: Build package
-        run: npm run build
+        run: pnpm build
 
-      - name: Publish to NPM
-        run: npm publish --access public
+      - name: Publish packages to NPM
+        run: pnpm -r publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH }}

@@ -1,0 +1,5 @@
+{
+  "globalVar": "globalValue",
+  "appName": "playson-e2e",
+  "priorityTest": "global"
+}

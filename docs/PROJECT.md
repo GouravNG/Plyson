@@ -1,4 +1,4 @@
-This project is play-son: a TypeScript framework for writing
+This project is playson: a TypeScript framework for writing
 API tests as JSON, then running them through Playwright.
 
 Big Picture

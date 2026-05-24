@@ -1,4 +1,4 @@
-# play-son — Technical Implementation
+# playson — Technical Implementation
 
 This document covers implementation-level detail for every component in the framework. It is intended for developers building or contributing to the internals. Familiarity with the architecture overview is assumed.
 
@@ -430,7 +430,7 @@ function resolvePhase2(request: Req, store: VariableStore, stepTitle: string): R
 
 ## 4. Faker JSON Schema System
 
-Instead of manual generator classes, play-son uses a declarative system that delegates directly to `@faker-js/faker`. This allows the use of any faker method via a simple JSON directive.
+Instead of manual generator classes, playson uses a declarative system that delegates directly to `@faker-js/faker`. This allows the use of any faker method via a simple JSON directive.
 
 ### Method Resolution
 

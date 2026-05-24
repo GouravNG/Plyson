@@ -38,8 +38,8 @@
  */
 
 'use strict'
-import http from 'node:http'
 import crypto from 'node:crypto'
+import http from 'node:http'
 import { buildOpenAPISpec } from './openapi.js'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -128,7 +128,7 @@ function logReq(method, url, status, ms, reqId) {
       `${MCL[method] || C.white}${C.bold}${method.padEnd(7)}${C.reset} ` +
       `${url.padEnd(50)} ` +
       `${sclr(status)}${status}${C.reset} ` +
-      `${C.dim}${ms}ms  [${reqId}]${C.reset}`
+      `${C.dim}${ms}ms  [${reqId}]${C.reset}`,
   )
 }
 
@@ -293,7 +293,7 @@ function requireAuth(res, req, reqId) {
         ? 'Token expired — please log in again'
         : 'Unauthorized — valid Bearer token required',
       reqId,
-      401
+      401,
     )
   return user
 }
@@ -373,7 +373,7 @@ route('POST', '/auth/register', async (req, res, { reqId }) => {
     res,
     { message: 'Registered — account is INACTIVE until approved', user: safeUser(user) },
     reqId,
-    201
+    201,
   )
 })
 
@@ -387,7 +387,7 @@ route('POST', '/auth/login', async (req, res, { reqId }) => {
 
   const email = body.email.toLowerCase().trim()
   const user = DB.users.find(
-    (u) => u.email === email && u.passwordHash === hashPassword(body.password) && !u.deletedAt
+    (u) => u.email === email && u.passwordHash === hashPassword(body.password) && !u.deletedAt,
   )
   if (!user) return err(res, 'Invalid email or password', reqId, 401)
 
@@ -404,7 +404,7 @@ route('POST', '/auth/login', async (req, res, { reqId }) => {
       expiresAt: new Date(expiresAt).toISOString(),
       user: safeUser(user),
     },
-    reqId
+    reqId,
   )
 })
 
@@ -428,13 +428,13 @@ route('POST', '/auth/refresh', async (req, res, { reqId }) => {
       res,
       reason === 'token_expired' ? 'Token expired — please log in again' : 'Unauthorized',
       reqId,
-      401
+      401,
     )
   DB.sessions[token].expiresAt = Date.now() + CONFIG.TOKEN_TTL_MS
   ok(
     res,
     { message: 'Token refreshed', expiresAt: new Date(DB.sessions[token].expiresAt).toISOString() },
-    reqId
+    reqId,
   )
 })
 
@@ -736,7 +736,7 @@ route(
     const inv = DB.inventory.find((i) => i.productId === params.productId)
     if (!inv) return err(res, 'Inventory not found', reqId, 404)
     ok(res, { inventory: inv }, reqId)
-  }
+  },
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -915,7 +915,7 @@ route('POST', '/orders', async (req, res, { reqId }) => {
     user.id,
     'ORDER',
     'Order placed',
-    `Your order #${order.id} has been placed and is PENDING.`
+    `Your order #${order.id} has been placed and is PENDING.`,
   )
 
   ok(res, { message: 'Order placed', order }, reqId, 201)
@@ -993,7 +993,7 @@ route('PATCH', /^\/orders\/(?<id>[^/]+)\/status$/, async (req, res, { params, re
       res,
       `Cannot transition from ${order.status} → ${target}. Allowed: ${ORDER_TRANSITIONS[order.status].join(', ') || 'none'}`,
       reqId,
-      409
+      409,
     )
 
   const now = new Date().toISOString()
@@ -1005,7 +1005,7 @@ route('PATCH', /^\/orders\/(?<id>[^/]+)\/status$/, async (req, res, { params, re
     order.userId,
     'ORDER',
     'Order update',
-    `Your order #${order.id} is now ${target}.`
+    `Your order #${order.id} is now ${target}.`,
   )
 
   ok(res, { message: `Order status updated to ${target}`, order }, reqId)
@@ -1156,7 +1156,7 @@ route('PATCH', /^\/reviews\/(?<id>[^/]+)\/moderate$/, async (req, res, { params,
     review.userId,
     'REVIEW',
     `Review ${review.status.toLowerCase()}`,
-    `Your review has been ${review.status.toLowerCase()}${body.note ? `: "${body.note}"` : '.'}`
+    `Your review has been ${review.status.toLowerCase()}${body.note ? `: "${body.note}"` : '.'}`,
   )
 
   ok(res, { message: `Review ${review.status}`, review }, reqId)
@@ -1212,7 +1212,7 @@ route('DELETE', /^\/notifications\/(?<id>[^/]+)$/, async (req, res, { params, re
   const user = requireAuth(res, req, reqId)
   if (!user) return
   const idx = DB.notifications.findIndex(
-    (n) => n.id === params.id && (n.userId === user.id || user.role === 'ADMIN')
+    (n) => n.id === params.id && (n.userId === user.id || user.role === 'ADMIN'),
   )
   if (idx === -1) return err(res, 'Notification not found', reqId, 404)
   DB.notifications.splice(idx, 1)
@@ -1231,7 +1231,7 @@ route('POST', '/notifications/broadcast', async (req, res, { reqId }) => {
   if (!valid) return err(res, 'Validation failed', reqId, 422, { errors })
 
   const targets = DB.users.filter(
-    (u) => !u.deletedAt && (!body.role || u.role === body.role.toUpperCase())
+    (u) => !u.deletedAt && (!body.role || u.role === body.role.toUpperCase()),
   )
   targets.forEach((u) => pushNotification(u.id, 'BROADCAST', body.title, body.message))
   ok(res, { message: `Broadcast sent to ${targets.length} user(s)`, count: targets.length }, reqId)
@@ -1297,7 +1297,7 @@ route('GET', '/', async (req, res, { reqId }) => {
         ],
       },
     },
-    reqId
+    reqId,
   )
 })
 
@@ -1332,7 +1332,7 @@ route('GET', '/health', async (req, res, { reqId }) => {
       },
       timestamp: new Date().toISOString(),
     },
-    reqId
+    reqId,
   )
 })
 
@@ -1347,7 +1347,7 @@ route('POST', '/cache-clear', async (req, res, { reqId }) => {
       sessionsCleared: count,
       timestamp: new Date().toISOString(),
     },
-    reqId
+    reqId,
   )
 })
 
@@ -1376,7 +1376,7 @@ route('GET', '/db-snapshot', async (req, res, { reqId }) => {
         notifications: DB.notifications,
       },
     },
-    reqId
+    reqId,
   )
 })
 
@@ -1525,7 +1525,7 @@ const server = http.createServer(async (req, res) => {
         error: `Rate limit exceeded — max ${CONFIG.RATE_LIMIT} req/min`,
         retryAfterMs: CONFIG.RATE_WINDOW_MS,
       },
-      reqId
+      reqId,
     )
     logReq(req.method, req.url, 429, Date.now() - start, reqId)
     return

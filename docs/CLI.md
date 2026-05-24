@@ -1,6 +1,6 @@
-# play-son CLI Design
+# playson CLI Design
 
-This document outlines the command-line interface (CLI) for the `play-son` API testing framework, designed as a specialized extension of the Playwright CLI.
+This document outlines the command-line interface (CLI) for the `playson` API testing framework, designed as a specialized extension of the Playwright CLI.
 
 ---
 
@@ -14,15 +14,15 @@ The `playson` command acts as a wrapper for `npx playwright`. Even as an API-fir
 - **Trace Viewer**: Supported. Allows post-mortem inspection of API failures.
 - **Reporting**: Commands like `show-report` are passed through to the underlying Playwright installation.
 - **Standard Commands**: `codegen`, `test --debug`, etc., work exactly as they do in native Playwright.
-- **Logic**: Custom `play-son` environment/variable injection remains active even in UI mode.
+- **Logic**: Custom `playson` environment/variable injection remains active even in UI mode.
 
 ---
 
-## 2. Custom play-son Commands
+## 2. Custom playson Commands
 
 ### `run` (Specialized `playwright test`)
 
-The primary entry point for executing `play-son` JSON-based test suites.
+The primary entry point for executing `playson` JSON-based test suites.
 
 **Usage:**
 
@@ -114,7 +114,7 @@ playson validate [path] [options]
 
 ### `init`
 
-Scaffolds a new `play-son` project directory structure.
+Scaffolds a new `playson` project directory structure.
 
 **Usage:**
 
@@ -130,4 +130,4 @@ playson init [project-name]
 
 1. CLI validates `dev.env.json` exists.
 2. CLI prepares environment variables and variable store.
-3. CLI invokes `playwright test` with internal configuration that points to the `play-son` runner and discovery logic.
+3. CLI invokes `playwright test` with internal configuration that points to the `playson` runner and discovery logic.

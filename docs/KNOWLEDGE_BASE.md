@@ -1,12 +1,12 @@
-# Play-son Knowledge Base
+# Playson Knowledge Base
 
-This document provides a comprehensive overview of the `play-son` testing framework, combining architectural conventions with technical type definitions.
+This document provides a comprehensive overview of the `playson` testing framework, combining architectural conventions with technical type definitions.
 
 ---
 
 ## 1. Project Architecture & Structure
 
-A `play-son` project follows a strict directory structure to enable auto-discovery and consistent test execution.
+A `playson` project follows a strict directory structure to enable auto-discovery and consistent test execution.
 
 ```
 my-api-tests/

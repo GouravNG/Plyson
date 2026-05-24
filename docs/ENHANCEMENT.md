@@ -30,7 +30,7 @@ Good mental model:
 
 Examples for someone who knows Faker:
 
-| Faker style                                                    | Play-son $gen style           |
+| Faker style                                                    | Playson $gen style           |
 | -------------------------------------------------------------- | ----------------------------- |
 | faker.string.uuid()                                            | { "$gen": "uuid" }            |
 | faker.internet.email()                                         | { "$gen": "email" }           |

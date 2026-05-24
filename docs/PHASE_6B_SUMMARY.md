@@ -2,7 +2,7 @@
 
 ## Goal
 
-Refine and complete the CLI implementation to provide a professional, interactive experience for managing and running `play-son` projects. This phase ensures the CLI matches the design specifications in `CLI.md` and provides robust utility for test authors.
+Refine and complete the CLI implementation to provide a professional, interactive experience for managing and running `playson` projects. This phase ensures the CLI matches the design specifications in `CLI.md` and provides robust utility for test authors.
 
 ## Deliverables
 
@@ -62,4 +62,4 @@ playson g env-var api_key "SECRET_123" --env prod
 
 ## Status
 
-All phases of the `play-son` framework are now complete. The framework is ready for declarative API testing at scale.
+All phases of the `playson` framework are now complete. The framework is ready for declarative API testing at scale.

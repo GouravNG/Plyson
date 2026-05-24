@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Environment Schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "baseUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "specUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "variables": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
+    }
+  },
+  "required": ["baseUrl"],
+  "additionalProperties": false
+}

@@ -1,6 +1,6 @@
 # Feature Flags
 
-This document catalogs proposed `play-son` runtime flags for API testing, debugging, resilience checks, and controlled fault injection.
+This document catalogs proposed `playson` runtime flags for API testing, debugging, resilience checks, and controlled fault injection.
 
 Use these flags deliberately. Several options intentionally weaken authentication, change transport behavior, or inject failures, so they should be restricted to local development, test environments, and CI jobs that are designed for those scenarios.
 

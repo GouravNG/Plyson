@@ -1,0 +1,49 @@
+{
+  "name": "@playson/test",
+  "description": "Core engine for playson declarative API testing",
+  "version": "0.1.4",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GouravNG/Playson.git",
+    "directory": "packages/test"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:watch": "vitest",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^10.4.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "glob": "^13.0.6",
+    "jmespath": "^0.16.0",
+    "jsonpath-plus": "^10.4.0",
+    "picocolors": "^1.1.1",
+    "zod": "^4.4.3"
+  },
+  "peerDependencies": {
+    "@playwright/test": "^1.59.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/jmespath": "^0.15.2",
+    "@types/node": "^25.6.2",
+    "@vitest/coverage-v8": "^4.1.5",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  }
+}
