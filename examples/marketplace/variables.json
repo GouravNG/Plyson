@@ -1,4 +1,5 @@
 {
+  "$schema": "./node_modules/@playson/test/src/schemas/variables.schema.json",
   "DEFAULT_PWD_LENGTH": 10,
   "MIN_PWD_LENGTH": 6,
   "MAX_NAME_LENGTH": 64,

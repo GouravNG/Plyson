@@ -1,5 +1,5 @@
 {
-  "$schema": "../../node_modules/playson/schemas/testsuite.schema.json",
+  "$schema": "../../Project-schema/testsuite.schema.json",
   "title": "Auth Me",
   "description": "Tests for the /auth/me endpoint",
   "tags": ["automated", "auth", "me"],

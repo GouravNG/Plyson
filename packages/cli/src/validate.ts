@@ -1,10 +1,10 @@
 import { confirm, select } from '@inquirer/prompts'
-import { AggregateLoadError, LoadError, ProjectLoader } from '@playson/test'
 import { Command } from 'commander'
 import { existsSync } from 'fs'
 import fs from 'fs/promises'
 import { jsonrepair } from 'jsonrepair'
 import path from 'path'
+import { loadTestPackage } from './utils/load-test-package.js'
 
 export const validateCommand = new Command('validate')
   .description('Validate the project structure and files')
@@ -16,13 +16,21 @@ export const validateCommand = new Command('validate')
   )
   .option('--repair', 'Interactively repair broken files and links')
   .action(async (targetPath, options) => {
+    // Load test package dynamically
+    const testPkg = await loadTestPackage()
+    const { ProjectLoader, AggregateLoadError, LoadError } = testPkg
+
     const rootDir = process.cwd()
     const env = options.env || 'dev'
     const loader = new ProjectLoader()
 
     try {
       if (options.repair) {
-        await handleRepair(targetPath, rootDir, env)
+        await handleRepair(targetPath, rootDir, env, {
+          ProjectLoader,
+          AggregateLoadError,
+          LoadError,
+        })
       } else {
         console.log(`Validating project at ${targetPath} (env: ${env})...`)
         const effectiveRoot =
@@ -31,10 +39,15 @@ export const validateCommand = new Command('validate')
         await loader.load(effectiveRoot, env)
         console.log('✅ Project is valid!')
       }
-    } catch (error) {
-      if (error instanceof AggregateLoadError) {
-        console.error(`\n❌ Validation failed with ${error.errors.length} error(s):`)
-        error.errors.forEach((err: LoadError, index: number) => {
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'errors' in error &&
+        Array.isArray((error as any).errors)
+      ) {
+        console.error(`\n❌ Validation failed with ${(error as any).errors.length} error(s):`)
+        ;(error as any).errors.forEach((err: any, index: number) => {
           const fileInfo = err.file ? ` [${err.file}]` : ''
           console.error(`${index + 1}. ${err.message}${fileInfo}`)
         })
@@ -53,8 +66,15 @@ export const validateCommand = new Command('validate')
     }
   })
 
-async function handleRepair(_targetPath: string, rootDir: string, env: string) {
+async function handleRepair(
+  _targetPath: string,
+  rootDir: string,
+  env: string,
+  testPkg: { ProjectLoader: any; AggregateLoadError: any; LoadError: any },
+) {
   console.log('🔧 Entering interactive repair mode...')
+
+  const { ProjectLoader, AggregateLoadError, LoadError } = testPkg
 
   // 1. Repair JSON syntax issues
   const jsonFiles = await findJsonFiles(rootDir)
@@ -85,9 +105,14 @@ async function handleRepair(_targetPath: string, rootDir: string, env: string) {
   try {
     await loader.load(rootDir, env)
     console.log('\n✅ Project is now valid!')
-  } catch (error) {
-    if (error instanceof AggregateLoadError) {
-      for (const err of error.errors) {
+  } catch (error: unknown) {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'errors' in error &&
+      Array.isArray((error as any).errors)
+    ) {
+      for (const err of (error as any).errors) {
         await repairSpecificError(err, rootDir)
       }
 
@@ -120,7 +145,7 @@ async function findJsonFiles(dir: string): Promise<string[]> {
   return files
 }
 
-async function repairSpecificError(err: LoadError, rootDir: string) {
+async function repairSpecificError(err: any, rootDir: string) {
   if (err.message.includes('Ref') && err.message.includes('not found')) {
     const match = err.message.match(/Ref "(.*)" not found/)
     if (match) {

@@ -1,5 +1,5 @@
 {
-  "$schema": "./node_modules/playson/schemas/project.schema.json",
+  "$schema": "./node_modules/@playson/test/src/schemas/project.schema.json",
   "title": "Marketplace API Validation",
   "description": "API testing project created with playson",
   "version": "1.0.0",

@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { generateCommand } from '../generate.js'
 import { initCommand } from '../init.js'
+import { syncProjectSchemasCommand } from '../sync-project-schemas.js'
 import { syncSchemasCommand } from '../sync-schemas.js'
 import { validateCommand } from '../validate.js'
 
@@ -16,6 +17,22 @@ const __dirname = path.dirname(__filename)
 vi.mock('@inquirer/prompts', () => ({
   confirm: vi.fn(),
   select: vi.fn(),
+}))
+
+// Mock loadTestPackage to avoid external dependency in tests
+vi.mock('../utils/load-test-package.js', () => ({
+  loadTestPackage: vi.fn().mockResolvedValue({
+    ProjectSchema: { toJSONSchema: () => ({ properties: {} }) },
+    TestSuiteSchema: { toJSONSchema: () => ({ properties: {} }) },
+    TestcaseSchema: { toJSONSchema: () => ({ properties: {} }) },
+    EnvironmentVariablesSchema: { toJSONSchema: () => ({ properties: {} }) },
+    VariablesSchema: { toJSONSchema: () => ({ properties: {} }) },
+    ProjectLoader: class {
+      load = vi.fn().mockResolvedValue({})
+    },
+    AggregateLoadError: Error,
+    LoadError: Error,
+  }),
 }))
 
 describe('CLI Commands', () => {
@@ -45,6 +62,7 @@ describe('CLI Commands', () => {
     program.addCommand(generateCommand)
     program.addCommand(validateCommand)
     program.addCommand(syncSchemasCommand)
+    program.addCommand(syncProjectSchemasCommand)
   })
 
   afterEach(() => {
@@ -165,6 +183,18 @@ describe('CLI Commands', () => {
       const repaired = JSON.parse(fs.readFileSync('scripts/broken.script.json', 'utf-8'))
       expect(repaired.id).toBe('test')
       expect(confirm).toHaveBeenCalled()
+    })
+  })
+
+  describe('sync-project-schemas', () => {
+    it('should generate schemas in Project-schema directory', async () => {
+      await program.parseAsync(['node', 'playson', 'sync-project-schemas'])
+
+      expect(fs.existsSync('Project-schema/project.schema.json')).toBe(true)
+      expect(fs.existsSync('Project-schema/testsuite.schema.json')).toBe(true)
+      expect(fs.existsSync('Project-schema/testcase.schema.json')).toBe(true)
+      expect(fs.existsSync('Project-schema/environment.schema.json')).toBe(true)
+      expect(fs.existsSync('Project-schema/variables.schema.json')).toBe(true)
     })
   })
 

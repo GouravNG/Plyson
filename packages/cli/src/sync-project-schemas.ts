@@ -1,34 +1,29 @@
-import {
-  EnvironmentVariablesSchema,
-  ProjectSchema,
-  TestSuiteSchema,
-  TestcaseSchema,
-  VariablesSchema,
-} from '@playson/test'
 import { Command } from 'commander'
 import fs from 'fs'
 import path from 'path'
-import { fileURLToPath } from 'url'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+import { loadTestPackage } from './utils/load-test-package.js'
 
 export const syncProjectSchemasCommand = new Command('sync-project-schemas')
-  .description('Sync core project JSON schemas from Zod definitions')
-  .action(() => {
-    const pkgRoot = path.resolve(__dirname, '../..')
-    const schemaDir = path.join(pkgRoot, 'test/schemas')
+  .description('Sync core project JSON schemas to Project-schema/ directory')
+  .action(async () => {
+    // Load the test package dynamically from the project's node_modules
+    const testPkg = await loadTestPackage()
 
+    // Resolve project root from environment variable or current working directory
+    const projectRoot = process.env.PLAYSON_ROOT || process.cwd()
+    const schemaDir = path.join(projectRoot, 'Project-schema')
+
+    // Create Project-schema directory
     if (!fs.existsSync(schemaDir)) {
       fs.mkdirSync(schemaDir, { recursive: true })
     }
 
     const schemas = [
-      { name: 'project', schema: ProjectSchema },
-      { name: 'testsuite', schema: TestSuiteSchema },
-      { name: 'testcase', schema: TestcaseSchema },
-      { name: 'environment', schema: EnvironmentVariablesSchema },
-      { name: 'variables', schema: VariablesSchema },
+      { name: 'project', schema: testPkg.ProjectSchema },
+      { name: 'testsuite', schema: testPkg.TestSuiteSchema },
+      { name: 'testcase', schema: testPkg.TestcaseSchema },
+      { name: 'environment', schema: testPkg.EnvironmentVariablesSchema },
+      { name: 'variables', schema: testPkg.VariablesSchema },
     ]
 
     console.log(`🔄 Syncing core schemas to ${schemaDir}...`)
@@ -55,5 +50,5 @@ export const syncProjectSchemasCommand = new Command('sync-project-schemas')
       }
     })
 
-    console.log('\nCore schema sync complete.')
+    console.log(`\n✨ Schemas exported to: ${path.relative(projectRoot, schemaDir) || '.'}/`)
   })

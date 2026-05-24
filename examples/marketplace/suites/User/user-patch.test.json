@@ -1,5 +1,5 @@
 {
-  "$schema": "../../node_modules/playson/schemas/testsuite.schema.json",
+  "$schema": "../../Project-schema/testsuite.schema.json",
   "title": "User Controller - Patch",
   "description": "Tests for updating own profile (/user) via PATCH",
   "tags": ["user", "profile", "patch", "regression"],

@@ -1,5 +1,5 @@
 {
-  "$schema": "../../node_modules/playson/schemas/testcase.schema.json",
+  "$schema": "../../Project-schema/testcase.schema.json",
   "id": "TC_ADMIN_AUTH",
   "title": "Auth Login Admin",
   "tags": ["auth", "admin", "setup"],

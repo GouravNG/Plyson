@@ -29,25 +29,25 @@ export const initCommand = new Command('init')
 
     const placeholders = {
       'project.json': {
-        $schema: './node_modules/@playson/test/schemas/project.schema.json',
+        $schema: './Project-schema/project.schema.json',
         title: projectName === '.' ? 'New API Project' : projectName,
         description: 'API testing project created with playson',
         version: '1.0.0',
         defaultEnv: 'dev',
       },
       'variables.json': {
-        $schema: './node_modules/@playson/test/schemas/variables.schema.json',
+        $schema: './Project-schema/variables.schema.json',
         appName: 'MyDemoAPI',
       },
       'environments/dev.env.json': {
-        $schema: '../node_modules/@playson/test/schemas/environment.schema.json',
+        $schema: '../Project-schema/environment.schema.json',
         baseUrl: 'http://localhost:3000',
         variables: {
           adminEmail: 'admin@example.com',
         },
       },
       'suites/sample.test.json': {
-        $schema: '../node_modules/@playson/test/schemas/testsuite.schema.json',
+        $schema: '../Project-schema/testsuite.schema.json',
         title: 'Sample Suite',
         description: 'Welcome to playson! This is a sample test suite.',
         tags: ['smoke'],
@@ -131,7 +131,15 @@ playwright/.cache/
 
     console.log('\nProject initialized successfully!')
     console.log('Next steps:')
-    console.log('1. Edit project.json and environments/dev.env.json')
-    console.log('2. Add your first test in suites/sample.test.json')
-    console.log('3. Run tests with: playson run --env dev')
+    if (projectName !== '.') {
+      console.log(`1. cd ${projectName}`)
+      console.log('2. npm install')
+      console.log('3. playson sync-project-schemas')
+    } else {
+      console.log('1. npm install')
+      console.log('2. playson sync-project-schemas')
+    }
+    console.log(`${projectName !== '.' ? '4' : '3'}. Edit project.json and environments/dev.env.json`)
+    console.log(`${projectName !== '.' ? '5' : '4'}. Add your first test in suites/sample.test.json`)
+    console.log(`${projectName !== '.' ? '6' : '5'}. Run tests with: playson run --env dev`)
   })

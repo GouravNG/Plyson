@@ -1,5 +1,5 @@
 {
-  "$schema": "../../node_modules/playson/schemas/testsuite.schema.json",
+  "$schema": "../../Project-schema/testsuite.schema.json",
   "title": "User Controller - Delete",
   "description": "Tests for soft-deleting own account (/user) via DELETE",
   "tags": ["automated", "user", "profile", "delete", "regression"],
