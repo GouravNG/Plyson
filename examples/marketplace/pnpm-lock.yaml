@@ -5,14 +5,14 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  playson: link:C:/Users/goura/AppData/Local/pnpm/global/5/node_modules/playson
+  plyson: link:C:/Users/goura/AppData/Local/pnpm/global/5/node_modules/plyson
 
 importers:
   .:
     dependencies:
-      playson:
-        specifier: link:C:/Users/goura/AppData/Local/pnpm/global/5/node_modules/playson
-        version: link:C:/Users/goura/AppData/Local/pnpm/global/5/node_modules/playson
+      plyson:
+        specifier: link:C:/Users/goura/AppData/Local/pnpm/global/5/node_modules/plyson
+        version: link:C:/Users/goura/AppData/Local/pnpm/global/5/node_modules/plyson
     devDependencies:
       '@playwright/test':
         specifier: ^1.59.1

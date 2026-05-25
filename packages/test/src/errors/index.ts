@@ -1,4 +1,4 @@
-export abstract class PlaysonError extends Error {
+export abstract class plysonError extends Error {
   abstract readonly code: string
   constructor(message: string) {
     super(message)
@@ -6,7 +6,7 @@ export abstract class PlaysonError extends Error {
   }
 }
 
-export class LoadError extends PlaysonError {
+export class LoadError extends plysonError {
   readonly code = 'LOAD_ERROR'
   constructor(
     message: string,
@@ -24,7 +24,7 @@ export class AggregateLoadError extends Error {
   }
 }
 
-export class ResolutionError extends PlaysonError {
+export class ResolutionError extends plysonError {
   readonly code = 'RESOLUTION_ERROR'
   constructor(
     public token: string,
@@ -34,7 +34,7 @@ export class ResolutionError extends PlaysonError {
   }
 }
 
-export class AssertionError extends PlaysonError {
+export class AssertionError extends plysonError {
   readonly code = 'ASSERTION_ERROR'
   constructor(
     public assertionTitle: string,
@@ -44,14 +44,14 @@ export class AssertionError extends PlaysonError {
   }
 }
 
-export class ExtractionError extends PlaysonError {
+export class ExtractionError extends plysonError {
   readonly code = 'EXTRACTION_ERROR'
   constructor(message: string) {
     super(message)
   }
 }
 
-export class SchemaValidationError extends PlaysonError {
+export class SchemaValidationError extends plysonError {
   readonly code = 'SCHEMA_VALIDATION_ERROR'
   constructor(
     public schemaName: string,

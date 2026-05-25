@@ -1,4 +1,4 @@
-# playson — Technical Implementation
+# plyson — Technical Implementation
 
 This document covers implementation-level detail for every component in the framework. It is intended for developers building or contributing to the internals. Familiarity with the architecture overview is assumed.
 
@@ -430,7 +430,7 @@ function resolvePhase2(request: Req, store: VariableStore, stepTitle: string): R
 
 ## 4. Faker JSON Schema System
 
-Instead of manual generator classes, playson uses a declarative system that delegates directly to `@faker-js/faker`. This allows the use of any faker method via a simple JSON directive.
+Instead of manual generator classes, plyson uses a declarative system that delegates directly to `@faker-js/faker`. This allows the use of any faker method via a simple JSON directive.
 
 ### Method Resolution
 
@@ -1099,7 +1099,7 @@ export async function safeParseJson(response: APIResponse): Promise<unknown> {
 ## 12. Error taxonomy
 
 ```typescript
-abstract class PlaysonError extends Error {
+abstract class plysonError extends Error {
   abstract readonly code: string
   constructor(message: string) {
     super(message)
@@ -1114,7 +1114,7 @@ class AggregateLoadError extends Error {
   }
 }
 
-class LoadError extends PlaysonError {
+class LoadError extends plysonError {
   readonly code = 'LOAD_ERROR'
   constructor(
     message: string,
@@ -1124,7 +1124,7 @@ class LoadError extends PlaysonError {
   }
 }
 
-class ResolutionError extends PlaysonError {
+class ResolutionError extends plysonError {
   readonly code = 'RESOLUTION_ERROR'
   constructor(
     public token: string,
@@ -1134,7 +1134,7 @@ class ResolutionError extends PlaysonError {
   }
 }
 
-class GeneratorOptionError extends PlaysonError {
+class GeneratorOptionError extends plysonError {
   readonly code = 'GENERATOR_OPTION_ERROR'
   constructor(
     public generator: string,
@@ -1144,14 +1144,14 @@ class GeneratorOptionError extends PlaysonError {
   }
 }
 
-class UnknownGeneratorError extends PlaysonError {
+class UnknownGeneratorError extends plysonError {
   readonly code = 'UNKNOWN_GENERATOR'
   constructor(public name: string) {
     super(`Unknown generator "$gen: ${name}" — see the generator reference table`)
   }
 }
 
-class AssertionError extends PlaysonError {
+class AssertionError extends plysonError {
   readonly code = 'ASSERTION_ERROR'
   constructor(
     public assertionTitle: string,
@@ -1161,14 +1161,14 @@ class AssertionError extends PlaysonError {
   }
 }
 
-class ExtractionError extends PlaysonError {
+class ExtractionError extends plysonError {
   readonly code = 'EXTRACTION_ERROR'
   constructor(message: string) {
     super(message)
   }
 }
 
-class SchemaValidationError extends PlaysonError {
+class SchemaValidationError extends plysonError {
   readonly code = 'SCHEMA_VALIDATION_ERROR'
   constructor(
     public schemaName: string,

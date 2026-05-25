@@ -15,32 +15,32 @@ describe('ConsoleLogger', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
-    delete process.env.PLAYSON_LOG_LEVEL
+    delete process.env.plyson_LOG_LEVEL
   })
 
   it('logs info when level is info', () => {
-    process.env.PLAYSON_LOG_LEVEL = 'info'
+    process.env.plyson_LOG_LEVEL = 'info'
     const logger = new ConsoleLogger('test-id')
     logger.info('hello')
     expect(logSpy).toHaveBeenCalledWith(`${pc.cyan('INFO')}  [test-id] -> hello`)
   })
 
   it('does not log info when level is warn', () => {
-    process.env.PLAYSON_LOG_LEVEL = 'warn'
+    process.env.plyson_LOG_LEVEL = 'warn'
     const logger = new ConsoleLogger('test-id')
     logger.info('hello')
     expect(logSpy).not.toHaveBeenCalled()
   })
 
   it('logs warn when level is warn', () => {
-    process.env.PLAYSON_LOG_LEVEL = 'warn'
+    process.env.plyson_LOG_LEVEL = 'warn'
     const logger = new ConsoleLogger('test-id')
     logger.warn('Title', 'message')
     expect(warnSpy).toHaveBeenCalledWith(`${pc.yellow('WARN')}  [test-id] -> Title: message`)
   })
 
   it('logs error when level is error', () => {
-    process.env.PLAYSON_LOG_LEVEL = 'error'
+    process.env.plyson_LOG_LEVEL = 'error'
     const logger = new ConsoleLogger('test-id')
     logger.error('error message')
     expect(errorSpy).toHaveBeenCalledWith(`${pc.red('ERROR')} [test-id] -> error message`)

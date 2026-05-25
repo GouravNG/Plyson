@@ -1,16 +1,16 @@
 {
-  "name": "@playson/example-marketplace",
+  "name": "@plyson/example-marketplace",
   "version": "1.0.0",
   "type": "module",
   "private": true,
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "playson run"
+    "test": "plyson run"
   },
   "dependencies": {
-    "@playson/cli": "workspace:*",
-    "@playson/test": "workspace:*"
+    "@plyson/cli": "workspace:*",
+    "@plyson/test": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0"

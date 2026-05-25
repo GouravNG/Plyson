@@ -12,7 +12,7 @@
         "payload": {
           "email": {
             "$gen": "email",
-            "provider": "playson.com"
+            "provider": "plyson.com"
           },
           "password": "Password@123",
           "firstname": {

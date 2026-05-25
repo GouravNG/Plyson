@@ -4,7 +4,7 @@ import fs from 'fs'
 import path from 'path'
 
 export const runCommand = new Command('run')
-  .description('Run playson tests via Playwright')
+  .description('Run plyson tests via Playwright')
   .argument('[paths...]', 'Specific test paths to run')
   .option('-e, --env <name>', 'Environment to use')
   .allowUnknownOption()
@@ -34,8 +34,8 @@ export const runCommand = new Command('run')
 
     const envVars = {
       ...process.env,
-      PLAYSON_ROOT: rootDir,
-      PLAYSON_ENV: env,
+      plyson_ROOT: rootDir,
+      plyson_ENV: env,
     }
 
     // Prepare playwright arguments
@@ -55,7 +55,7 @@ export const runCommand = new Command('run')
       playwrightArgs.push(arg)
     }
 
-    console.log(`Running playson tests in "${env}" environment...`)
+    console.log(`Running plyson tests in "${env}" environment...`)
 
     const child = spawn('npx', ['playwright', ...playwrightArgs], {
       stdio: 'inherit',

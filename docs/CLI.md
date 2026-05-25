@@ -1,6 +1,6 @@
-# playson CLI Design
+# plyson CLI Design
 
-This document outlines the command-line interface (CLI) for the `playson` API testing framework, designed as a specialized extension of the Playwright CLI.
+This document outlines the command-line interface (CLI) for the `plyson` API testing framework, designed as a specialized extension of the Playwright CLI.
 
 ---
 
@@ -8,26 +8,26 @@ This document outlines the command-line interface (CLI) for the `playson` API te
 
 ### 1. Native Playwright Pass-through
 
-The `playson` command acts as a wrapper for `npx playwright`. Even as an API-first framework, it leverages Playwright's powerful debugging and reporting tools.
+The `plyson` command acts as a wrapper for `npx playwright`. Even as an API-first framework, it leverages Playwright's powerful debugging and reporting tools.
 
 - **UI Mode (`--ui`)**: Fully supported. Highly recommended for API testing as it provides a visual trace of every request, including headers, payloads, and response bodies.
 - **Trace Viewer**: Supported. Allows post-mortem inspection of API failures.
 - **Reporting**: Commands like `show-report` are passed through to the underlying Playwright installation.
 - **Standard Commands**: `codegen`, `test --debug`, etc., work exactly as they do in native Playwright.
-- **Logic**: Custom `playson` environment/variable injection remains active even in UI mode.
+- **Logic**: Custom `plyson` environment/variable injection remains active even in UI mode.
 
 ---
 
-## 2. Custom playson Commands
+## 2. Custom plyson Commands
 
 ### `run` (Specialized `playwright test`)
 
-The primary entry point for executing `playson` JSON-based test suites.
+The primary entry point for executing `plyson` JSON-based test suites.
 
 **Usage:**
 
 ```bash
-playson run [options] [paths...]
+plyson run [options] [paths...]
 ```
 
 **Environment Handling:**
@@ -49,7 +49,7 @@ Synchronizes local `schemas/` with the remote OpenAPI/Swagger specification.
 **Usage:**
 
 ```bash
-playson sync-schemas [options]
+plyson sync-schemas [options]
 ```
 
 **Workflow:**
@@ -78,7 +78,7 @@ Scaffolds new project resources quickly, inspired by the NestJS CLI.
 **Usage:**
 
 ```bash
-playson g <resource> <name> [options]
+plyson g <resource> <name> [options]
 ```
 
 **Sub-commands:**
@@ -101,7 +101,7 @@ Performs static analysis on the project to catch errors before execution.
 **Usage:**
 
 ```bash
-playson validate [path] [options]
+plyson validate [path] [options]
 ```
 
 **Features:**
@@ -114,20 +114,20 @@ playson validate [path] [options]
 
 ### `init`
 
-Scaffolds a new `playson` project directory structure.
+Scaffolds a new `plyson` project directory structure.
 
 **Usage:**
 
 ```bash
-playson init [project-name]
+plyson init [project-name]
 ```
 
 ---
 
 ## Execution Flow Example
 
-`playson run --env dev --grep "User Auth"`
+`plyson run --env dev --grep "User Auth"`
 
 1. CLI validates `dev.env.json` exists.
 2. CLI prepares environment variables and variable store.
-3. CLI invokes `playwright test` with internal configuration that points to the `playson` runner and discovery logic.
+3. CLI invokes `playwright test` with internal configuration that points to the `plyson` runner and discovery logic.

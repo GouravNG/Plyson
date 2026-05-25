@@ -1,4 +1,4 @@
-# playson
+# plyson
 
 A declarative, JSON-driven API testing framework built on top of [Playwright](https://playwright.dev/).
 
@@ -16,7 +16,7 @@ A declarative, JSON-driven API testing framework built on top of [Playwright](ht
 ## Installation
 
 ```bash
-npm install playson
+npm install plyson
 ```
 
 ## Quick Start
@@ -24,12 +24,12 @@ npm install playson
 1. Initialize a new project:
 
    ```bash
-   npx playson init my-tests
+   npx plyson init my-tests
    ```
 
 2. Run your tests:
    ```bash
-   npx playson run my-tests/suites/sample.test.json
+   npx plyson run my-tests/suites/sample.test.json
    ```
 
 ## Documentation

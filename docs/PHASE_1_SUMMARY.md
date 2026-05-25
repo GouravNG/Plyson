@@ -3,7 +3,7 @@
 **Date:** Monday, 11 May 2026
 **Status:** Completed ✅
 
-Phase 1 focused on setting up the foundational infrastructure for the `playson` framework, including the project configuration, directory structure, core type system, and runtime validation schemas.
+Phase 1 focused on setting up the foundational infrastructure for the `plyson` framework, including the project configuration, directory structure, core type system, and runtime validation schemas.
 
 ---
 
@@ -50,7 +50,7 @@ Implemented Zod schemas for all core types to ensure runtime data integrity:
 
 Created a robust error handling system with specific error classes:
 
-- `PlaysonError` (Abstract base)
+- `plysonError` (Abstract base)
 - `LoadError` & `AggregateLoadError` (For project loading phase)
 - `ResolutionError` (For variable interpolation)
 - `GeneratorOptionError` & `UnknownGeneratorError` (For data generation)

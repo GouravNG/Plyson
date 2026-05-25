@@ -7,7 +7,7 @@ This document tracks planned improvements to the TypeScript configuration and ty
 Upgrade the root configuration to use modern ESM-first flags and stricter checks.
 
 ### Proposed Changes
-Update `playson/tsconfig.json` with the following flags:
+Update `plyson/tsconfig.json` with the following flags:
 
 | Flag | Purpose | Benefit |
 | :--- | :--- | :--- |
@@ -36,6 +36,6 @@ Update `playson/tsconfig.json` with the following flags:
 ```
 
 ## 2. Validation Steps
-- [ ] Run `pnpm build` (turbo) to ensure no regressions in `@playson/cli` or `@playson/test`.
+- [ ] Run `pnpm build` (turbo) to ensure no regressions in `@plyson/cli` or `@plyson/test`.
 - [ ] Verify `import type` usage in all packages (required by `verbatimModuleSyntax`).
 - [ ] Fix potential "possibly undefined" errors triggered by `noUncheckedIndexedAccess`.

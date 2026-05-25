@@ -1,7 +1,7 @@
 {
-  "$schema": "./node_modules/@playson/test/src/schemas/project.schema.json",
+  "$schema": "./node_modules/@plyson/test/src/schemas/project.schema.json",
   "title": "Marketplace API Validation",
-  "description": "API testing project created with playson",
+  "description": "API testing project created with plyson",
   "version": "1.0.0",
   "defaultEnv": "local",
   "beforeAll": [

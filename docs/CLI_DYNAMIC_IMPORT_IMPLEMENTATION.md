@@ -8,10 +8,10 @@
 
 ## Overview
 
-The Playson CLI has been refactored to **dynamically load** `@playson/test` from the consuming project's node_modules instead of maintaining it as a hard dependency. This ensures that:
+The plyson CLI has been refactored to **dynamically load** `@plyson/test` from the consuming project's node_modules instead of maintaining it as a hard dependency. This ensures that:
 
-1. **Version Safety**: CLI always uses the version of `@playson/test` installed in the user's project
-2. **No Stale Data**: When users upgrade `@playson/test`, schemas are generated from the current version
+1. **Version Safety**: CLI always uses the version of `@plyson/test` installed in the user's project
+2. **No Stale Data**: When users upgrade `@plyson/test`, schemas are generated from the current version
 3. **Lightweight CLI**: Reduces CLI package size by removing unnecessary dependencies
 4. **Project-Centric**: Schemas are exported to the project root (`Project-schema/`) where users can easily access them
 
@@ -22,15 +22,15 @@ The Playson CLI has been refactored to **dynamically load** `@playson/test` from
 ### Before (Static Dependency Model)
 ```
 CLI package.json
-  └─ @playson/test (workspace:*)
+  └─ @plyson/test (workspace:*)
        └─ CLI imports from CLI's own node_modules
-       └─ Risk: Stale schemas if user upgrades @playson/test
+       └─ Risk: Stale schemas if user upgrades @plyson/test
 ```
 
 ### After (Dynamic Import Model)
 ```
 CLI
-  └─ Detects @playson/test in user's project
+  └─ Detects @plyson/test in user's project
   └─ Dynamically imports from user's node_modules
   └─ Always uses installed version ✓
 ```
@@ -46,7 +46,7 @@ CLI
 ```json
 // BEFORE
 "dependencies": {
-  "@playson/test": "workspace:*",
+  "@plyson/test": "workspace:*",
   "commander": "^14.0.3",
   ...
 }
@@ -80,17 +80,17 @@ export interface TestPackageType {
 
 export async function loadTestPackage(): Promise<TestPackageType> {
   try {
-    const testPackage = await import('@playson/test')
+    const testPackage = await import('@plyson/test')
     return testPackage as unknown as TestPackageType
   } catch (error) {
     const errorMessage =
       error instanceof Error && error.message.includes('MODULE_NOT_FOUND')
-        ? `@playson/test is not installed in this project.`
-        : `Failed to load @playson/test: ...`
+        ? `@plyson/test is not installed in this project.`
+        : `Failed to load @plyson/test: ...`
 
     console.error(`\n❌ Error: ${errorMessage}`)
     console.error(
-      '\nTo fix this, install @playson/test in your project:\n  npm install @playson/test',
+      '\nTo fix this, install @plyson/test in your project:\n  npm install @plyson/test',
     )
     process.exit(1)
   }
@@ -104,7 +104,7 @@ export async function loadTestPackage(): Promise<TestPackageType> {
 - Type-safe interface for exported modules
 
 **Key Features**:
-- Uses `import('@playson/test')` to resolve from user's project
+- Uses `import('@plyson/test')` to resolve from user's project
 - Catches MODULE_NOT_FOUND errors gracefully
 - Provides helpful error message if package missing
 - Returns typed interface for IDE autocomplete
@@ -119,7 +119,7 @@ export async function loadTestPackage(): Promise<TestPackageType> {
 - Removed static imports of Zod schemas
 - Uses `loadTestPackage()` for dynamic loading
 - **Output directory changed**: `packages/test/src/schemas/` → `Project-schema/` (project root)
-- Respects `PLAYSON_ROOT` env var or uses `process.cwd()`
+- Respects `plyson_ROOT` env var or uses `process.cwd()`
 
 #### Before:
 ```typescript
@@ -129,7 +129,7 @@ import {
   TestcaseSchema,
   EnvironmentVariablesSchema,
   VariablesSchema,
-} from '@playson/test'
+} from '@plyson/test'
 
 export const syncProjectSchemasCommand = new Command('sync-project-schemas')
   .action(() => {
@@ -147,7 +147,7 @@ export const syncProjectSchemasCommand = new Command('sync-project-schemas')
   .action(async () => {
     const testPkg = await loadTestPackage()
     
-    const projectRoot = process.env.PLAYSON_ROOT || process.cwd()
+    const projectRoot = process.env.plyson_ROOT || process.cwd()
     const schemaDir = path.join(projectRoot, 'Project-schema')
     
     // ... generates to Project-schema/ in project root
@@ -180,7 +180,7 @@ export const syncProjectSchemasCommand = new Command('sync-project-schemas')
 
 #### Before:
 ```typescript
-import { AggregateLoadError, LoadError, ProjectLoader } from '@playson/test'
+import { AggregateLoadError, LoadError, ProjectLoader } from '@plyson/test'
 
 export const validateCommand = new Command('validate')
   .action(async (targetPath, options) => {
@@ -210,11 +210,11 @@ export const validateCommand = new Command('validate')
 **File**: `packages/cli/src/init.ts`
 
 #### Note:
-The `init` command generates template files with hardcoded `@playson/test` imports in:
-- `suites/playson.spec.ts` - Uses `import { bootstrap } from '@playson/test'`
+The `init` command generates template files with hardcoded `@plyson/test` imports in:
+- `suites/plyson.spec.ts` - Uses `import { bootstrap } from '@plyson/test'`
 - Generated JSON schemas reference node_modules paths
 
-This is intentional - users' generated code should still import from `@playson/test` as a normal dependency.
+This is intentional - users' generated code should still import from `@plyson/test` as a normal dependency.
 
 ---
 
@@ -223,14 +223,14 @@ This is intentional - users' generated code should still import from `@playson/t
 ### Command Execution Flow
 
 ```
-User: playson sync-project-schemas
+User: plyson sync-project-schemas
        │
-       ├─ CLI Entry Point (bin/playson.js)
+       ├─ CLI Entry Point (bin/plyson.js)
        │
        ├─ Command Handler (sync-project-schemas.ts)
        │
        ├─ Call loadTestPackage()
-       │  ├─ Try import('@playson/test')
+       │  ├─ Try import('@plyson/test')
        │  ├─ Resolve from user's node_modules ✓
        │  └─ Return TestPackageType
        │
@@ -257,19 +257,19 @@ User: playson sync-project-schemas
 
 ## Error Handling
 
-### Missing @playson/test
+### Missing @plyson/test
 
-**Scenario**: User tries to run CLI command but `@playson/test` not installed
+**Scenario**: User tries to run CLI command but `@plyson/test` not installed
 
 **Error Message**:
 ```
-❌ Error: @playson/test is not installed in this project.
+❌ Error: @plyson/test is not installed in this project.
 
-To fix this, install @playson/test in your project:
-  npm install @playson/test
+To fix this, install @plyson/test in your project:
+  npm install @plyson/test
 
 Or if using pnpm:
-  pnpm install @playson/test
+  pnpm install @plyson/test
 ```
 
 **Exit Code**: 1
@@ -280,13 +280,13 @@ Or if using pnpm:
 
 **Error Message**:
 ```
-❌ Error: Failed to load @playson/test: [detailed error message]
+❌ Error: Failed to load @plyson/test: [detailed error message]
 
-To fix this, install @playson/test in your project:
-  npm install @playson/test
+To fix this, install @plyson/test in your project:
+  npm install @plyson/test
 
 Or if using pnpm:
-  pnpm install @playson/test
+  pnpm install @plyson/test
 ```
 
 ---
@@ -297,10 +297,10 @@ Or if using pnpm:
 
 ```bash
 cd my-project
-npm install @playson/test
+npm install @plyson/test
 
 # Generate schemas to Project-schema/ directory
-playson sync-project-schemas
+plyson sync-project-schemas
 
 # Output:
 # 🔄 Syncing core schemas to /path/to/my-project/Project-schema...
@@ -315,22 +315,22 @@ playson sync-project-schemas
 ### Validate Project with Dynamic Load
 
 ```bash
-playson validate --env dev
+plyson validate --env dev
 
-# Dynamically loads @playson/test from project
+# Dynamically loads @plyson/test from project
 # Uses ProjectLoader from loaded package
 ```
 
 ### Re-generate After Upgrade
 
 ```bash
-# User upgrades @playson/test
-npm install @playson/test@2.0.0
+# User upgrades @plyson/test
+npm install @plyson/test@2.0.0
 
 # Re-run command - gets latest schemas
-playson sync-project-schemas
+plyson sync-project-schemas
 
-# Schemas now match @playson/test@2.0.0 ✓
+# Schemas now match @plyson/test@2.0.0 ✓
 ```
 
 ---
@@ -339,26 +339,26 @@ playson sync-project-schemas
 
 The CLI determines the project root in this order:
 
-1. **`PLAYSON_ROOT` environment variable** (if set)
+1. **`plyson_ROOT` environment variable** (if set)
    ```bash
-   PLAYSON_ROOT=/path/to/project playson sync-project-schemas
+   plyson_ROOT=/path/to/project plyson sync-project-schemas
    ```
 
 2. **Current working directory** (default)
    ```bash
    cd /path/to/project
-   playson sync-project-schemas
+   plyson sync-project-schemas
    ```
 
 **Example**:
 ```bash
 # Scenario 1: From project directory
 cd ~/my-project
-playson sync-project-schemas
+plyson sync-project-schemas
 → Creates ~/my-project/Project-schema/
 
 # Scenario 2: From different directory with env var
-PLAYSON_ROOT=~/my-project playson sync-project-schemas
+plyson_ROOT=~/my-project plyson sync-project-schemas
 → Creates ~/my-project/Project-schema/
 ```
 
@@ -366,7 +366,7 @@ PLAYSON_ROOT=~/my-project playson sync-project-schemas
 
 ## Output Structure
 
-After running `playson sync-project-schemas`:
+After running `plyson sync-project-schemas`:
 
 ```
 my-project/
@@ -404,7 +404,7 @@ Projects can now use local Project-schema/ instead of node_modules paths:
 Instead of:
 ```json
 {
-  "$schema": "./node_modules/@playson/test/schemas/project.schema.json",
+  "$schema": "./node_modules/@plyson/test/schemas/project.schema.json",
   "title": "My Project"
 }
 ```
@@ -413,7 +413,7 @@ Instead of:
 
 ## Version Compatibility
 
-| CLI Version | @playson/test Required | Notes |
+| CLI Version | @plyson/test Required | Notes |
 |---|---|---|
 | 0.1.4+ | Any version | Dynamic loading - uses installed version |
 | 0.1.3 | Via dependency | Static import from CLI dependency |
@@ -424,16 +424,16 @@ Instead of:
 
 ### For Existing Projects
 
-1. **Update CLI**: `npm install @playson/cli@latest`
-2. **Verify @playson/test is installed**: `npm install @playson/test`
-3. **Run sync-project-schemas**: `playson sync-project-schemas`
+1. **Update CLI**: `npm install @plyson/cli@latest`
+2. **Verify @plyson/test is installed**: `npm install @plyson/test`
+3. **Run sync-project-schemas**: `plyson sync-project-schemas`
 4. **Optional: Update $schema paths** in JSON files to use `Project-schema/`
 
 ### For New Projects
 
-1. **Initialize**: `playson init my-project`
+1. **Initialize**: `plyson init my-project`
 2. **Install packages**: `cd my-project && npm install`
-3. **Sync schemas**: `playson sync-project-schemas`
+3. **Sync schemas**: `plyson sync-project-schemas`
 4. **Update $schema paths** in generated JSON files (optional, for local references)
 
 ---
@@ -441,7 +441,7 @@ Instead of:
 ## Benefits
 
 ### For Users
-- ✅ Always get latest schemas when upgrading @playson/test
+- ✅ Always get latest schemas when upgrading @plyson/test
 - ✅ Schemas available locally in Project-schema/ directory
 - ✅ No stale data issues
 - ✅ Clear error messages if package missing
@@ -449,7 +449,7 @@ Instead of:
 ### For Developers
 - ✅ Cleaner CLI dependencies
 - ✅ Smaller CLI package size
-- ✅ Single source of truth (@playson/test installed version)
+- ✅ Single source of truth (@plyson/test installed version)
 - ✅ Easier to test version compatibility
 - ✅ Reduced maintenance burden
 
@@ -484,11 +484,11 @@ Tests cover:
 
 ## Future Considerations
 
-1. **Auto-run during init**: Could automatically run `sync-project-schemas` after `playson init`
+1. **Auto-run during init**: Could automatically run `sync-project-schemas` after `plyson init`
 2. **Conditional $schema paths**: Could auto-update JSON files to use Project-schema/ paths
-3. **Watch mode**: Could regenerate schemas when @playson/test changes
-4. **Schema versioning**: Could track which @playson/test version generated schemas
-5. **Peer dependency option**: Could make @playson/test a peerDependency instead
+3. **Watch mode**: Could regenerate schemas when @plyson/test changes
+4. **Schema versioning**: Could track which @plyson/test version generated schemas
+5. **Peer dependency option**: Could make @plyson/test a peerDependency instead
 
 ---
 
@@ -498,10 +498,10 @@ Tests cover:
 - `packages/cli/src/utils/load-test-package.ts` - Dynamic import helper (35 lines)
 
 ### Modified Files
-- `packages/cli/package.json` - Removed @playson/test from dependencies (1 line change)
+- `packages/cli/package.json` - Removed @plyson/test from dependencies (1 line change)
 - `packages/cli/src/sync-project-schemas.ts` - Dynamic import + output location (60 lines, ~30% refactored)
 - `packages/cli/src/validate.ts` - Dynamic import of ProjectLoader (10 lines changed)
-- `packages/cli/src/init.ts` - No changes required (already imports @playson/test correctly)
+- `packages/cli/src/init.ts` - No changes required (already imports @plyson/test correctly)
 
 ### Lines of Code
 - **New**: ~35 lines (load-test-package helper)
@@ -513,4 +513,4 @@ Tests cover:
 
 ## Conclusion
 
-This implementation achieves the goal of making the CLI independent of a hardcoded `@playson/test` dependency while ensuring schemas are always current and accessible to users. The dynamic import pattern is clean, maintainable, and provides clear error handling.
+This implementation achieves the goal of making the CLI independent of a hardcoded `@plyson/test` dependency while ensuring schemas are always current and accessible to users. The dynamic import pattern is clean, maintainable, and provides clear error handling.

@@ -1,6 +1,6 @@
 # Data Generation & Variable Interpolation
 
-`playson` provides a powerful dual-system for handling dynamic data: **Variable Interpolation** for reusing values and **Dynamic Generators** (backed by Faker.js) for creating fresh data on the fly.
+`plyson` provides a powerful dual-system for handling dynamic data: **Variable Interpolation** for reusing values and **Dynamic Generators** (backed by Faker.js) for creating fresh data on the fly.
 
 ---
 
