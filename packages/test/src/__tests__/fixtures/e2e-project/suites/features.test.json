@@ -98,7 +98,7 @@
                   "from": "header",
                   "path": "X-Custom-Header",
                   "operator": "equals",
-                  "value": "playson-rocks"
+                  "value": "plyson-rocks"
                 }
               ]
             },
@@ -231,7 +231,7 @@
                   "from": "body",
                   "path": "$.app",
                   "operator": "equals",
-                  "value": "playson-e2e"
+                  "value": "plyson-e2e"
                 }
               ]
             }

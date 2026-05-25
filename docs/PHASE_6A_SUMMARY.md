@@ -67,4 +67,4 @@ npm test
 ## Next Steps (Phase 7)
 
 - Implement the CLI commands (`run`, `validate`, `generate`, etc.) using `commander`.
-- Wire `playson run` to trigger the Playwright execution.
+- Wire `plyson run` to trigger the Playwright execution.

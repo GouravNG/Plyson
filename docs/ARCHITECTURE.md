@@ -1,6 +1,6 @@
-# playson Architecture
+# plyson Architecture
 
-`playson` is a declarative API testing framework built on top of Playwright. Test authors write JSON — the framework handles discovery, resolution, execution, assertion, and reporting.
+`plyson` is a declarative API testing framework built on top of Playwright. Test authors write JSON — the framework handles discovery, resolution, execution, assertion, and reporting.
 
 ---
 
@@ -11,7 +11,7 @@ JSON definitions
       │
       ▼
 ┌─────────────────┐
-│   CLI (playson) │  ← parses flags, selects env, boots runner
+│   CLI (plyson) │  ← parses flags, selects env, boots runner
 └────────┬────────┘
          │
          ▼
@@ -58,7 +58,7 @@ Entry point for all user interaction. Responsibilities:
 - Parses flags (`--env`, `--grep`, `--workers`, etc.)
 - Validates that a matching `*.env.json` exists for the selected environment
 - Passes native Playwright flags through unchanged to `playwright test`
-- Injects `playson`-specific config (env variables, project root) into the Playwright context before test discovery begins
+- Injects `plyson`-specific config (env variables, project root) into the Playwright context before test discovery begins
 
 The CLI does not execute tests directly — it boots the runner and hands off control to Playwright.
 
@@ -247,7 +247,7 @@ A handler that throws fails the step. Multiple handlers run in series — if one
 ## Execution lifecycle
 
 ```
-playson run --env staging
+plyson run --env staging
       │
       ├─ CLI validates env, boots runner
       │

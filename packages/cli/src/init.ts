@@ -8,7 +8,7 @@ export const initCommand = new Command('init')
   .argument('[project-name]', 'Name of the project', '.')
   .action((projectName) => {
     const rootDir = path.resolve(projectName)
-    console.log(`Initializing playson project in ${rootDir}...`)
+    console.log(`Initializing plyson project in ${rootDir}...`)
 
     const dirs = ['environments', 'schemas', 'handlers', 'scripts', 'suites']
 
@@ -46,10 +46,10 @@ export const initCommand = new Command('init')
     if (projectName !== '.') {
       console.log(`1. cd ${projectName}`)
       console.log('2. npm install')
-      console.log('3. playson sync-project-schemas')
+      console.log('3. plyson sync-project-schemas')
     } else {
       console.log('1. npm install')
-      console.log('2. playson sync-project-schemas')
+      console.log('2. plyson sync-project-schemas')
     }
     console.log(
       `${projectName !== '.' ? '4' : '3'}. Edit project.json and environments/dev.env.json`,
@@ -57,5 +57,5 @@ export const initCommand = new Command('init')
     console.log(
       `${projectName !== '.' ? '5' : '4'}. Add your first test in suites/sample.test.json`,
     )
-    console.log(`${projectName !== '.' ? '6' : '5'}. Run tests with: playson run --env dev`)
+    console.log(`${projectName !== '.' ? '6' : '5'}. Run tests with: plyson run --env dev`)
   })

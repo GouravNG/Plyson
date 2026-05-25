@@ -10,7 +10,7 @@ export const syncProjectSchemasCommand = new Command('sync-project-schemas')
     const testPkg = await loadTestPackage()
 
     // Resolve project root from environment variable or current working directory
-    const projectRoot = process.env.PLAYSON_ROOT || process.cwd()
+    const projectRoot = process.env.plyson_ROOT || process.cwd()
     const schemaDir = path.join(projectRoot, 'Project-schema')
 
     // Create Project-schema directory

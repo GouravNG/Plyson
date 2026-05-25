@@ -6,12 +6,12 @@ my-api-tests/
   data/                           # External test data (future scope)
   environments/                   # Environment config files
   handlers/                       # Custom validation / extraction handlers
-  schemas/                        # API schemas (managed by playson sync-schemas)
+  schemas/                        # API schemas (managed by plyson sync-schemas)
   scripts/                        # Reusable standalone test cases
   suites/                         # Test suites
   project.json                    # Project root config
   variables.json                  # Global variables
-  playwright.config.ts            # Playwright config — extends playson base
+  playwright.config.ts            # Playwright config — extends plyson base
   package.json
 ```
 
@@ -63,13 +63,13 @@ Maps to the `Variables` type.
 
 **Exact filename. Required. One per project.**
 
-Extends the base config provided by the playson library. Users only override
+Extends the base config provided by the plyson library. Users only override
 what they need — workers, reporter, etc. The `testMatch` and `globalSetup`
 are handled by the base config and should not be changed.
 
 ```ts
 import { defineConfig } from '@playwright/test'
-import base from 'playson/playwright.config.base'
+import base from 'plyson/playwright.config.base'
 
 export default defineConfig({
   ...base,
@@ -88,7 +88,7 @@ export default defineConfig({
 One file per environment. Selected at runtime via the `--env` flag:
 
 ```bash
-playson run --env staging
+plyson run --env staging
 ```
 
 The filename stem (e.g. `staging` from `staging.env.json`) is the environment
@@ -108,7 +108,7 @@ name passed to `--env`.
 Maps to the `EnvironmentVariables` type.
 
 - `baseUrl` — required. The base URL prepended to all request endpoints.
-- `specUrl` — optional. OpenAPI/Swagger spec URL used by `playson sync-schemas`.
+- `specUrl` — optional. OpenAPI/Swagger spec URL used by `plyson sync-schemas`.
 - `variables` — optional. Environment-specific variables that override global `variables.json`.
 
 ---
@@ -136,17 +136,17 @@ The above references `schemas/user.schema.json`.
 
 ```bash
 # Download all schemas from the active environment's specUrl
-playson sync-schemas --env dev
+plyson sync-schemas --env dev
 
 # Detect and remove stale schema files no longer present in the spec
-playson sync-schemas --env dev --prune
+plyson sync-schemas --env dev --prune
 ```
 
 `--prune` compares local `*.schema.json` files against the fetched spec and
 removes any that no longer exist. Without `--prune`, stale files are reported
 as warnings but not deleted.
 
-Re-run `playson sync-schemas` whenever the API spec changes.
+Re-run `plyson sync-schemas` whenever the API spec changes.
 
 > **Note:** You can choose to commit `schemas/` to version control (recommended
 > for stability) or add it to `.gitignore` and treat it as a build artifact.
@@ -171,7 +171,7 @@ A handler file receives the full response context and the current variable store
 
 ```ts
 // assert-pagination.handler.ts
-import type { HandlerContext } from '@playson/test'
+import type { HandlerContext } from '@plyson/test'
 
 export async function run({ response, body, status, store }: HandlerContext) {
   const { total, page, limit, items } = body

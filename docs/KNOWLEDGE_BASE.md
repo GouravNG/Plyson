@@ -1,12 +1,12 @@
-# Playson Knowledge Base
+# plyson Knowledge Base
 
-This document provides a comprehensive overview of the `playson` testing framework, combining architectural conventions with technical type definitions.
+This document provides a comprehensive overview of the `plyson` testing framework, combining architectural conventions with technical type definitions.
 
 ---
 
 ## 1. Project Architecture & Structure
 
-A `playson` project follows a strict directory structure to enable auto-discovery and consistent test execution.
+A `plyson` project follows a strict directory structure to enable auto-discovery and consistent test execution.
 
 ```
 my-api-tests/
@@ -43,7 +43,7 @@ Defines global variables available across the entire project.
 
 ### `playwright.config.ts`
 
-Extends `playson/playwright.config.base`. Users should only override specific Playwright settings like `workers` or `reporter`.
+Extends `plyson/playwright.config.base`. Users should only override specific Playwright settings like `workers` or `reporter`.
 
 ---
 
@@ -63,7 +63,7 @@ Selected via `--env <name>` flag (e.g., `--env dev` loads `dev.env.json`).
 ## 4. Schemas & Auto-fill (`schemas/`)
 
 **Convention**: `schemas/*.schema.json`
-Managed by `playson sync-schemas`. Used for response validation and request payload auto-filling.
+Managed by `plyson sync-schemas`. Used for response validation and request payload auto-filling.
 
 ### Auto-fill Logic
 

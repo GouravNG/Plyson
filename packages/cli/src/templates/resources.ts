@@ -2,7 +2,7 @@
  * Templates for handlers, scripts, and suites
  */
 
-export const getHandlerTemplate = (name: string) => `import { HandlerContext } from '@playson/test';
+export const getHandlerTemplate = (name: string) => `import { HandlerContext } from '@plyson/test';
 
 /**
  * Custom handler: ${name}

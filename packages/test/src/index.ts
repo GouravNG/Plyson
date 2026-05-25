@@ -10,16 +10,16 @@ export { VariableStore } from './core/variable-store.js'
 export * from './errors/index.js'
 
 /**
- * Bootstraps the playson project and registers all suites as Playwright tests.
- * This should be called from a Playwright test file (e.g., suites/playson.spec.ts).
+ * Bootstraps the plyson project and registers all suites as Playwright tests.
+ * This should be called from a Playwright test file (e.g., suites/plyson.spec.ts).
  */
 export async function bootstrap(test: TestType<any, any>, expect: Expect) {
-  const rootDir = process.env.PLAYSON_ROOT || process.cwd()
-  const env = process.env.PLAYSON_ENV
+  const rootDir = process.env.plyson_ROOT || process.cwd()
+  const env = process.env.plyson_ENV
 
   if (!env) {
     throw new Error(
-      'PLAYSON_ENV environment variable is not set. Please specify an environment with --env.',
+      'plyson_ENV environment variable is not set. Please specify an environment with --env.',
     )
   }
 
@@ -33,7 +33,7 @@ export async function bootstrap(test: TestType<any, any>, expect: Expect) {
     // Register all suites as Playwright tests
     registerSuites(graph, store, test, expect)
   } catch (error) {
-    console.error('Failed to load playson project:')
+    console.error('Failed to load plyson project:')
     throw error
   }
 }

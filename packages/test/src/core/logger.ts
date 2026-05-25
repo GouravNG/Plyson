@@ -21,7 +21,7 @@ export class ConsoleLogger implements Logger {
 
   constructor(id: string) {
     this.id = id
-    const envLevel = (process.env.PLAYSON_LOG_LEVEL?.toLowerCase() as LogLevel) || 'info'
+    const envLevel = (process.env.plyson_LOG_LEVEL?.toLowerCase() as LogLevel) || 'info'
     this.level = LOG_LEVELS[envLevel] ?? LOG_LEVELS.info
   }
 

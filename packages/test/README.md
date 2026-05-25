@@ -1,5 +1,5 @@
-# @playson/test
+# @plyson/test
 
-Core engine for the playson declarative API testing framework.
+Core engine for the plyson declarative API testing framework.
 
-For more information and full documentation, please visit the [main repository](https://github.com/GouravNG/Playson).
+For more information and full documentation, please visit the [main repository](https://github.com/GouravNG/plyson).

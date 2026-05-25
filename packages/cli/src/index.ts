@@ -19,7 +19,7 @@ const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 
 const program = new Command()
 
 program
-  .name('playson')
+  .name('plyson')
   .description('A declarative API testing framework runs on top of Playwright')
   .version(packageJson.version)
 

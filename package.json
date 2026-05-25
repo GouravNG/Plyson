@@ -1,5 +1,5 @@
 {
-  "name": "playson",
+  "name": "plyson",
   "private": true,
   "description": "A declarative API testing framework runs on top of Playwright",
   "scripts": {

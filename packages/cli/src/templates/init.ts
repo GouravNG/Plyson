@@ -12,7 +12,7 @@ export const getInitTemplates = ({ projectName, packageJsonName }: InitTemplates
     'project.json': {
       $schema: './Project-schema/project.schema.json',
       title: projectName === '.' ? 'New API Project' : projectName,
-      description: 'API testing project created with playson',
+      description: 'API testing project created with plyson',
       version: '1.0.0',
       defaultEnv: 'dev',
     },
@@ -30,7 +30,7 @@ export const getInitTemplates = ({ projectName, packageJsonName }: InitTemplates
     'suites/sample.test.json': {
       $schema: '../Project-schema/testsuite.schema.json',
       title: 'Sample Suite',
-      description: 'Welcome to playson! This is a sample test suite.',
+      description: 'Welcome to plyson! This is a sample test suite.',
       tags: ['smoke'],
       testCases: [
         {
@@ -54,11 +54,11 @@ export const getInitTemplates = ({ projectName, packageJsonName }: InitTemplates
         },
       ],
     },
-    'suites/playson.spec.ts': `import { test, expect } from '@playwright/test';
-import { bootstrap } from '@playson/test';
+    'suites/plyson.spec.ts': `import { test, expect } from '@playwright/test';
+import { bootstrap } from '@plyson/test';
 
 /**
- * This is the entry point for playson tests. 
+ * This is the entry point for plyson tests. 
  * It discovers all *.test.json files and registers them as Playwright tests.
  */
 await bootstrap(test, expect);
@@ -68,14 +68,14 @@ await bootstrap(test, expect);
       version: '1.0.0',
       type: 'module',
       scripts: {
-        test: 'playson run',
+        test: 'plyson run',
       },
       dependencies: {
-        '@playson/test': 'latest',
+        '@plyson/test': 'latest',
       },
       devDependencies: {
         '@playwright/test': '^1.59.1',
-        '@playson/cli': 'latest',
+        '@plyson/cli': 'latest',
       },
     },
     'playwright.config.ts': `import { defineConfig } from '@playwright/test';

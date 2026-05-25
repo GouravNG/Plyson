@@ -57,7 +57,7 @@ export async function createMockServer(port: number = 0): Promise<MockServer> {
       } else if (req.url === '/echo' && req.method === 'POST') {
         res.writeHead(200, {
           'Content-Type': 'application/json',
-          'X-Custom-Header': 'playson-rocks',
+          'X-Custom-Header': 'plyson-rocks',
         })
         res.end(JSON.stringify(parsedBody))
       } else if (req.url === '/public' && req.method === 'GET') {

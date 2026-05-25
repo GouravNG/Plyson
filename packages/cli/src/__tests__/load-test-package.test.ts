@@ -24,7 +24,7 @@ describe('loadTestPackage', () => {
     vi.mocked(createRequire).mockReturnValue(mockRequire as any)
   })
 
-  it('should throw error and exit if @playson/test is not found', async () => {
+  it('should throw error and exit if @plyson/test is not found', async () => {
     mockRequire.resolve.mockImplementation(() => {
       throw new Error('MODULE_NOT_FOUND')
     })
@@ -34,12 +34,12 @@ describe('loadTestPackage', () => {
     await expect(loadTestPackage()).rejects.toThrow('process.exit: 1')
 
     expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('@playson/test is not installed'),
+      expect.stringContaining('@plyson/test is not installed'),
     )
     consoleSpy.mockRestore()
   })
 
-  it('should return the package if @playson/test is found', async () => {
+  it('should return the package if @plyson/test is found', async () => {
     // In a real scenario, this would import the actual package.
     // For testing, we just need to ensure it doesn't fail before the import.
     // Since we are mocking the module system heavily, we might need to mock the import too.
@@ -47,15 +47,15 @@ describe('loadTestPackage', () => {
     // Actually, testing the import() call in vitest is tricky.
     // Let's at least verify it tries to resolve correctly.
 
-    mockRequire.resolve.mockReturnValue('/path/to/@playson/test/index.js')
+    mockRequire.resolve.mockReturnValue('/path/to/@plyson/test/index.js')
 
-    // We expect it to fail on the dynamic import because /path/to/@playson/test/index.js doesn't exist
+    // We expect it to fail on the dynamic import because /path/to/@plyson/test/index.js doesn't exist
     // but it confirms that resolve was called.
 
     try {
       await loadTestPackage()
     } catch (e: any) {
-      expect(mockRequire.resolve).toHaveBeenCalledWith('@playson/test')
+      expect(mockRequire.resolve).toHaveBeenCalledWith('@plyson/test')
     }
   })
 })

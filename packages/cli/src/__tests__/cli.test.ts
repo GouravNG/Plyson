@@ -76,7 +76,7 @@ describe('CLI Commands', () => {
 
   describe('init', () => {
     it('should initialize a new project with correct structure', async () => {
-      await program.parseAsync(['node', 'playson', 'init', 'test-init'])
+      await program.parseAsync(['node', 'plyson', 'init', 'test-init'])
 
       const projectPath = path.join(testDir, 'test-init')
       expect(fs.existsSync(path.join(projectPath, 'project.json'))).toBe(true)
@@ -95,7 +95,7 @@ describe('CLI Commands', () => {
         fs.readFileSync(path.join(projectPath, 'package.json'), 'utf-8'),
       )
       expect(packageJson.name).toBe('test-init')
-      expect(packageJson.scripts.test).toBe('playson run')
+      expect(packageJson.scripts.test).toBe('plyson run')
     })
 
     it('should handle "." as project name and use current directory name for package.json', async () => {
@@ -104,7 +104,7 @@ describe('CLI Commands', () => {
       fs.mkdirSync(subDir)
       process.chdir(subDir)
 
-      await program.parseAsync(['node', 'playson', 'init', '.'])
+      await program.parseAsync(['node', 'plyson', 'init', '.'])
 
       const packageJson = JSON.parse(fs.readFileSync(path.join(subDir, 'package.json'), 'utf-8'))
       expect(packageJson.name).toBe('current-dir-test')
@@ -128,7 +128,7 @@ describe('CLI Commands', () => {
     })
 
     it('should add a variable to variables.json', async () => {
-      await program.parseAsync(['node', 'playson', 'generate', 'var', 'myKey', 'myValue'])
+      await program.parseAsync(['node', 'plyson', 'generate', 'var', 'myKey', 'myValue'])
 
       const vars = JSON.parse(fs.readFileSync('variables.json', 'utf-8'))
       expect(vars.myKey).toBe('myValue')
@@ -137,7 +137,7 @@ describe('CLI Commands', () => {
     it('should add env-var to all environment files', async () => {
       await program.parseAsync([
         'node',
-        'playson',
+        'plyson',
         'generate',
         'env-var',
         'apiKey',
@@ -154,11 +154,11 @@ describe('CLI Commands', () => {
     })
 
     it('should create a handler boilerplate', async () => {
-      await program.parseAsync(['node', 'playson', 'generate', 'handler', 'my-handler'])
+      await program.parseAsync(['node', 'plyson', 'generate', 'handler', 'my-handler'])
 
       expect(fs.existsSync('handlers/my-handler.handler.ts')).toBe(true)
       const content = fs.readFileSync('handlers/my-handler.handler.ts', 'utf-8')
-      expect(content).toContain("import { HandlerContext } from '@playson/test'")
+      expect(content).toContain("import { HandlerContext } from '@plyson/test'")
     })
   })
 
@@ -175,7 +175,7 @@ describe('CLI Commands', () => {
       vi.mocked(confirm).mockResolvedValue(true)
 
       try {
-        await program.parseAsync(['node', 'playson', 'validate', '.', '--repair'])
+        await program.parseAsync(['node', 'plyson', 'validate', '.', '--repair'])
       } catch (e: any) {
         if (!e.message.startsWith('process.exit')) throw e
       }
@@ -188,7 +188,7 @@ describe('CLI Commands', () => {
 
   describe('sync-project-schemas', () => {
     it('should generate schemas in Project-schema directory', async () => {
-      await program.parseAsync(['node', 'playson', 'sync-project-schemas'])
+      await program.parseAsync(['node', 'plyson', 'sync-project-schemas'])
 
       expect(fs.existsSync('Project-schema/project.schema.json')).toBe(true)
       expect(fs.existsSync('Project-schema/testsuite.schema.json')).toBe(true)
@@ -225,7 +225,7 @@ describe('CLI Commands', () => {
       vi.mocked(confirm).mockResolvedValue(true)
       vi.mocked(select).mockResolvedValue('delete')
 
-      await program.parseAsync(['node', 'playson', 'sync-schemas', '--env', 'dev'])
+      await program.parseAsync(['node', 'plyson', 'sync-schemas', '--env', 'dev'])
 
       expect(fs.existsSync('schemas/User.schema.json')).toBe(true)
       expect(fs.existsSync('schemas/Stale.schema.json')).toBe(false)

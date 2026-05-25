@@ -1,4 +1,4 @@
-# playson — Phase-wise Implementation Plan
+# plyson — Phase-wise Implementation Plan
 
 Each phase ends with working, tested code. Later phases build on earlier ones without breaking them. IDE prompts are written to be pasted directly into Cursor, Copilot Chat, or any context-aware IDE tool.
 
@@ -15,7 +15,7 @@ Each phase ends with working, tested code. Later phases build on earlier ones wi
 - Full `src/` module structure (empty files with correct exports)
 - All TypeScript types from the design (`Testcase`, `TestSuite`, `Project`, `Assertions`, `Req`, `Res`, etc.)
 - All zod schemas matching the types
-- Full error class hierarchy (`PlaysonError`, `LoadError`, `AggregateLoadError`, `ResolutionError`, etc.)
+- Full error class hierarchy (`plysonError`, `LoadError`, `AggregateLoadError`, `ResolutionError`, etc.)
 - `vitest` configured and one smoke test passing
 
 **Why first:** Every other phase imports from types and errors. Getting this right early prevents type churn across all subsequent phases.
@@ -27,7 +27,7 @@ Each phase ends with working, tested code. Later phases build on earlier ones wi
 ### Phase 1 IDE Prompt
 
 ```
-You are scaffolding a new TypeScript library called playson — a declarative API testing framework built on Playwright.
+You are scaffolding a new TypeScript library called plyson — a declarative API testing framework built on Playwright.
 
 Create the full project structure and type system. Do not implement any runtime logic yet.
 
@@ -134,19 +134,19 @@ Each schema must exactly match its TypeScript type. Use z.lazy() for self-refere
 
 --- ERROR CLASSES (src/errors/index.ts) ---
 
-abstract class PlaysonError extends Error {
+abstract class plysonError extends Error {
   abstract readonly code: string
   constructor(message: string) { super(message); this.name = this.constructor.name }
 }
 
 class AggregateLoadError extends Error — holds LoadError[]
-class LoadError extends PlaysonError — code: "LOAD_ERROR", optional file?: string
-class ResolutionError extends PlaysonError — code: "RESOLUTION_ERROR", token + stepTitle
-class GeneratorOptionError extends PlaysonError — code: "GENERATOR_OPTION_ERROR", generator name
-class UnknownGeneratorError extends PlaysonError — code: "UNKNOWN_GENERATOR", generator name
-class AssertionError extends PlaysonError — code: "ASSERTION_ERROR", assertionTitle + cause
-class ExtractionError extends PlaysonError — code: "EXTRACTION_ERROR"
-class SchemaValidationError extends PlaysonError — code: "SCHEMA_VALIDATION_ERROR", schemaName + validationErrors[]
+class LoadError extends plysonError — code: "LOAD_ERROR", optional file?: string
+class ResolutionError extends plysonError — code: "RESOLUTION_ERROR", token + stepTitle
+class GeneratorOptionError extends plysonError — code: "GENERATOR_OPTION_ERROR", generator name
+class UnknownGeneratorError extends plysonError — code: "UNKNOWN_GENERATOR", generator name
+class AssertionError extends plysonError — code: "ASSERTION_ERROR", assertionTitle + cause
+class ExtractionError extends plysonError — code: "EXTRACTION_ERROR"
+class SchemaValidationError extends plysonError — code: "SCHEMA_VALIDATION_ERROR", schemaName + validationErrors[]
 
 --- TESTS ---
 
@@ -183,7 +183,7 @@ All tests must pass with `npx vitest run`.
 ### Phase 2 IDE Prompt
 
 ```
-Implement the VariableStore and Resolver for the playson framework.
+Implement the VariableStore and Resolver for the plyson framework.
 These are in src/core/variable-store.ts and src/core/resolver.ts.
 All types and error classes are already defined in src/types and src/errors.
 
@@ -344,7 +344,7 @@ All tests pass with npx vitest run.
 ### Phase 3 IDE Prompt
 
 ```
-Implement the GeneratorRegistry and all built-in generators for playson.
+Implement the GeneratorRegistry and all built-in generators for plyson.
 Files: src/generators/registry.ts and src/generators/*.generator.ts
 Types and errors are in src/types and src/errors. Resolver is already done.
 
@@ -502,7 +502,7 @@ All tests pass with npx vitest run — no regressions on phase 1 or 2 tests.
 ### Phase 4 IDE Prompt
 
 ```
-Implement the ProjectLoader and HttpExecutor for playson.
+Implement the ProjectLoader and HttpExecutor for plyson.
 Files: src/core/project-loader.ts, src/core/http-executor.ts, src/autofill/
 
 All types, errors, and schemas from phase 1 are available.
@@ -682,7 +682,7 @@ All tests pass with npx vitest run — no regressions.
 ### Phase 5 IDE Prompt
 
 ```
-Implement the PathEngine, AssertionEngine, ExtractionEngine, and HandlerRunner for playson.
+Implement the PathEngine, AssertionEngine, ExtractionEngine, and HandlerRunner for plyson.
 All previous phases are complete. Import expect from @playwright/test.
 
 --- PATH ENGINE (src/path/index.ts) ---
@@ -853,7 +853,7 @@ All tests pass with npx vitest run — no regressions on any previous phase.
 
 ## Phase 6 — Test Runner & CLI
 
-**Goal:** The framework is fully working end-to-end. `playson run --env dev` discovers suites, registers them as Playwright tests, and executes them. CLI commands are wired up.
+**Goal:** The framework is fully working end-to-end. `plyson run --env dev` discovers suites, registers them as Playwright tests, and executes them. CLI commands are wired up.
 
 **Deliverables:**
 
@@ -870,7 +870,7 @@ All tests pass with npx vitest run — no regressions on any previous phase.
 ### Phase 6 IDE Prompt
 
 ```
-Implement the TestRunner and CLI for playson.
+Implement the TestRunner and CLI for plyson.
 All previous phases are complete and tested. This phase wires everything together.
 
 --- UTILITIES ---
@@ -954,38 +954,38 @@ Use commander. Entry point: src/cli/index.ts
 
 Commands:
 
-playson run [paths...]
+plyson run [paths...]
   Required flag: --env, -e (string) unless project.json has defaultEnv
   Pass all unrecognised flags through to playwright test
   Before running: load ProjectGraph, register suites, invoke playwright programmatically
 
-playson validate [path] [options]
+plyson validate [path] [options]
   --type, -t: "project" | "suite" | "script" | "handler" | "env" | "var"
   --repair: boolean
   Load ProjectGraph (catch AggregateLoadError, display each error clearly)
   If --repair: interactive prompts (use @inquirer/prompts or readline)
 
-playson generate <resource> <name> [options]
+plyson generate <resource> <name> [options]
   g var <key> [value]          → append to variables.json
   g env-var <key> <value> --env <name> → update all env files
   g handler <name>             → create handlers/<name>.handler.ts with run boilerplate
   g script <name>              → create scripts/<name>.script.json with unique id (uuid)
   g suite <name>               → create suites/<name>.test.json with boilerplate
 
-playson sync-schemas [options]
+plyson sync-schemas [options]
   --env, -e: string
   --all (default) | --name <name>
   --skip-stale: boolean
   Fetch specUrl from env file, parse OpenAPI spec, write schemas/<name>.schema.json for each
 
-playson init [project-name]
+plyson init [project-name]
   Create full directory structure with placeholder files
 
 --- E2E TESTS (src/__tests__/e2e/full-run.test.ts) ---
 
 Strategy: start a real local HTTP server (use express or msw node adapter) before tests.
-Create a minimal valid playson project in a temp directory pointing at the local server.
-Use PlaywrightRunner or spawn a child process running `playson run --env test`.
+Create a minimal valid plyson project in a temp directory pointing at the local server.
+Use PlaywrightRunner or spawn a child process running `plyson run --env test`.
 
 Scenarios to cover:
 

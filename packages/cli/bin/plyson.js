@@ -7,7 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const entry = join(__dirname, '../dist/index.js')
 
 if (!existsSync(entry)) {
-  console.error('Playson CLI has not been built yet. Run "pnpm --filter @playson/cli build" first.')
+  console.error('plyson CLI has not been built yet. Run "pnpm --filter @plyson/cli build" first.')
   process.exit(1)
 }
 
