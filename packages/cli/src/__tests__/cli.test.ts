@@ -85,6 +85,17 @@ describe('CLI Commands', () => {
       expect(fs.existsSync(path.join(projectPath, 'package.json'))).toBe(true)
       expect(fs.existsSync(path.join(projectPath, 'playwright.config.ts'))).toBe(true)
       expect(fs.existsSync(path.join(projectPath, '.gitignore'))).toBe(true)
+      expect(fs.existsSync(path.join(projectPath, 'skills/sdet-json-generator/SKILL.md'))).toBe(
+        true,
+      )
+      expect(
+        fs.existsSync(path.join(projectPath, 'skills/sdet-testcase-generator/SKILL.md')),
+      ).toBe(true)
+      expect(
+        fs.existsSync(
+          path.join(projectPath, 'skills/sdet-json-generator/references/assertion-operators.md'),
+        ),
+      ).toBe(true)
 
       const projectJson = JSON.parse(
         fs.readFileSync(path.join(projectPath, 'project.json'), 'utf-8'),

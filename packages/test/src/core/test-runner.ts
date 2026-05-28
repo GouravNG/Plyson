@@ -27,8 +27,13 @@ export function registerSuites(
   AssertionEngine.setExpect(expect)
 
   test.beforeAll(async ({ request }: { request: APIRequestContext }) => {
-    store.push('global', graph.variables)
-    store.push('environment', graph.environment.variables ?? {})
+    // Phase 1 resolution for global and environment variables
+    store.push('global', {})
+    resolvePhase1(graph.variables ?? {}, store, 'global')
+
+    store.push('environment', {})
+    resolvePhase1(graph.environment.variables ?? {}, store, 'environment')
+
     AssertionEngine.registerSchemas(graph.schemas)
     if (graph.project.beforeAll) {
       await runSteps(
@@ -60,7 +65,8 @@ export function registerSuites(
 
     describeFn(suite.title, () => {
       test.beforeAll(async ({ request }: { request: APIRequestContext }) => {
-        store.push('suite', suite.variables ?? {})
+        store.push('suite', {})
+        resolvePhase1(suite.variables ?? {}, store, 'suite')
         if (suite.beforeAll) {
           await runSteps(
             suite.beforeAll,
@@ -108,8 +114,8 @@ export function registerSuites(
             logger.info(`Running testcase: ${testCase.title}`)
 
             // Phase 1 — resolve case variables once before any step runs
-            const resolvedVars = resolvePhase1(testCase.variables ?? {}, store)
-            store.push('case', resolvedVars)
+            store.push('case', {})
+            resolvePhase1(testCase.variables ?? {}, store, 'case')
 
             try {
               await runSteps(testCase.steps, request, store, graph, test, logger)

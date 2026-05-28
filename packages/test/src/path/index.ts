@@ -17,6 +17,10 @@ export class PathEngine {
   private extractJsonPath(source: any, path: string): unknown {
     const result = JSONPath({ path, json: source, wrap: true }) as any[]
 
+    if (result.length === 0) {
+      return undefined
+    }
+
     // filter expressions always return the full array so isEmpty/isNotEmpty work correctly
     if (this.isFilterExpression(path)) {
       return result
