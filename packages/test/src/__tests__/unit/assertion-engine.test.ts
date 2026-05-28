@@ -81,6 +81,42 @@ describe('AssertionEngine', () => {
       )
     })
 
+    it('should handle JSONPath existence correctly', async () => {
+      // Should pass when exists
+      await AssertionEngine.runAssertion(
+        { title: 'json ex', from: 'body', path: '$.a', operator: 'exists' },
+        { a: 1 },
+        mockResponse,
+        [],
+      )
+      // Should throw when missing
+      await expect(
+        AssertionEngine.runAssertion(
+          { title: 'json ex fail', from: 'body', path: '$.b', operator: 'exists' },
+          { a: 1 },
+          mockResponse,
+          [],
+        ),
+      ).rejects.toThrow(AssertionError)
+
+      // Should pass when notExists
+      await AssertionEngine.runAssertion(
+        { title: 'json nex', from: 'body', path: '$.b', operator: 'notExists' },
+        { a: 1 },
+        mockResponse,
+        [],
+      )
+      // Should throw when exists but expected not to
+      await expect(
+        AssertionEngine.runAssertion(
+          { title: 'json nex fail', from: 'body', path: '$.a', operator: 'notExists' },
+          { a: 1 },
+          mockResponse,
+          [],
+        ),
+      ).rejects.toThrow(AssertionError)
+    })
+
     it('should handle numeric comparisons', async () => {
       await AssertionEngine.runAssertion(
         { title: 'gt', from: 'body', path: 'a', operator: 'isGreaterThan', value: 5 },
@@ -136,6 +172,26 @@ describe('AssertionEngine', () => {
         mockResponse,
         [],
       )
+    })
+
+    it('should throw for isEmpty/isNotEmpty on missing path', async () => {
+      await expect(
+        AssertionEngine.runAssertion(
+          { title: 'empty missing', from: 'body', path: '$.missing', operator: 'isEmpty' },
+          {},
+          mockResponse,
+          [],
+        ),
+      ).rejects.toThrow(AssertionError)
+
+      await expect(
+        AssertionEngine.runAssertion(
+          { title: 'notempty missing', from: 'body', path: '$.missing', operator: 'isNotEmpty' },
+          {},
+          mockResponse,
+          [],
+        ),
+      ).rejects.toThrow(AssertionError)
     })
 
     it('should handle containsSubset', async () => {
