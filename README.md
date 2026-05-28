@@ -1,45 +1,54 @@
-# plyson
+# Plyson
 
 A declarative, JSON-driven API testing framework built on top of [Playwright](https://playwright.dev/).
 
 ## Features
 
-- **Declarative Testing**: Write API tests in JSON format.
-- **Variable Injection**: Easy variable management across global, environment, suite, and case scopes.
-- **Dynamic Generators**: Built-in support for generating random data (dates, IDs, strings, etc.) using `@faker-js/faker`.
-- **JSON Schema Validation**: Built-in validation for requests and responses.
-- **Flexible Assertions**: Comprehensive set of assertions (equals, exists, length, etc.).
-- **Response Extraction**: Extract values from responses to use in subsequent steps.
+- **Declarative Testing**: Write API tests in pure JSON format.
+- **IDE Intellisense**: Built-in JSON Schema support for autocompletion and validation in your IDE.
+- **Dynamic Data**: Support for variables and random data generation (via Faker.js).
+- **Playwright Powered**: Leverages Playwright's reliable HTTP execution and reporting.
+- **Variable Scoping**: Manage variables across global, environment, suite, and case scopes.
 - **Custom Handlers**: TypeScript escape hatches for complex logic.
-- **Playwright Integration**: Leverages Playwright's powerful `APIRequestContext` and reporting.
-
-## Installation
-
-```bash
-npm install plyson
-```
 
 ## Quick Start
 
-1. Initialize a new project:
+### 1. Install the CLI globally
 
-   ```bash
-   npx plyson init my-tests
-   ```
+```bash
+npm install -g @plyson/cli
+```
 
-2. Run your tests:
-   ```bash
-   npx plyson run my-tests/suites/sample.test.json
-   ```
+### 2. Initialize a new project
+
+```bash
+npx plyson init my-tests
+cd my-tests
+```
+
+### 3. Sync Project Schemas
+
+This step is crucial to enable **Intellisense** and autocompletion in your IDE while writing JSON tests.
+
+```bash
+npx plyson sync-project-schemas
+```
+
+### 4. Run your tests
+
+Run all tests in your project against the default `dev` environment.
+
+```bash
+npx plyson run --env dev
+```
 
 ## Documentation
 
-For detailed information, please refer to the [docs](./docs) directory:
+For detailed information, please refer to our [Documentation Site](https://gouravng.github.io/Play-son/):
 
-- [Architecture](./docs/ARCHITECTURE.md)
-- [CLI Reference](./docs/CLI.md)
-- [Assertions](./docs/ASSERTIONS.md)
-- [Variable Management](./docs/KNOWLEDGE_BASE.md)
+- [Installation Guide](https://gouravng.github.io/Play-son/docs/installation)
+- [Architecture Overview](https://gouravng.github.io/Play-son/docs/architecture)
+- [Assertions Reference](https://gouravng.github.io/Play-son/docs/assertions)
 
 ## License
 
