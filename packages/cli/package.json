@@ -40,7 +40,7 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-template-assets.mjs",
     "dev": "tsc --watch",
     "test": "vitest run"
   },
