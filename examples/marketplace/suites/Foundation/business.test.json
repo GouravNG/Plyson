@@ -1,0 +1,838 @@
+{
+  "$schema": "../../Project-schema/testsuite.schema.json",
+  "title": "Foundation - Business Management",
+  "description": "Comprehensive tests for the /foundation/business endpoint",
+  "tags": ["automated", "foundation", "business"],
+  "beforeAll": [
+    {
+      "ref": "TC_ADMIN_AUTH"
+    },
+    {
+      "ref": "TC_USER_AUTH"
+    },
+    {
+      "title": "Create a test business for the suite",
+      "request": {
+        "method": "POST",
+        "endpoint": "/foundation/business",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        },
+        "autoFill": {
+          "schemaName": "Business"
+        },
+        "payload": {
+          "name": "Suite Test Business",
+          "email": "suite@test.com"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "activeBizId",
+            "from": "body",
+            "path": "$.business.id",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Create and delete a business for the suite",
+      "request": {
+        "method": "POST",
+        "endpoint": "/foundation/business",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        },
+        "autoFill": {
+          "schemaName": "Business",
+          "excludeFields": ["email"]
+        },
+        "payload": {
+          "name": "Suite Deleted Business"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "deletedBizId",
+            "from": "body",
+            "path": "$.business.id",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Soft delete the business",
+      "request": {
+        "method": "DELETE",
+        "endpoint": "/foundation/business/{{deletedBizId}}",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 200
+        }
+      }
+    }
+  ],
+  "testCases": [
+    {
+      "id": "TC_FOUND01_001",
+      "title": "List businesses as Admin → 200 OK with paginated list",
+      "testType": "positive",
+      "tags": ["positive", "get", "foundation", "p0", "smoke"],
+      "steps": [
+        {
+          "title": "List active businesses",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/business",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "No deleted records are present in the list",
+                  "from": "body",
+                  "path": "$.businesses[?(@.deletedAt != null)]",
+                  "operator": "notExists"
+                },
+                {
+                  "title": "Meta contains pagination info",
+                  "from": "body",
+                  "path": "$.meta",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND01_002",
+      "title": "Access denied for non-Admin users → 403 Forbidden",
+      "testType": "negative",
+      "tags": ["negative", "security", "foundation", "p0"],
+      "steps": [
+        {
+          "title": "Attempt to list businesses as standard user",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/business",
+            "headers": {
+              "Authorization": "Bearer {{userToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 403
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND01_003",
+      "title": "List businesses including soft-deleted → 200 OK with all records",
+      "testType": "positive",
+      "tags": ["positive", "get", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "List businesses with includeDeleted=true",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/business",
+            "queryParams": {
+              "includeDeleted": true
+            },
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "List contains at least one soft-deleted record",
+                  "from": "body",
+                  "path": "$.businesses[?(@.deletedAt != null)]",
+                  "operator": "isNotEmpty"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND01_004",
+      "title": "Pagination limits respected → 200 OK with requested page size",
+      "testType": "edge",
+      "tags": ["boundary", "get", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "List businesses with limit=1",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/business",
+            "queryParams": {
+              "limit": 1,
+              "page": 1
+            },
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Data length matches limit",
+                  "from": "body",
+                  "path": "$.businesses",
+                  "operator": "hasLength",
+                  "value": 1
+                },
+                {
+                  "title": "Meta shows page 1",
+                  "from": "body",
+                  "path": "$.meta.page",
+                  "operator": "equals",
+                  "value": 1
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND01_005",
+      "title": "Unauthenticated access rejected → 401 Unauthorized",
+      "testType": "negative",
+      "tags": ["negative", "security", "foundation", "p0"],
+      "steps": [
+        {
+          "title": "Attempt to list businesses without token",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/business"
+          },
+          "response": {
+            "validations": {
+              "statusCode": 401
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND02_001",
+      "title": "Create business with mandatory fields → 201 Created",
+      "testType": "positive",
+      "tags": ["positive", "post", "foundation", "p0", "smoke"],
+      "variables": {
+        "bizName": {
+          "$gen": "alpha",
+          "length": 10
+        }
+      },
+      "steps": [
+        {
+          "title": "Create business",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/business",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "{{bizName}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201,
+              "assertions": [
+                {
+                  "title": "Name matches requested",
+                  "from": "body",
+                  "path": "$.business.name",
+                  "operator": "equals",
+                  "value": "{{bizName}}"
+                },
+                {
+                  "title": "ID is present",
+                  "from": "body",
+                  "path": "$.business.id",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND02_002",
+      "title": "Create business rejected when name is missing → 422 Unprocessable Entity",
+      "testType": "negative",
+      "tags": ["negative", "post", "foundation", "validation", "p0"],
+      "steps": [
+        {
+          "title": "Attempt create business without name",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/business",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "email": "test@example.com"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 422,
+              "assertions": [
+                {
+                  "title": "Errors include name field",
+                  "from": "body",
+                  "path": "$.errors",
+                  "operator": "includes",
+                  "value": "'name' is required"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND02_003",
+      "title": "Create business rejected with invalid email format → 422 Unprocessable Entity",
+      "testType": "negative",
+      "tags": ["negative", "post", "foundation", "validation", "p1"],
+      "steps": [
+        {
+          "title": "Attempt create business with invalid email",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/business",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Invalid Email Biz",
+              "email": "invalid-email"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 422,
+              "assertions": [
+                {
+                  "title": "Errors include email field",
+                  "from": "body",
+                  "path": "$.errors",
+                  "operator": "includes",
+                  "value": "'email' has an invalid format"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND02_004",
+      "title": "Create business with all optional fields → 201 Created",
+      "testType": "positive",
+      "tags": ["positive", "post", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Create full business",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/business",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Full Business",
+              "email": "contact@fullbiz.com",
+              "phone": "+1234567890",
+              "address": "123 Business St"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201,
+              "assertions": [
+                {
+                  "title": "Email persisted",
+                  "from": "body",
+                  "path": "$.business.email",
+                  "operator": "equals",
+                  "value": "contact@fullbiz.com"
+                },
+                {
+                  "title": "Address persisted",
+                  "from": "body",
+                  "path": "$.business.address",
+                  "operator": "equals",
+                  "value": "123 Business St"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND02_005",
+      "title": "Create business access restricted to Admin → 403 Forbidden",
+      "testType": "negative",
+      "tags": ["negative", "security", "foundation", "p0"],
+      "steps": [
+        {
+          "title": "Attempt create business as standard user",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/business",
+            "headers": {
+              "Authorization": "Bearer {{userToken}}"
+            },
+            "payload": {
+              "name": "Hack Business"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 403
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND03_001",
+      "title": "Get active business details → 200 OK",
+      "testType": "positive",
+      "tags": ["positive", "get", "foundation", "p0", "smoke"],
+      "steps": [
+        {
+          "title": "Get business by ID",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/business/{{activeBizId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "ID matches",
+                  "from": "body",
+                  "path": "$.business.id",
+                  "operator": "equals",
+                  "value": "{{activeBizId}}"
+                },
+                {
+                  "title": "Is active",
+                  "from": "body",
+                  "path": "$.business.deletedAt",
+                  "operator": "isNull"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND03_002",
+      "title": "Get non-existent business → 404 Not Found",
+      "testType": "negative",
+      "tags": ["negative", "get", "foundation", "p0"],
+      "steps": [
+        {
+          "title": "Get invalid ID",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/business/non-existent-id",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND03_003",
+      "title": "Get soft-deleted business → 404 Not Found",
+      "testType": "negative",
+      "tags": ["negative", "get", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Get deleted ID",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/business/{{deletedBizId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND04_001",
+      "title": "Partial update of business name → 200 OK",
+      "testType": "positive",
+      "tags": ["positive", "patch", "foundation", "p0", "smoke"],
+      "steps": [
+        {
+          "title": "Update business name",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/business/{{activeBizId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "New Name"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Name updated",
+                  "from": "body",
+                  "path": "$.business.name",
+                  "operator": "equals",
+                  "value": "New Name"
+                },
+                {
+                  "title": "Email remains same",
+                  "from": "body",
+                  "path": "$.business.email",
+                  "operator": "equals",
+                  "value": "suite@test.com"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND04_002",
+      "title": "Update fails for deleted business → 404 Not Found",
+      "testType": "negative",
+      "tags": ["negative", "patch", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Attempt update deleted business",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/business/{{deletedBizId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Attempt Update"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND04_003",
+      "title": "Update rejected with invalid email format → 422 Unprocessable Entity",
+      "testType": "negative",
+      "tags": ["negative", "patch", "foundation", "validation", "p1"],
+      "steps": [
+        {
+          "title": "Attempt update with invalid email",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/business/{{activeBizId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "email": "bad-email"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 422
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND04_004",
+      "title": "Update all fields → 200 OK",
+      "testType": "positive",
+      "tags": ["positive", "patch", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Update all fields",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/business/{{activeBizId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Updated Biz",
+              "email": "updated@biz.com",
+              "phone": "+9999999",
+              "address": "New Address"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Address updated",
+                  "from": "body",
+                  "path": "$.business.address",
+                  "operator": "equals",
+                  "value": "New Address"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND04_005",
+      "title": "Idempotent update → 200 OK",
+      "testType": "positive",
+      "tags": ["positive", "patch", "foundation", "p2"],
+      "steps": [
+        {
+          "title": "First update",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/business/{{activeBizId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Same Name"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200
+            }
+          }
+        },
+        {
+          "title": "Second update (repeat)",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/business/{{activeBizId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Same Name"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND05_001",
+      "title": "Soft delete active business → 200 OK",
+      "testType": "positive",
+      "tags": ["positive", "delete", "foundation", "p0", "smoke"],
+      "steps": [
+        {
+          "title": "Create a temporary business",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/business",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Delete Me"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201
+            },
+            "extract": [
+              {
+                "name": "tempBizId",
+                "from": "body",
+                "path": "$.business.id",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Delete the business",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/foundation/business/{{tempBizId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Is marked deleted",
+                  "from": "body",
+                  "path": "$.business.deletedAt",
+                  "operator": "isNotNull"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Verify subsequent GET returns 404",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/business/{{tempBizId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND05_002",
+      "title": "Delete non-existent business → 404 Not Found",
+      "testType": "negative",
+      "tags": ["negative", "delete", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Delete invalid ID",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/foundation/business/invalid-id",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND05_003",
+      "title": "Delete already deleted business → 404 Not Found",
+      "testType": "negative",
+      "tags": ["negative", "delete", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Delete already deleted ID",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/foundation/business/{{deletedBizId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND05_004",
+      "title": "Delete access restricted to Admin → 403 Forbidden",
+      "testType": "negative",
+      "tags": ["negative", "security", "foundation", "p0"],
+      "steps": [
+        {
+          "title": "Attempt delete business as standard user",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/foundation/business/{{activeBizId}}",
+            "headers": {
+              "Authorization": "Bearer {{userToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 403
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

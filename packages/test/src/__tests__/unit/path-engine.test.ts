@@ -19,6 +19,10 @@ describe('PathEngine', () => {
     expect(pathEngine.extract(source, '$.items[*].s')).toEqual(['a', 'b'])
   })
 
+  it('should return undefined for missing paths in JSONPath', () => {
+    expect(pathEngine.extract({ a: 1 }, '$.b')).toBeUndefined()
+  })
+
   it('should extract value using JMESPath', () => {
     const source = { data: { id: 'abc' } }
     expect(pathEngine.extract(source, 'data.id')).toBe('abc')

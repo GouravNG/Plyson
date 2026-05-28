@@ -1,10 +1,10 @@
 import { faker } from '@faker-js/faker'
 import { ResolutionError } from '../errors/index.js'
-import { GeneratorObject, Req, Variables, VariableValue } from '../types/index.js'
+import { GeneratorObject, Req, Scope, Variables, VariableValue } from '../types/index.js'
 import { isGenObject } from '../utils/is-gen-object.js'
 import { VariableStore } from './variable-store.js'
 
-const TOKEN_RE = /\{\{\s*(.*?)\s*\}\}/g
+const TOKEN_RE = /\{\{([^}]+)\}\}/g
 
 /**
  * Finds a faker method by name, potentially qualified with a module name.
@@ -61,9 +61,7 @@ export class Resolver {
       return this.executeGenerator(input) as T
     }
 
-    // Array support (with potential $count at root of object containing $gen)
-    // Wait, isGenObject handles the object with $gen.
-    // But what if it's a plain array?
+    // Array support
     if (Array.isArray(input)) {
       return input.map((v) => this.resolve(v)) as unknown as T
     }
@@ -94,27 +92,29 @@ export class Resolver {
    * Resolve tokens within a string.
    */
   private resolveString(input: string): VariableValue {
-    const tokens = [...input.matchAll(TOKEN_RE)]
-    if (tokens.length === 0) {
+    if (!input.includes('{{')) {
       return input
     }
 
     const trimmedInput = input.trim()
-    const singleTokenMatch = trimmedInput.match(/^\{\{\s*(.*?)\s*\}\}$/)
+    const singleTokenMatch = trimmedInput.match(/^\{\{([^}]+)\}\}$/)
+
+    // If it's a single token, return the value directly (could be non-string)
     if (singleTokenMatch) {
       const tokenName = singleTokenMatch[1].trim()
       const value = this.store.get(tokenName)
       if (value === undefined) {
-        throw new ResolutionError(tokenName, this.stepTitle)
+        throw new ResolutionError(`"${tokenName}" in "${input}"`, this.stepTitle)
       }
       return value
     }
 
+    // Otherwise, replace all tokens in the string
     return input.replace(TOKEN_RE, (_, name) => {
       const trimmed = name.trim()
       const value = this.store.get(trimmed)
       if (value === undefined) {
-        throw new ResolutionError(trimmed, this.stepTitle)
+        throw new ResolutionError(`"${trimmed}" in "${input}"`, this.stepTitle)
       }
       return String(value)
     })
@@ -159,11 +159,22 @@ export class Resolver {
 /**
  * Phase 1 Resolution: Resolves variables and returns a plain object.
  */
-export function resolvePhase1(variables: Variables, store: VariableStore): Variables {
+export function resolvePhase1(
+  variables: Variables,
+  store: VariableStore,
+  scope?: Scope,
+): Variables {
   const resolver = new Resolver(store, 'case variables')
   const resolved: Variables = {}
   for (const [key, value] of Object.entries(variables)) {
-    resolved[key] = resolver.resolve(value)
+    const resolvedValue = resolver.resolve(value)
+    resolved[key] = resolvedValue
+
+    // If a scope is provided, update the store immediately so subsequent
+    // variables in the same block can reference this one.
+    if (scope) {
+      store.set(key, resolvedValue, scope)
+    }
   }
   return resolved
 }

@@ -515,6 +515,13 @@ route('PATCH', /^\/foundation\/business\/(?<id>[^/]+)$/, async (req, res, { para
   const biz = DB.businesses.find((b) => b.id === params.id && !b.deletedAt)
   if (!biz) return err(res, 'Business not found', reqId, 404)
   const body = await parseBody(req)
+  const { valid, errors } = validate(body, {
+    name: { type: 'string', minLength: 1, maxLength: 120 },
+    email: { type: 'string', match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
+    phone: { type: 'string', maxLength: 20 },
+    address: { type: 'string', maxLength: 255 },
+  })
+  if (!valid) return err(res, 'Validation failed', reqId, 422, { errors })
   for (const k of ['name', 'email', 'phone', 'address']) if (body[k] !== undefined) biz[k] = body[k]
   biz.updatedAt = new Date().toISOString()
   ok(res, { business: biz }, reqId)

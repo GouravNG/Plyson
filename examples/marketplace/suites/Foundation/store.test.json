@@ -1,0 +1,850 @@
+{
+  "$schema": "../../Project-schema/testsuite.schema.json",
+  "title": "Foundation - Store Management",
+  "description": "Comprehensive tests for the /foundation/store endpoint",
+  "tags": ["automated", "foundation", "store"],
+  "beforeAll": [
+    {
+      "ref": "TC_ADMIN_AUTH"
+    },
+    {
+      "ref": "TC_USER_AUTH"
+    },
+    {
+      "title": "Create a test business for the suite",
+      "request": {
+        "method": "POST",
+        "endpoint": "/foundation/business",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        },
+        "autoFill": {
+          "schemaName": "Business"
+        },
+        "payload": {
+          "name": "Store Suite Business",
+          "email": "store-suite@test.com"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "activeBizId",
+            "from": "body",
+            "path": "$.business.id",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Create and delete a business for the suite",
+      "request": {
+        "method": "POST",
+        "endpoint": "/foundation/business",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        },
+        "payload": {
+          "name": "Store Suite Deleted Business"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "deletedBizId",
+            "from": "body",
+            "path": "$.business.id",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Soft delete the business",
+      "request": {
+        "method": "DELETE",
+        "endpoint": "/foundation/business/{{deletedBizId}}",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 200
+        }
+      }
+    },
+    {
+      "title": "Create a test store for the suite",
+      "request": {
+        "method": "POST",
+        "endpoint": "/foundation/store",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        },
+        "payload": {
+          "name": "Suite Test Store",
+          "businessId": "{{activeBizId}}",
+          "location": "Test City"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "activeStoreId",
+            "from": "body",
+            "path": "$.store.id",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Create and delete a store for the suite",
+      "request": {
+        "method": "POST",
+        "endpoint": "/foundation/store",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        },
+        "payload": {
+          "name": "Suite Deleted Store",
+          "businessId": "{{activeBizId}}"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "deletedStoreId",
+            "from": "body",
+            "path": "$.store.id",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Soft delete the store",
+      "request": {
+        "method": "DELETE",
+        "endpoint": "/foundation/store/{{deletedStoreId}}",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 200
+        }
+      }
+    }
+  ],
+  "testCases": [
+    {
+      "id": "TC_FOUND06_001",
+      "title": "Admin can retrieve paginated list of stores → 200 OK",
+      "testType": "positive",
+      "tags": ["positive", "get", "foundation", "p0", "smoke"],
+      "steps": [
+        {
+          "title": "List stores with pagination",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/store",
+            "queryParams": {
+              "page": 1,
+              "limit": 10
+            },
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Stores array is present",
+                  "from": "body",
+                  "path": "$.stores",
+                  "operator": "exists"
+                },
+                {
+                  "title": "Meta contains pagination info",
+                  "from": "body",
+                  "path": "$.meta.total",
+                  "operator": "isNotNull"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND06_002",
+      "title": "Non-admin user cannot list stores → 403 Forbidden",
+      "testType": "negative",
+      "tags": ["negative", "security", "foundation", "p0"],
+      "steps": [
+        {
+          "title": "Attempt to list stores as standard user",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/store",
+            "headers": {
+              "Authorization": "Bearer {{userToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 403
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND06_003",
+      "title": "Unauthenticated user cannot list stores → 401 Unauthorized",
+      "testType": "negative",
+      "tags": ["negative", "security", "foundation", "p0"],
+      "steps": [
+        {
+          "title": "Attempt to list stores without token",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/store"
+          },
+          "response": {
+            "validations": {
+              "statusCode": 401
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND06_004",
+      "title": "Soft-deleted stores are excluded from list → Only active stores returned",
+      "testType": "positive",
+      "tags": ["positive", "get", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "List stores and check for deleted records",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/store",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "No deleted records are present in the list",
+                  "from": "body",
+                  "path": "$.stores[?(@.deletedAt != null)]",
+                  "operator": "notExists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND07_001",
+      "title": "Admin can create a store with mandatory name → 201 Created",
+      "testType": "positive",
+      "tags": ["positive", "post", "foundation", "p0", "smoke"],
+      "variables": {
+        "storeName": {
+          "$gen": "alpha",
+          "length": 12
+        }
+      },
+      "steps": [
+        {
+          "title": "Create store with only name",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/store",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "{{storeName}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201,
+              "assertions": [
+                {
+                  "title": "Name matches requested",
+                  "from": "body",
+                  "path": "$.store.name",
+                  "operator": "equals",
+                  "value": "{{storeName}}"
+                },
+                {
+                  "title": "ID is generated",
+                  "from": "body",
+                  "path": "$.store.id",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND07_002",
+      "title": "Admin can create a store with optional location and business association → 201 Created",
+      "testType": "positive",
+      "tags": ["positive", "post", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Create store with location and businessId",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/store",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Full Store",
+              "location": "San Francisco",
+              "businessId": "{{activeBizId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201,
+              "assertions": [
+                {
+                  "title": "Location is set",
+                  "from": "body",
+                  "path": "$.store.location",
+                  "operator": "equals",
+                  "value": "San Francisco"
+                },
+                {
+                  "title": "Business ID is linked",
+                  "from": "body",
+                  "path": "$.store.businessId",
+                  "operator": "equals",
+                  "value": "{{activeBizId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND07_003",
+      "title": "Store creation fails without mandatory name → 422 Unprocessable Entity",
+      "testType": "negative",
+      "tags": ["negative", "post", "foundation", "validation", "p1"],
+      "steps": [
+        {
+          "title": "Attempt create store without name",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/store",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "location": "Nowhere"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 422,
+              "assertions": [
+                {
+                  "title": "Errors include name field",
+                  "from": "body",
+                  "path": "$.errors",
+                  "operator": "includes",
+                  "value": "'name' is required"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND07_004",
+      "title": "Store creation fails with non-existent business ID → 404 Not Found",
+      "testType": "negative",
+      "tags": ["negative", "post", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Attempt create store with invalid businessId",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/store",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Invalid Biz Store",
+              "businessId": "non-existent-biz-id"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND07_005",
+      "title": "Store creation fails with soft-deleted business ID → 404 Not Found",
+      "testType": "negative",
+      "tags": ["negative", "post", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Attempt create store with deleted businessId",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/store",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Deleted Biz Store",
+              "businessId": "{{deletedBizId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND08_001",
+      "title": "Admin can retrieve a specific store by ID → 200 OK",
+      "testType": "positive",
+      "tags": ["positive", "get", "foundation", "p0", "smoke"],
+      "steps": [
+        {
+          "title": "Get store details",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/store/{{activeStoreId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "ID matches",
+                  "from": "body",
+                  "path": "$.store.id",
+                  "operator": "equals",
+                  "value": "{{activeStoreId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND08_002",
+      "title": "Get store returns 404 for non-existent ID",
+      "testType": "negative",
+      "tags": ["negative", "get", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Get invalid store ID",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/store/invalid-store-id",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND08_003",
+      "title": "Get store returns 404 for soft-deleted store",
+      "testType": "negative",
+      "tags": ["negative", "get", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Get soft-deleted store ID",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/store/{{deletedStoreId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND09_001",
+      "title": "Admin can update store name and location → 200 OK",
+      "testType": "positive",
+      "tags": ["positive", "patch", "foundation", "p0", "smoke"],
+      "steps": [
+        {
+          "title": "Update store fields",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/store/{{activeStoreId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Updated Store Name",
+              "location": "New Location"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Name updated",
+                  "from": "body",
+                  "path": "$.store.name",
+                  "operator": "equals",
+                  "value": "Updated Store Name"
+                },
+                {
+                  "title": "Location updated",
+                  "from": "body",
+                  "path": "$.store.location",
+                  "operator": "equals",
+                  "value": "New Location"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND09_002",
+      "title": "Admin can update business association → 200 OK",
+      "testType": "positive",
+      "tags": ["positive", "patch", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Update businessId of a store",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/store/{{activeStoreId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "businessId": "{{activeBizId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Business association updated",
+                  "from": "body",
+                  "path": "$.store.businessId",
+                  "operator": "equals",
+                  "value": "{{activeBizId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND09_003",
+      "title": "Update fails with 404 for non-existent store",
+      "testType": "negative",
+      "tags": ["negative", "patch", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Attempt update on invalid store ID",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/store/invalid-store-id",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Hack Name"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND09_004",
+      "title": "Update is partial (other fields remain unchanged) → 200 OK",
+      "testType": "positive",
+      "tags": ["positive", "patch", "foundation", "p2"],
+      "steps": [
+        {
+          "title": "Partial update of store name",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/store/{{activeStoreId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Only Name Changed"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Name is updated",
+                  "from": "body",
+                  "path": "$.store.name",
+                  "operator": "equals",
+                  "value": "Only Name Changed"
+                },
+                {
+                  "title": "Location remains unchanged",
+                  "from": "body",
+                  "path": "$.store.location",
+                  "operator": "equals",
+                  "value": "New Location"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND10_001",
+      "title": "Admin can soft-delete a store → 200 OK",
+      "testType": "positive",
+      "tags": ["positive", "delete", "foundation", "p0", "smoke"],
+      "steps": [
+        {
+          "title": "Create temporary store to delete",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/store",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Delete Me Soon"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201
+            },
+            "extract": [
+              {
+                "name": "tempStoreId",
+                "from": "body",
+                "path": "$.store.id",
+                "scope": "suite"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Soft-delete the store",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/foundation/store/{{tempStoreId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND10_002",
+      "title": "Deletion is soft (record returns 404 in active list)",
+      "testType": "negative",
+      "tags": ["integration", "delete", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Verify subsequent GET returns 404",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/store/{{tempStoreId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND10_003",
+      "title": "Delete returns 404 for non-existent or already deleted store",
+      "testType": "negative",
+      "tags": ["negative", "delete", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Delete invalid store ID",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/foundation/store/invalid-id",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        },
+        {
+          "title": "Delete already deleted store ID",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/foundation/store/{{deletedStoreId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND10_004",
+      "title": "Idempotency of delete → Second delete returns 404",
+      "testType": "negative",
+      "tags": ["negative", "delete", "foundation", "p2"],
+      "steps": [
+        {
+          "title": "Create another store to delete",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/store",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Idempotency Test Store"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201
+            },
+            "extract": [
+              {
+                "name": "idemStoreId",
+                "from": "body",
+                "path": "$.store.id",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "First delete call",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/foundation/store/{{idemStoreId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200
+            }
+          }
+        },
+        {
+          "title": "Second delete call",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/foundation/store/{{idemStoreId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

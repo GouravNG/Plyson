@@ -1,7 +1,41 @@
 import { Command } from 'commander'
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
 import { getInitTemplates } from './templates/index.js'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const skillTemplatesDir = path.resolve(__dirname, 'templates/skills')
+
+const copyDirectoryContents = (sourceDir: string, targetDir: string): number => {
+  if (!fs.existsSync(sourceDir)) {
+    return 0
+  }
+
+  if (!fs.existsSync(targetDir)) {
+    fs.mkdirSync(targetDir, { recursive: true })
+  }
+
+  let copiedFiles = 0
+
+  fs.readdirSync(sourceDir, { withFileTypes: true }).forEach((entry) => {
+    const sourcePath = path.join(sourceDir, entry.name)
+    const targetPath = path.join(targetDir, entry.name)
+
+    if (entry.isDirectory()) {
+      copiedFiles += copyDirectoryContents(sourcePath, targetPath)
+      return
+    }
+
+    if (!fs.existsSync(targetPath)) {
+      fs.copyFileSync(sourcePath, targetPath)
+      copiedFiles += 1
+    }
+  })
+
+  return copiedFiles
+}
 
 export const initCommand = new Command('init')
   .description('Create full directory structure with placeholder files')
@@ -40,6 +74,13 @@ export const initCommand = new Command('init')
         console.log(`${filename} already exists, skipping.`)
       }
     })
+
+    const copiedSkillFiles = copyDirectoryContents(skillTemplatesDir, path.join(rootDir, 'skills'))
+    if (copiedSkillFiles > 0) {
+      console.log('Created skills')
+    } else {
+      console.log('skills already exists, skipping.')
+    }
 
     console.log('\nProject initialized successfully!')
     console.log('Next steps:')
