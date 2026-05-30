@@ -44,11 +44,9 @@ npx plyson run --env dev
 
 ## Documentation
 
-For detailed information, please refer to our [Documentation Site](https://gouravng.github.io/Play-son/):
+For detailed information, please refer to our [Documentation Site](https://plyson.vercel.app):
 
-- [Installation Guide](https://gouravng.github.io/Play-son/docs/installation)
-- [Architecture Overview](https://gouravng.github.io/Play-son/docs/architecture)
-- [Assertions Reference](https://gouravng.github.io/Play-son/docs/assertions)
+- [Installation Guide](https://plyson.vercel.app/docs/test/getting-started/installation)
 
 ## License
 
