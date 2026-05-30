@@ -1,0 +1,12 @@
+{
+  "title": "CLI Reference",
+  "pages": [
+    "index",
+    "run",
+    "validate",
+    "generate",
+    "sync-schemas",
+    "sync-project-schemas",
+    "init"
+  ]
+}

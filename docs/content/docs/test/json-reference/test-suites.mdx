@@ -1,0 +1,42 @@
+---
+title: Test Suites
+description: Reference for top-level fields in *.test.json files.
+---
+
+A test suite is the primary container for your API tests. It groups related test cases together and can define shared variables and hooks.
+
+## Fields
+
+- **`$schema`** (Optional): Points to the test suite schema for **Intellisense**.
+- **`title`** (**Required**): A descriptive name for the suite.
+- **`tags`** (**Required**): An array of strings used for filtering (e.g., `["smoke", "user"]`). These tags are automatically available to every test case within this suite.
+- **`description`** (Optional): A summary of what this suite covers.
+- **`disabled`** (Optional): Set to `true` to skip all test cases in this suite.
+- **`variables`** (Optional): Suite-level variables that override global and environment scopes.
+- **`beforeAll`** (Optional): An array of [test steps](/docs/test/json-reference/test-cases-steps#test-step-fields) or [script references](/docs/test/json-reference/scripts) that run once before any test cases in this suite.
+- **`afterAll`** (Optional): An array of [test steps](/docs/test/json-reference/test-cases-steps#test-step-fields) or [script references](/docs/test/json-reference/scripts) that run once after all test cases in this suite.
+- **`testCases`** (**Required**): An array of [Test Case](/docs/test/json-reference/test-cases-steps) objects.
+
+## CLI Command
+
+Generate a new test suite boilerplate:
+
+```bash
+npx plyson generate suite <name>
+```
+
+---
+
+## Example
+
+```json
+{
+  "$schema": "../Project-schema/testsuite.schema.json",
+  "title": "Auth API",
+  "tags": ["smoke"],
+  "variables": {
+    "BASE_AUTH_PATH": "/auth"
+  },
+  "testCases": []
+}
+```

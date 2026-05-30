@@ -1,0 +1,17 @@
+{
+  "title": "JSON Reference",
+  "pages": [
+    "project",
+    "variables",
+    "environments",
+    "test-suites",
+    "test-cases-steps",
+    "requests",
+    "responses",
+    "assertions",
+    "variables-interpolation",
+    "data-generators",
+    "scripts",
+    "handlers"
+  ]
+}

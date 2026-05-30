@@ -1,0 +1,74 @@
+---
+title: Validate
+description: Validate Plyson project files and optionally enter interactive repair mode.
+---
+
+The `validate` command loads a Plyson project through `@plyson/test` and reports structural, schema, and reference errors.
+
+## Syntax
+
+```bash
+plyson validate [path] [options]
+```
+
+## Arguments
+
+- **`[path]`**: Optional path to a project root or file. Defaults to `.`.
+
+## Options
+
+- **`-e, --env <environment>`**: Environment used during validation. Defaults to `dev`.
+- **`-t, --type <type>`**: Declared target category: `project`, `suite`, `script`, `handler`, `env`, or `var`.
+- **`--repair`**: Enters interactive repair mode for broken JSON and some broken references.
+
+## Behavior
+
+- Loads `@plyson/test` from the consuming project, not from the CLI package.
+- Uses the provided path as the effective root only when that path exists and is a directory.
+- Prints aggregated validation errors when the loader throws an error list.
+- Exits with status code `1` on validation failure.
+
+## Repair Mode
+
+When `--repair` is enabled, the command performs two passes:
+
+1. Scans JSON files under the project root and proposes syntax repairs using `jsonrepair`.
+2. Runs the project loader and offers limited fixes for broken `ref` links that include `Ref "..." not found`.
+
+Current repair actions:
+
+- Fix malformed JSON after interactive confirmation.
+- Remove a broken step from `steps` or `testCases[].steps`.
+- Skip non-repairable issues and rerun validation at the end.
+
+## Examples
+
+Validate the current project with the default `dev` environment:
+
+```bash
+plyson validate
+```
+
+Validate against a specific environment:
+
+```bash
+plyson validate --env prod
+```
+
+Run interactive repair mode:
+
+```bash
+plyson validate . --env dev --repair
+```
+
+Validate a specific project directory:
+
+```bash
+plyson validate ./examples/marketplace --env local
+```
+
+## Notes
+
+- `--type` is currently exposed in the CLI but not consumed inside the validation action. It does not change behavior today.
+- The command depends on `@plyson/test` being installed in the project you are validating.
+- If `@plyson/test` cannot be resolved, the CLI prints installation guidance and exits.

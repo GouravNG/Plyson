@@ -1,0 +1,58 @@
+---
+title: Variables & Interpolation
+description: Understand how to use dynamic variables and interpolation syntax in your JSON files.
+---
+
+Plyson features a powerful variable system that allows you to reuse data and inject dynamic values throughout your project.
+
+## Interpolation Syntax
+
+To use a variable anywhere in your JSON (endpoints, payloads, assertions), wrap the name in double curly braces:
+
+```text
+{{VARIABLE_NAME}}
+```
+
+**Example:**
+`"endpoint": "/users/{{userId}}"`
+
+---
+
+## Variable Scopes
+
+Plyson uses a hierarchical scope system. If a variable with the same name exists in multiple places, the most specific scope wins:
+
+| Priority | Scope | Description |
+| :--- | :--- | :--- |
+| **1 (Highest)** | **Case** | Defined within a specific `testCase`. |
+| **2** | **Suite** | Defined at the top level of a `*.test.json`. |
+| **3** | **Environment** | Defined in your `*.env.json`. |
+| **4 (Lowest)** | **Global** | Defined in `variables.json`. |
+
+---
+
+## Reserved Variables
+
+Plyson provides built-in variables that are always available:
+
+- **`{{$timestamp}}`**: Current Unix timestamp in milliseconds.
+- **`{{$isoTimestamp}}`**: Current timestamp in ISO 8601 format.
+- **`{{$guid}}`**: A randomly generated UUID/GUID.
+- **`{{$randomInt}}`**: A random integer (0-999).
+
+---
+
+## Usage in Payloads
+
+Variables are automatically resolved within your `payload` objects.
+
+```json
+{
+  "payload": {
+    "email": "user_{{$timestamp}}@example.com",
+    "token": "{{authToken}}"
+  }
+}
+```
+
+> **Note:** If a variable is not found in any scope, it will remain as a literal string `{{name}}` and may cause request failures or validation errors.

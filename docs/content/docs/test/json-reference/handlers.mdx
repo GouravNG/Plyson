@@ -1,0 +1,82 @@
+---
+title: Custom Handlers
+description: Learn how to use TypeScript as an escape hatch for complex logic using Custom Handlers.
+---
+
+Custom Handlers are TypeScript "escape hatches" for logic that is too complex for pure JSON. Use them for cross-field assertions, complex data transformations, or interacting with external systems during a test step.
+
+## File Convention
+
+Handlers are stored in the `handlers/` directory and must follow the `*.handler.ts` naming pattern. The CLI automatically discovers and makes them available to your test steps.
+
+## Handler Structure
+
+Every handler must export a `run` function that receives a `HandlerContext`.
+
+```typescript
+import { HandlerContext } from '@plyson/test';
+
+export const run = async (ctx: HandlerContext) => {
+  // Your custom logic here
+};
+```
+
+### Handler Context (`ctx`)
+The context provides full access to the current step's execution state:
+
+- **`request`**: The fully resolved request object (method, URL, headers, payload).
+- **`response`**: The raw Playwright `APIResponse` object.
+- **`body`**: The parsed response body (JSON).
+- **`status`**: The HTTP response status code.
+- **`store`**: Interface to interact with the variable store.
+  - `get(name)`: Retrieve a variable.
+  - `set(name, value, scope)`: Save a new variable.
+- **`log(msg)`**: Log a message to the test output.
+- **`error(msg)`**: Throw an assertion error to fail the test.
+
+---
+
+## Using a Handler
+
+To use a handler, add its filename (without the extension) to the `handlers` array of any test step:
+
+```json
+{
+  "title": "Validate complex business logic",
+  "request": { "method": "GET", "endpoint": "/orders/123" },
+  "handlers": ["validate-order-total"]
+}
+```
+
+---
+
+## Example: Cross-field Assertion
+
+This handler (`handlers/validate-order-total.handler.ts`) ensures that the sum of items matches the `totalPrice` field in the response.
+
+```typescript
+import { HandlerContext } from '@plyson/test';
+
+export const run = async (ctx: HandlerContext) => {
+  const { body, error } = ctx;
+
+  const items = (body as any).items;
+  const totalPrice = (body as any).totalPrice;
+
+  const sum = items.reduce((acc: number, item: any) => acc + item.price, 0);
+
+  if (sum !== totalPrice) {
+    error(`Calculated sum (${sum}) does not match response totalPrice (${totalPrice})`);
+  }
+};
+```
+
+---
+
+## CLI Command
+
+You can generate a new handler boilerplate using the CLI:
+
+```bash
+npx plyson generate handler <name>
+```

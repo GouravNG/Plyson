@@ -17,7 +17,7 @@ export default function HomePage() {
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Link
-            href="/docs"
+            href="/docs/test"
             className="px-8 py-4 rounded-xl bg-fd-primary text-fd-primary-foreground font-bold hover:brightness-110 transition-all shadow-lg shadow-fd-primary/20"
           >
             Read Documentation
@@ -129,7 +129,7 @@ export default function HomePage() {
         <h2 className="text-3xl font-bold mb-4 text-fd-foreground">Ready to test?</h2>
         <p className="text-fd-muted-foreground mb-8">Start your first Plyson project in seconds.</p>
         <Link
-          href="/docs/getting-started/installation"
+          href="/docs/test/getting-started/installation"
           className="px-8 py-4 rounded-xl bg-fd-primary text-fd-primary-foreground font-bold hover:brightness-110 transition-all shadow-lg shadow-fd-primary/20 inline-block"
         >
           Get Started with Installation

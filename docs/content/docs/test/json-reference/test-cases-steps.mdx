@@ -1,0 +1,88 @@
+---
+title: Test Cases & Steps
+description: Reference for the core logic of your tests—cases and the steps within them.
+---
+
+Test cases define individual scenarios, while steps define the atomic HTTP actions.
+
+## Test Case Fields
+
+- **`id`** (**Required**): A unique identifier (standard format: `FEATURE_ACTION_INDEX`).
+- **`title`** (**Required**): A descriptive name for the scenario.
+- **`tags`** (**Required**): Case-specific tags for filtering.
+- **`steps`** (**Required**): An array of Test Step objects.
+- **`testType`** (Optional): Defaults to `positive`. Can be `negative` or `edge`.
+- **`description`** (Optional): A summary of what this case covers.
+- **`disabled`** (Optional): Set to `true` to skip this specific test case.
+- **`variables`** (Optional): Case-level variables (highest priority).
+
+---
+
+## Test Step Fields
+
+A Test Step is the atomic unit of execution in Plyson. It can be defined in two ways: **Inline** (with a full request) or as a **Reference** (to a [reusable script](/docs/test/json-reference/scripts)).
+
+### Common Fields
+These fields are available on all types of steps:
+
+- **`title`** (**Required**): A human-readable name for the step, shown in reports.
+- **`description`** (Optional): A more detailed summary of what the step does.
+- **`disabled`** (Optional): Set to `true` to skip this specific step.
+- **`wait`** (Optional): Number of milliseconds to wait *before* executing this step.
+- **`flags`** (Optional): An array of strings to enable specific framework behaviors.
+  - `skip_auth`: Temporarily disables the `Authorization` header for this specific step. Useful for testing login endpoints or public resources while in an authenticated session.
+
+```json
+{
+  "title": "Access public endpoint",
+  "flags": ["skip_auth"],
+  "request": { "method": "GET", "endpoint": "/public/status" },
+  "response": { "validations": { "statusCode": 200 } }
+}
+```
+- **`handlers`** (Optional): An array of [Custom Handlers](/docs/getting-started/project-structure#handlers) to run after the step completes.
+
+### 1. Inline Steps
+Inline steps define the complete HTTP request and its expected response.
+
+- **`request`** (**Required**): The HTTP configuration.
+  - `method`: GET, POST, etc.
+  - `endpoint`: The relative API path (prepended with `baseUrl`).
+  - `payload`: The request body.
+  - `autoFill`: Configuration for automatic schema-based data injection.
+- **`response`** (**Required**): Validation and extraction logic.
+  - `validations`: Status code and body assertions.
+  - `extract`: Saving values from the response into variables.
+
+### 2. Referenced Steps (`ref`)
+Referenced steps allow you to reuse common logic defined in a separate [Script](/docs/json-reference/scripts) file.
+
+- **`ref`** (**Required**): The unique `id` of a script defined in the `scripts/` directory.
+- **Note:** When using `ref`, you cannot provide a `request` block. The step will execute the logic defined in the referenced script.
+
+For more details on creating and managing these fragments, see the [Reusable Scripts](/docs/json-reference/scripts) guide.
+
+---
+
+## Example
+
+```json
+{
+  "id": "USER_CREATE_001",
+  "title": "Should create a user",
+  "tags": ["positive", "regression"],
+  "steps": [
+    {
+      "title": "POST /users",
+      "request": {
+        "method": "POST",
+        "endpoint": "/users",
+        "payload": { "name": "John" }
+      },
+      "response": {
+        "validations": { "statusCode": 201 }
+      }
+    }
+  ]
+}
+```

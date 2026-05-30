@@ -1,0 +1,50 @@
+---
+title: Sync Project Schemas
+description: Export Plyson core JSON schemas into the local Project-schema directory.
+---
+
+The `sync-project-schemas` command generates the JSON schemas that power IDE autocomplete and validation for Plyson project files.
+
+## Syntax
+
+```bash
+plyson sync-project-schemas
+```
+
+## Behavior
+
+- Dynamically loads `@plyson/test` from the consuming project.
+- Writes schema files into `Project-schema/` under the current project root.
+- Uses `plyson_ROOT` when that environment variable is already set, otherwise falls back to the current working directory.
+- Creates `Project-schema/` when it does not exist.
+
+## Files Generated
+
+- `Project-schema/project.schema.json`
+- `Project-schema/testsuite.schema.json`
+- `Project-schema/testcase.schema.json`
+- `Project-schema/environment.schema.json`
+- `Project-schema/variables.schema.json`
+
+## Example
+
+Generate or refresh all core schemas:
+
+```bash
+plyson sync-project-schemas
+```
+
+Typical setup flow after project initialization:
+
+```bash
+plyson init my-api-tests
+cd my-api-tests
+npm install
+plyson sync-project-schemas
+```
+
+## Notes
+
+- This command requires `@plyson/test` to be installed in the target project.
+- Each generated file is written independently; one schema can fail while others still succeed.
+- The generated files include a draft-07 `$schema` header and an added `$schema` string property.

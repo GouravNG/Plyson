@@ -1,0 +1,62 @@
+---
+title: CLI Overview
+description: Reference guide for every Plyson CLI command, subcommand, option, and interactive flow.
+---
+
+The Plyson CLI is the primary command-line interface for creating, validating, and running Plyson test projects.
+
+## Installation
+
+Install the CLI globally:
+
+```bash
+npm install -g @plyson/cli
+```
+
+Or run it through `npx` when you want to use the project-local version:
+
+```bash
+npx plyson --help
+```
+
+## Command Groups
+
+- **Project setup**: [`init`](/docs/cli/init), [`sync-project-schemas`](/docs/cli/sync-project-schemas)
+- **Execution**: [`run`](/docs/cli/run)
+- **Validation**: [`validate`](/docs/cli/validate)
+- **Boilerplate generation**: [`generate`](/docs/cli/generate)
+- **OpenAPI schema sync**: [`sync-schemas`](/docs/cli/sync-schemas)
+
+## Top-Level Commands
+
+```bash
+plyson run
+plyson validate
+plyson generate
+plyson sync-schemas
+plyson sync-project-schemas
+plyson init
+```
+
+## What This Reference Covers
+
+Each command page in this section documents:
+
+- positional arguments
+- short and long flags
+- default values
+- interactive prompts
+- files read or written
+- current limitations in the implementation
+
+## Recommended Starting Flow
+
+For a new project, the usual sequence is:
+
+```bash
+plyson init my-api-tests
+cd my-api-tests
+npm install
+plyson sync-project-schemas
+plyson run --env dev
+```

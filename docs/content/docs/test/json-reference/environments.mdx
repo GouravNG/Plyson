@@ -1,0 +1,39 @@
+---
+title: Environments
+description: Reference for environment files (*.env.json) used to manage stage-specific data.
+---
+
+Environment files (stored in `environments/`) allow you to define configuration that changes between stages like Dev, Staging, and Production.
+
+## Fields
+
+- **`$schema`** (Optional): Points to the environment schema for **Intellisense**.
+- **`baseUrl`** (**Required**): The root URL for all API requests in this environment.
+- **`specUrl`** (Optional): The URL to your OpenAPI/Swagger specification, used by the CLI for schema synchronization.
+- **`variables`** (Optional): Environment-specific overrides for your global variables.
+
+## CLI Command
+
+To add a variable to all your environment files at once:
+
+```bash
+npx plyson generate env-var <key> <value> --env <name>
+```
+
+- **`key` / `value`**: The variable to add.
+- **`--env <name>`**: The specific environment where the value should be set (others will receive an empty string placeholder).
+
+---
+
+## Example (`dev.env.json`)
+
+```json
+{
+  "$schema": "../Project-schema/environment.schema.json",
+  "baseUrl": "http://localhost:3000",
+  "specUrl": "http://localhost:3000/openapi.json",
+  "variables": {
+    "adminEmail": "dev-admin@example.com"
+  }
+}
+```
