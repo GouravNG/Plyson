@@ -1,0 +1,75 @@
+---
+title: Sync Schemas
+description: Pull request and response schemas from an OpenAPI document into the local schemas directory.
+---
+
+The `sync-schemas` command fetches an OpenAPI document from `specUrl` in an environment file, extracts schema definitions, rewrites internal references, and writes local `.schema.json` files.
+
+## Syntax
+
+```bash
+plyson sync-schemas [options]
+```
+
+## Options
+
+- **`-e, --env <name>`**: Environment file to read. Defaults to `dev`.
+- **`--all`**: Declared flag for syncing all schemas. Default is `true`.
+- **`--name <name>`**: Sync only one schema by name.
+- **`--skip-stale`**: Skip stale local file checks after syncing.
+
+## Requirements
+
+- `environments/<env>.env.json` must exist.
+- The environment file must contain `specUrl`.
+- The remote `specUrl` must return JSON with either:
+  - `components.schemas`, or
+  - `definitions`
+
+## Behavior
+
+- Always prompts for confirmation before writing synced schemas.
+- Creates the local `schemas/` directory when missing.
+- Rewrites `$ref` values like `#/components/schemas/User` to `User.schema.json`.
+- When `--name` is used, only the named schema is written.
+- When stale checking is enabled, the command compares local schema files with remote schema names and prompts for each stale file.
+
+## Stale File Actions
+
+For each stale `*.schema.json` file, the interactive choices are:
+
+- `Keep it`
+- `Delete it`
+- `Abort sync`
+
+## Examples
+
+Sync all schemas from `dev.env.json`:
+
+```bash
+plyson sync-schemas
+```
+
+Sync all schemas from a specific environment:
+
+```bash
+plyson sync-schemas --env qa
+```
+
+Sync only one schema:
+
+```bash
+plyson sync-schemas --env dev --name User
+```
+
+Skip stale file prompts:
+
+```bash
+plyson sync-schemas --env dev --skip-stale
+```
+
+## Notes
+
+- `--all` is currently redundant in practice because syncing all schemas is already the default path when `--name` is not provided.
+- Network and JSON parsing failures are reported as `Error syncing schemas: ...`.
+- If the requested schema name does not exist remotely, the command prints `No schemas found to sync.`

@@ -1,0 +1,64 @@
+---
+title: Reusable Scripts
+description: Reference for *.script.json files used to share test logic across multiple suites.
+---
+
+Reusable Scripts allow you to define common test sequences—such as user login, data cleanup, or complex setup—once and use them anywhere in your project.
+
+## File Convention
+Scripts are stored in the `scripts/` directory and must follow the `*.script.json` naming pattern.
+
+> **Pro Tip:** Like test suites, scripts support the recursive `**/*.script.json` pattern. You can organize your reusable logic into subfolders (e.g., `scripts/auth/`, `scripts/common/`) to maintain a clean and scalable project structure.
+
+## Fields
+
+- **`id`** (**Required**): A unique id used to reference this script from other tests. 
+- **`title`** (**Required**): A descriptive name for the script.
+- **`description`** (Optional): A summary of the script's purpose.
+- **`steps`** (**Required**): An array of [Test Step](/docs/json-reference/test-cases-steps#test-step-fields) objects.
+
+## Using a Script
+
+To use a script in a test case, use the `ref` field in a test step:
+
+```json
+{
+  "title": "Perform Login",
+  "ref": "YOUR_SCRIPT_ID_HERE"
+}
+```
+
+---
+
+## CLI Command
+
+You can generate a new script with a unique ID automatically using the CLI:
+
+```bash
+npx plyson generate script <name>
+```
+
+---
+
+## Example (`login.script.json`)
+
+```json
+{
+  "id": "TC_USER_AUTH",
+  "title": "Standard User Authentication",
+  "steps": [
+    {
+      "title": "Login POST",
+      "request": {
+        "method": "POST",
+        "endpoint": "/auth/login",
+        "payload": { "email": "{{USER_EMAIL}}", "password": "{{USER_PWD}}" }
+      },
+      "response": {
+        "validations": { "statusCode": 200 },
+        "extract": [{ "name": "authToken", "from": "body", "path": "$.token", "scope": "environment" }]
+      }
+    }
+  ]
+}
+```

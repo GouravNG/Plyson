@@ -1,0 +1,41 @@
+---
+title: Global Variables
+description: Reference for the variables.json file, used for defining project-wide constants.
+---
+
+The `variables.json` file is used to store constant values that remain the same across all different environments. These global variables are available to every test suite, case, and script in your project, but they have the lowest priority in the variable scope chain.
+
+Use this file for project-wide defaults like application names or pagination limits.
+
+## Structure
+
+The file is a flat JSON object where keys are variable names and values are their defaults.
+
+- **Keys**: The name you use in interpolation (e.g., `{{APP_NAME}}`).
+- **Values**: Can be strings, numbers, booleans, or objects.
+
+## CLI Command
+
+You can quickly add or update a global variable using the CLI:
+
+```bash
+npx plyson generate var <key> <value>
+```
+
+**Example:**
+```bash
+npx plyson generate var TIMEOUT 5000
+```
+
+---
+
+## Example
+
+```json
+{
+  "$schema": "./Project-schema/variables.schema.json",
+  "APP_NAME": "MyDemoAPI",
+  "DEFAULT_LIMIT": 20,
+  "RETRY_COUNT": 3
+}
+```

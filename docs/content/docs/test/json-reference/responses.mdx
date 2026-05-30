@@ -1,0 +1,72 @@
+---
+title: Responses
+description: Technical reference for response validation and data extraction.
+---
+
+The `response` block defines how to validate the result of an HTTP call and how to save data for use in subsequent steps.
+
+## Fields
+
+- **`validations`** (**Required**): Checks that must pass for the step to be considered successful.
+  - `statusCode`: A number or an array of allowed HTTP status codes (e.g., `200` or `[200, 201]`).
+  - `assertions`: An array of detailed checks against the response body or headers.
+- **`extract`** (Optional): An array of rules for saving response data into variables.
+- **`schema`** (Optional): Validation against a JSON schema.
+  - `name`: The schema filename.
+  - `validation`: Set to `warn` for soft failures or `true` (default) for hard failures.
+
+---
+
+## Assertions Reference
+
+Each assertion requires the following fields:
+
+- **`title`** (**Required**): A name for the assertion.
+- **`from`** (**Required**): Where to look—`body` or `header`.
+- **`path`** (**Required**): The path to the value you want to check or extract.
+  - **JSONPath**: Use for complex filtering. Must start with `$` (e.g., `$.items[0].id` or `$.users[?(@.active)].email`).
+  - **JMESPath**: Use for simple property access or transformations. (e.g., `items[0].id` or `users[?active].email`).
+  - **Headers**: Use the literal header name (case-insensitive, e.g., `Content-Type` or `authorization`).
+- **`operator`** (**Required**): The check to perform (e.g., `equals`, `contains`, `exists`).
+- **`value`** (Optional): The expected value for the check.
+- **`validation`** (Optional): Defaults to `error`. Set to `warn` to log a failure without stopping the test.
+
+---
+
+## Extraction Reference
+
+Extract allows you to save data for later:
+
+- **`name`** (**Required**): The variable name to save to.
+- **`from`** (**Required**): `body` or `header`.
+- **`path`** (**Required**): The path to the value to extract. Supports **JSONPath** (starting with `$`) and **JMESPath** (see Assertions Reference for examples).
+- **`scope`** (**Required**): Where the variable should live—`case`, `suite`, or `environment`.
+
+---
+
+## Example
+
+```json
+"response": {
+  "validations": {
+    "statusCode": 200,
+    "assertions": [
+      {
+        "title": "Status is ACTIVE",
+        "from": "body",
+        "path": "$.status",
+        "operator": "equals",
+        "value": "ACTIVE"
+      }
+    ]
+  },
+  "extract": [
+    {
+      "name": "newId",
+      "from": "body",
+      "path": "$.id",
+      "scope": "suite"
+    }
+  ]
+}
+```

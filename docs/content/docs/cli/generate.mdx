@@ -1,0 +1,147 @@
+---
+title: Generate
+description: Create boilerplate files and project variables from the command line.
+---
+
+The `generate` command groups small scaffolding utilities under one namespace. It also has the alias `g`.
+
+## Syntax
+
+```bash
+plyson generate <subcommand> [options]
+plyson g <subcommand> [options]
+```
+
+## Subcommands
+
+- `var <key> [value]`
+- `env-var <key> <value>`
+- `handler <name>`
+- `script <name>`
+- `suite <name>`
+
+## `generate var`
+
+Append or overwrite a key in `variables.json`.
+
+### Syntax
+
+```bash
+plyson generate var <key> [value]
+```
+
+### Behavior
+
+- Creates `variables.json` if it does not exist.
+- Reads the existing file as JSON when it already exists.
+- Writes an empty string when `[value]` is omitted.
+
+### Example
+
+```bash
+plyson generate var apiToken secret-token
+```
+
+```bash
+plyson generate var basePath
+```
+
+## `generate env-var`
+
+Add the same variable key to every `environments/*.env.json` file.
+
+### Syntax
+
+```bash
+plyson generate env-var <key> <value> [--env <name>]
+```
+
+### Options
+
+- **`-e, --env <name>`**: Environment that receives the provided value. Defaults to `dev`.
+
+### Behavior
+
+- Requires the `environments` directory to exist.
+- Writes the provided value into the selected environment file.
+- Writes an empty string for the same key into every other environment file.
+
+### Example
+
+Set `apiKey` in `prod.env.json` and blank it in all other environment files:
+
+```bash
+plyson generate env-var apiKey live-secret --env prod
+```
+
+## `generate handler`
+
+Create a TypeScript handler boilerplate in `handlers/`.
+
+### Syntax
+
+```bash
+plyson generate handler <name>
+```
+
+### Behavior
+
+- Creates the `handlers` directory if needed.
+- Writes `<name>.handler.ts`.
+- Refuses to overwrite an existing file.
+
+### Example
+
+```bash
+plyson generate handler create-user
+```
+
+## `generate script`
+
+Create a JSON script boilerplate in `scripts/`.
+
+### Syntax
+
+```bash
+plyson generate script <name>
+```
+
+### Behavior
+
+- Creates the `scripts` directory if needed.
+- Writes `<name>.script.json`.
+- Generates a random UUID and includes it in the template.
+- Refuses to overwrite an existing file.
+
+### Example
+
+```bash
+plyson generate script auth-login
+```
+
+## `generate suite`
+
+Create a JSON suite boilerplate in `suites/`.
+
+### Syntax
+
+```bash
+plyson generate suite <name>
+```
+
+### Behavior
+
+- Creates the `suites` directory if needed.
+- Writes `<name>.test.json`.
+- Refuses to overwrite an existing file.
+
+### Example
+
+```bash
+plyson generate suite smoke
+```
+
+## Notes
+
+- None of the subcommands overwrite existing files.
+- `generate var` and `generate env-var` mutate JSON files directly and do not prompt before writing.

@@ -1,0 +1,85 @@
+---
+title: Data Generators
+description: Learn how to use the $gen operator to generate dynamic, realistic test data via Faker.js.
+---
+
+Plyson includes a built-in data generation system powered by **Faker.js**. This allows you to create realistic, unique data for every request without manual setup.
+
+## How to Transform Faker.js to JSON
+
+If you are familiar with [Faker.js](https://fakerjs.dev/api/), you can easily translate any method call into Plyson's `$gen` syntax.
+
+### The Basic Formula
+Put the **method name** in the `$gen` key, and any **arguments** as top-level keys beside it.
+
+| Faker.js (Code) | Plyson (JSON) |
+| :--- | :--- |
+| `faker.string.uuid()` | `{ "$gen": "uuid" }` |
+| `faker.internet.email()` | `{ "$gen": "email" }` |
+| `faker.number.int({ min: 10, max: 100 })` | `{ "$gen": "int", "min": 10, "max": 100 }` |
+| `faker.person.fullName({ sex: 'male' })` | `{ "$gen": "fullName", "sex": "male" }` |
+
+---
+
+## Resolution Modes
+
+Plyson provides three ways to target a specific Faker method:
+
+### 1. Auto-Discovery
+Simply provide the method name. Plyson will search all Faker modules to find a match.
+```json
+{ "$gen": "email" } 
+```
+
+### 2. Qualified Names
+Specify the module and method separated by a dot. Use this if multiple modules have the same method name.
+```json
+{ "$gen": "vehicle.type" }
+```
+
+### 3. Module Hints
+Use the `$module` key to specify which Faker module to use.
+```json
+{ "$gen": "type", "$module": "animal" }
+```
+
+---
+
+## Advanced Logic
+
+### Nested Resolution
+You can use variables or even *other generators* inside the options of a generator.
+```json
+{
+  "$gen": "string",
+  "length": { "$gen": "number", "min": 4, "max": 12 }
+}
+```
+
+### Array Generation (`$count`)
+To generate an array of random values instead of a single one, add the `$count` key:
+```json
+{
+  "tags": { "$gen": "word", "$count": 3 }
+}
+```
+*Result: `["apple", "banana", "cherry"]`*
+
+---
+
+## Example
+
+```json
+{
+  "title": "Register User",
+  "request": {
+    "method": "POST",
+    "endpoint": "/register",
+    "payload": {
+      "email": { "$gen": "email" },
+      "firstName": { "$gen": "firstName" },
+      "age": { "$gen": "number", "min": 21, "max": 99 }
+    }
+  }
+}
+```

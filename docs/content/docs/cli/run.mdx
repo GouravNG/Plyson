@@ -1,0 +1,68 @@
+---
+title: Run
+description: Execute Plyson tests through Playwright and pass through Playwright arguments.
+---
+
+The `run` command executes Plyson tests by spawning `npx playwright test` with the current project root and environment exposed through environment variables.
+
+## Syntax
+
+```bash
+plyson run [paths...] [--env <name>] [playwright options...]
+```
+
+## Arguments
+
+- **`[paths...]`**: Optional test paths or Playwright test filters. These are forwarded to `playwright test`.
+
+## Options
+
+- **`-e, --env <name>`**: Environment to use.
+  If omitted, the CLI reads `project.json` and uses `defaultEnv` when available.
+
+## Behavior
+
+- Requires an environment either from `--env` or `project.json.defaultEnv`.
+- Sets `plyson_ROOT` to the current working directory.
+- Sets `plyson_ENV` to the resolved environment name.
+- Forwards unknown flags to Playwright because the command uses `allowUnknownOption()`.
+- Removes `--env` and `-e` before invoking Playwright.
+
+## Examples
+
+Run the full project against the `dev` environment:
+
+```bash
+plyson run --env dev
+```
+
+Run a specific suite:
+
+```bash
+plyson run suites/auth.test.json --env qa
+```
+
+Pass Playwright flags through the CLI:
+
+```bash
+plyson run --env dev --grep login --reporter=list
+```
+
+Use `project.json.defaultEnv` and omit `--env`:
+
+```bash
+plyson run
+```
+
+## Common Failures
+
+If no environment can be resolved, the command exits with:
+
+```text
+Error: Environment is required. Use --env <name> or set defaultEnv in project.json
+```
+
+## Notes
+
+- The command always shells out to `npx playwright test`.
+- Any Playwright option not claimed by Plyson should continue to work as a pass-through argument.

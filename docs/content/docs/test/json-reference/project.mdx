@@ -1,0 +1,40 @@
+---
+title: Project Config
+description: Reference for the project.json file, the central configuration for your Plyson project.
+---
+
+The `project.json` file is the brain of your testing project. It defines metadata, default behaviors, and global lifecycle hooks that run before or after your tests.
+
+## Fields
+
+- **`$schema`** (Optional): Points to the local JSON schema for **Intellisense** and real-time validation.
+- **`title`** (**Required**): A human-readable name for your project, used in reports.
+- **`version`** (**Required**): The version of your test suite.
+- **`description`** (Optional): A brief summary of the project's purpose.
+- **`defaultEnv`** (Optional): The name of the environment file to use if the `--env` flag is omitted in the CLI.
+- **`beforeAll`** (Optional): An array of [test steps](/docs/json-reference/test-cases-steps#test-step-fields) or [script references](/docs/json-reference/scripts) that run exactly once before any test suites.
+- **`afterAll`** (Optional): An array of [test steps](/docs/json-reference/test-cases-steps#test-step-fields) or [script references](/docs/json-reference/scripts) that run exactly once after all test suites have finished.
+
+## CLI Command
+
+You can generate a new `project.json` file as part of the initial project scaffolding:
+
+```bash
+npx plyson init <project-name>
+```
+
+---
+
+## Example
+
+```json
+{
+  "$schema": "./Project-schema/project.schema.json",
+  "title": "Marketplace API Validation",
+  "version": "1.0.0",
+  "defaultEnv": "dev",
+  "beforeAll": [
+    { "ref": "GLOBAL_SETUP" }
+  ]
+}
+```

@@ -1,0 +1,88 @@
+---
+title: Assertion Operators
+description: A complete catalog of all operators available for response validation in Plyson.
+---
+
+Plyson provides a wide range of operators to validate API responses. These operators are powered by Playwright's `expect` library and can be used against both response bodies and headers.
+
+## Equality & Existence
+
+| Operator | Value | Description |
+| :--- | :--- | :--- |
+| **`equals`** | Any | Checks if the actual value is equal to the expected value. |
+| **`notEquals`** | Any | Checks if the actual value is NOT equal to the expected value. |
+| **`equalsIgnoreCase`** | String | Case-insensitive string equality check. |
+| **`exists`** | (None) | Checks if the value is defined (not `undefined`). |
+| **`notExists`** | (None) | Checks if the value is `undefined`. |
+| **`isNull`** | (None) | Checks if the value is explicitly `null`. |
+| **`isNotNull`** | (None) | Checks if the value is NOT `null`. |
+
+---
+
+## Numeric Comparisons
+
+| Operator | Value | Description |
+| :--- | :--- | :--- |
+| **`isGreaterThan`** | Number | `Actual > Value` |
+| **`isLessThan`** | Number | `Actual < Value` |
+| **`isGreaterThanOrEquals`** | Number | `Actual >= Value` |
+| **`isLessThanOrEquals`** | Number | `Actual <= Value` |
+
+---
+
+## Strings & Arrays
+
+| Operator | Value | Description |
+| :--- | :--- | :--- |
+| **`contains`** | String | Checks if a string contains a substring. |
+| **`notContains`** | String | Checks if a string does NOT contain a substring. |
+| **`matches`** | String (Regex) | Validates a string against a Regular Expression. |
+| **`hasLength`** | Number | Checks if a string or array has an exact length. |
+| **`hasMinLength`** | Number | Checks for minimum length. |
+| **`hasMaxLength`** | Number | Checks for maximum length. |
+| **`includes`** | Any | Checks if an array contains a specific item. |
+| **`notIncludes`** | Any | Checks if an array does NOT contain an item. |
+| **`isEmpty`** | (None) | Checks if a string or array is empty. |
+| **`isNotEmpty`** | (None) | Checks if a string or array is NOT empty. |
+
+---
+
+## Advanced Validation
+
+### `containsSubset`
+Checks if the response object contains the specified properties and values. This is great for partial object matches.
+
+```json
+{
+  "operator": "containsSubset",
+  "value": { "role": "ADMIN", "active": true }
+}
+```
+
+### `notContainsSubset`
+Ensures that the response object does NOT match the provided subset of properties.
+
+### Type Checks
+Validate the data type of the response field:
+- **`isString`**
+- **`isNumber`**
+- **`isBoolean`**
+- **`isArray`**
+- **`isObject`**
+
+---
+
+## Complete Example
+
+```json
+{
+  "title": "Validate User Details",
+  "from": "body",
+  "path": "$.user",
+  "operator": "containsSubset",
+  "value": {
+    "email": "jane@example.com",
+    "settings": { "theme": "dark" }
+  }
+}
+```

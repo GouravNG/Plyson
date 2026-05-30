@@ -1,0 +1,70 @@
+---
+title: Init
+description: Scaffold a Plyson project with default folders, starter files, and skill templates.
+---
+
+The `init` command creates a ready-to-edit Plyson project layout in the current directory or in a new target folder.
+
+## Syntax
+
+```bash
+plyson init [project-name]
+```
+
+## Arguments
+
+- **`[project-name]`**: Target project directory. Defaults to `.`.
+
+## Behavior
+
+- Creates these directories when missing:
+  - `environments`
+  - `schemas`
+  - `handlers`
+  - `scripts`
+  - `suites`
+- Writes starter files from the CLI templates.
+- Copies bundled skill templates into `skills/`.
+- Skips files that already exist instead of overwriting them.
+- Uses the current directory name for `package.json.name` when the argument is `.`.
+
+## Generated Starter Files
+
+The exact starter files come from the CLI templates, but the generated project includes at least:
+
+- `project.json`
+- `variables.json`
+- `package.json`
+- `playwright.config.ts`
+- `.gitignore`
+- `environments/dev.env.json`
+- `suites/sample.test.json`
+
+## Examples
+
+Create a new project in a fresh folder:
+
+```bash
+plyson init my-api-tests
+```
+
+Initialize the current directory:
+
+```bash
+plyson init .
+```
+
+## Next Steps
+
+The command prints a suggested setup flow after scaffolding:
+
+1. Install dependencies.
+2. Run `plyson sync-project-schemas`.
+3. Edit `project.json` and `environments/dev.env.json`.
+4. Add or update suite files.
+5. Run `plyson run --env dev`.
+
+## Notes
+
+- Existing files are preserved.
+- Skill templates are copied only when the destination files do not already exist.
