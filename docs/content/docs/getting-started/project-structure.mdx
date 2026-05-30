@@ -1,0 +1,85 @@
+---
+title: Project Structure
+description: Understand the organization of a Plyson project and its file conventions.
+---
+
+import { Files, Folder, File } from 'fumadocs-ui/components/files';
+
+Top-level folders and files are used to organize your test suites, environments, and custom logic.
+
+<Files>
+  <Folder name="environments" defaultOpen>
+    <File name="dev.env.json" />
+  </Folder>
+  <Folder name="suites" defaultOpen>
+    <File name="sample.test.json" />
+  </Folder>
+  <Folder name="schemas">
+    <File name="User.schema.json" />
+  </Folder>
+  <Folder name="handlers">
+    <File name="auth.handler.ts" />
+  </Folder>
+  <Folder name="scripts">
+    <File name="login.script.json" />
+  </Folder>
+  <File name="project.json" />
+  <File name="variables.json" />
+  <File name="playwright.config.ts" />
+</Files>
+
+---
+
+## Top-level folders
+
+<div className="not-prose my-6 divide-y divide-fd-border border-y border-fd-border">
+  <div className="flex flex-col gap-2 py-4 sm:grid sm:grid-cols-[160px_1fr] sm:gap-4 sm:items-center">
+    <code className="text-sky-500 bg-sky-500/10 border border-sky-500/20 px-1.5 py-0.5 rounded-md text-xs font-mono w-fit">environments</code>
+    <p className="text-sm text-fd-muted-foreground">**Required.** Contains environment-specific configurations (`*.env.json`) like base URLs and variables.</p>
+  </div>
+  <div className="flex flex-col gap-2 py-4 sm:grid sm:grid-cols-[160px_1fr] sm:gap-4 sm:items-center">
+    <code className="text-sky-500 bg-sky-500/10 border border-sky-500/20 px-1.5 py-0.5 rounded-md text-xs font-mono w-fit">suites</code>
+    <p className="text-sm text-fd-muted-foreground">**Required.** Where your declarative API test suites live (`*.test.json`).</p>
+  </div>
+  <div className="flex flex-col gap-2 py-4 sm:grid sm:grid-cols-[160px_1fr] sm:gap-4 sm:items-center">
+    <code className="text-sky-500 bg-sky-500/10 border border-sky-500/20 px-1.5 py-0.5 rounded-md text-xs font-mono w-fit">schemas</code>
+    <p className="text-sm text-fd-muted-foreground">Optional. Stores JSON schemas (`*.schema.json`) for request auto-filling and response validation.</p>
+  </div>
+  <div className="flex flex-col gap-2 py-4 sm:grid sm:grid-cols-[160px_1fr] sm:gap-4 sm:items-center">
+    <code className="text-sky-500 bg-sky-500/10 border border-sky-500/20 px-1.5 py-0.5 rounded-md text-xs font-mono w-fit">scripts</code>
+    <p className="text-sm text-fd-muted-foreground">Optional. Reusable test case fragments (`*.script.json`) that can be shared across suites.</p>
+  </div>
+  <div className="flex flex-col gap-2 py-4 sm:grid sm:grid-cols-[160px_1fr] sm:gap-4 sm:items-center">
+    <code className="text-sky-500 bg-sky-500/10 border border-sky-500/20 px-1.5 py-0.5 rounded-md text-xs font-mono w-fit">handlers</code>
+    <p className="text-sm text-fd-muted-foreground">Optional. TypeScript "escape hatches" (`*.handler.ts`) for complex custom logic.</p>
+  </div>
+</div>
+
+## Top-level files
+
+Top-level files are used to configure your project, manage global variables, and define Playwright settings.
+
+<div className="not-prose my-6 divide-y divide-fd-border border-y border-fd-border">
+  <div className="flex flex-col gap-2 py-4 sm:grid sm:grid-cols-[160px_1fr] sm:gap-4 sm:items-center">
+    <code className="text-sky-500 bg-sky-500/10 border border-sky-500/20 px-1.5 py-0.5 rounded-md text-xs font-mono w-fit">project.json</code>
+    <p className="text-sm text-fd-muted-foreground">**Required.** The root configuration for metadata, versioning, and global hooks.</p>
+  </div>
+  <div className="flex flex-col gap-2 py-4 sm:grid sm:grid-cols-[160px_1fr] sm:gap-4 sm:items-center">
+    <code className="text-sky-500 bg-sky-500/10 border border-sky-500/20 px-1.5 py-0.5 rounded-md text-xs font-mono w-fit">variables.json</code>
+    <p className="text-sm text-fd-muted-foreground">Optional. Global defaults for your test project.</p>
+  </div>
+  <div className="flex flex-col gap-2 py-4 sm:grid sm:grid-cols-[160px_1fr] sm:gap-4 sm:items-center">
+    <code className="text-sky-500 bg-sky-500/10 border border-sky-500/20 px-1.5 py-0.5 rounded-md text-xs font-mono w-fit">playwright.config.ts</code>
+    <p className="text-sm text-fd-muted-foreground">**Required.** Playwright configuration file that handles reporting and worker settings.</p>
+  </div>
+</div>
+
+---
+
+## Next Steps
+
+Now that you understand the layout, let's dive into writing your first test.
+
+<Cards>
+  <Card title="Writing Your First Test" href="/docs/getting-started/writing-tests" description="Learn how to structure a test suite and add assertions." />
+</Cards>

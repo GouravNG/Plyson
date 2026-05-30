@@ -1,0 +1,100 @@
+---
+title: Writing Your First Test
+description: Learn how to structure a Plyson test suite and add assertions.
+---
+
+Now that you understand the [Project Structure](/docs/getting-started/project-structure), let's dive into writing your first test. Plyson tests are defined in JSON, which means they are purely declarative and easy to maintain.
+
+## Creating a Test Suite
+
+You can manually create a JSON file or use the Plyson CLI to generate a boilerplate for you:
+
+```bash
+npx plyson generate suite users
+```
+
+This will create a new file at `suites/users.test.json`. 
+
+> **Pro Tip:** Plyson recursively discovers all files matching the `suites/**/*.test.json` pattern. This means you can organize your tests into subfolders (e.g., `suites/auth/`, `suites/billing/`) at any depth to keep your project clean.
+
+A suite is a collection of **Test Cases**, and each case contains one or more **Steps**.
+
+```json
+{
+  "title": "User Management API",
+  "description": "Tests for the user-related endpoints",
+  "testCases": [
+    {
+      "id": "USER_GET_001",
+      "title": "Should fetch a list of users",
+      "steps": [
+        {
+          "title": "List Users",
+          "request": {
+            "method": "GET",
+            "endpoint": "/users"
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Breakdown of the Test Step
+
+1.  **`title`**: A human-readable name for the step, shown in reports.
+2.  **`request`**: Defines the HTTP call.
+    - `method`: GET, POST, PUT, DELETE, etc.
+    - `endpoint`: The path relative to your environment's `baseUrl`.
+3.  **`response`**: Defines what to do with the result.
+    - `validations`: A block for checks like `statusCode` or custom `assertions`.
+
+## Adding Assertions
+
+Simple status code checks are great, but usually, you want to validate the response body. Let's add an assertion to check if we received an array.
+
+```json
+{
+  "title": "List Users",
+  "request": {
+    "method": "GET",
+    "endpoint": "/users"
+  },
+  "response": {
+    "validations": {
+      "statusCode": 200,
+      "assertions": [
+        {
+          "title": "Response is an array",
+          "from": "body",
+          "path": "$",
+          "operator": "isArray"
+        }
+      ]
+    }
+  }
+}
+```
+
+## Running the Test
+
+Save your file and run your tests using the Plyson CLI:
+
+```bash
+npx plyson run --env dev
+```
+
+> **Pro Tip:** You can omit the `--env` flag entirely if you have a `defaultEnv` specified in your `project.json` file. The CLI will automatically use that environment.
+
+Plyson will:
+1. Load your `project.json` and `dev.env.json`.
+2. Construct the full URL using the `baseUrl` from your environment.
+3. Execute the request using Playwright.
+4. Validate the status code and your custom assertions.
+5. Generate a report of the results.
