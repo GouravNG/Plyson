@@ -1,0 +1,60 @@
+---
+title: Installation
+description: Get started with Plyson by initializing your project and syncing schemas.
+---
+
+import { Steps } from 'fumadocs-ui/components/steps';
+
+To start using Plyson, we recommend installing the CLI globally. This allows you to access the `plyson` command from any directory, though we'll use `npx` in our examples to ensure you're always using the project-local version where applicable.
+
+<Steps>
+
+### Install the CLI globally
+
+Install the Plyson CLI globally using npm.
+
+```bash
+npm install -g @plyson/cli
+```
+
+### Initialize your project
+
+Create a new directory for your tests and initialize a standard Plyson project structure.
+
+```bash
+npx plyson init my-api-tests
+cd my-api-tests
+```
+
+This will create a folder structure including:
+- `suites/`: Where your JSON test files live.
+- `environments/`: For environment-specific variables (baseUrl, tokens).
+- `schemas/`: For JSON request/response schemas.
+- `project.json`: Global configuration for your test project.
+
+### Sync Project Schemas
+
+To get full **Intellisense** and autocompletion in your IDE (like VS Code), you need to sync the project schemas. This generates the local JSON schemas that validate your test files as you write them.
+
+```bash
+npx plyson sync-project-schemas
+```
+
+> **Pro Tip:** Ensure your IDE is configured to handle JSON Schema. In VS Code, this works out of the box for files containing a `$schema` property pointing to your local schemas.
+
+### Run your first test
+
+Plyson comes with a sample suite. Since the `init` command creates a `dev` environment by default, you can run all tests in your project with a single command.
+
+```bash
+npx plyson run --env dev
+```
+
+</Steps>
+
+## Next Steps
+
+Now that you have your Plyson project set up, you can start exploring:
+
+- [Writing your first test](/docs/index)
+- [Project Configuration](/docs/index)
