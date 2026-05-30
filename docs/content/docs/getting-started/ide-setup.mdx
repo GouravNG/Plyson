@@ -1,0 +1,38 @@
+---
+title: IDE Setup
+description: Configure VS Code for the best Plyson development experience with autocompletion and validation.
+---
+
+One of Plyson's most powerful features is its **JSON Schema-driven development**. By correctly configuring your IDE, you get full autocompletion, real-time validation, and documentation tooltips for every field in your test files.
+
+## VS Code Integration
+
+We recommend using **Visual Studio Code** for the best experience.
+
+### 1. Enable JSON Schema Support
+Plyson test files include a `$schema` property that points to a local schema file. VS Code detects this automatically and provides:
+- **Autocomplete**: Press `Ctrl + Space` to see available fields (like `method`, `endpoint`, `assertions`).
+- **Validation**: If you misspell a field or provide the wrong data type (e.g., a string instead of a number for status code), you'll see a red underline immediately.
+- **Tooltips**: Hover over any field to see its description and allowed values.
+
+### 2. Sync Your Schemas
+To ensure your IDE has the latest definitions for your specific project (especially for request auto-filling), run the sync command whenever you change your project structure:
+
+```bash
+npx plyson sync-project-schemas
+```
+
+### 3. Recommended Extensions
+While not required, these extensions make working with JSON even better:
+- **JSON Language Features**: (Built-in to VS Code) - Provides the core schema support.
+- **Prettier**: Ensures your JSON test files are always perfectly formatted.
+- **Error Lens**: Highlights validation errors directly in the line of code.
+
+---
+
+## Troubleshooting Intellisense
+
+If you're not seeing autocompletion:
+1.  **Check the `$schema` path**: Ensure the `$schema` property in your `.test.json` file correctly points to the `Project-schema` folder (usually `../Project-schema/...`).
+2.  **Restart the VS Code language server**: Sometimes VS Code needs a nudge to reload schemas. You can do this by running the "Developer: Reload Window" command from the Command Palette (`Ctrl+Shift+P`).
+3.  **Run Sync Command**: Make sure you've run `npx plyson sync-project-schemas` at least once in your project root.

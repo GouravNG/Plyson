@@ -1,0 +1,57 @@
+---
+title: Environment Configuration
+description: Learn how to manage different API environments like Dev, Staging, and Production.
+---
+
+Plyson makes it easy to switch between different API environments without changing your test code. By using environment files, you can manage base URLs, API keys, and other stage-specific variables in one place.
+
+## Environment Files
+
+Environment files are stored in the `environments/` directory and follow the `*.env.json` naming convention.
+
+- `environments/dev.env.json` -> selected via `--env dev`
+- `environments/staging.env.json` -> selected via `--env staging`
+
+### Structure of an Environment File
+
+```json
+{
+  "$schema": "../Project-schema/environment.schema.json",
+  "baseUrl": "https://api.staging.example.com",
+  "variables": {
+    "API_KEY": "staging_secret_key_123",
+    "TIMEOUT": 5000
+  }
+}
+```
+
+- **`baseUrl`**: **Required.** The root URL that will be prepended to all `endpoint` values in your test suites.
+- **`variables`**: Optional. Environment-specific variables that override global defaults found in `variables.json`.
+
+## Switching Environments
+
+To run your tests against a specific environment, use the `--env` flag:
+
+```bash
+npx plyson run --env staging
+```
+
+## Default Environment
+
+You can specify a default environment in your `project.json` so you don't have to provide the flag every time:
+
+```json
+{
+  "title": "My API Project",
+  "defaultEnv": "dev"
+}
+```
+
+With this setting, running `npx plyson run` will automatically target the `dev` environment.
+
+---
+
+## Best Practices
+
+1.  **Don't Hardcode URLs**: Always use relative paths in your test suites (e.g., `/users`) and define the `baseUrl` in your environment files.
+2.  **Variable Overrides**: Use environment variables for things that change between stages, such as database IDs or feature flags.

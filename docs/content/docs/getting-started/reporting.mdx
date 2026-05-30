@@ -1,0 +1,43 @@
+---
+title: Running & Reporting
+description: Learn how to execute your tests and analyze the results using Playwright's built-in reporters.
+---
+
+Plyson leverages the full power of Playwright for test execution and reporting. This means you get detailed, interactive reports and powerful filtering options out of the box.
+
+## Execution Commands
+
+### Run all tests
+To run every `*.test.json` file discovered in your `suites/` directory:
+
+```bash
+npx plyson run --env dev
+```
+
+### Filtering with Tags
+You can use tags to run a subset of your tests (e.g., only smoke tests). Tags can be defined at the Suite, Case, or Step level.
+
+```bash
+npx plyson run --env dev --grep @smoke
+```
+
+---
+
+## Viewing Reports
+
+After a test run finishes, Plyson (via Playwright) generates a report. By default, it creates an HTML report in the `playwright-report/` folder.
+
+### Open the HTML Report
+To view an interactive, searchable dashboard of your test results:
+
+```bash
+npx playwright show-report
+```
+
+This report includes:
+- **Test Status**: Passed, failed, or skipped.
+- **Request Details**: The exact URL, method, headers, and payload sent.
+- **Response Details**: The status code, headers, and body received.
+- **Error Messages**: Detailed breakdowns of failed assertions.
+
+> **Note:** For more advanced configuration of workers, retries, and timeouts, you can modify the `playwright.config.ts` file in your project root.

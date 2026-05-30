@@ -1,0 +1,11 @@
+{
+  "title": "Getting Started",
+  "pages": [
+    "installation",
+    "project-structure",
+    "writing-tests",
+    "environments",
+    "reporting",
+    "ide-setup"
+  ]
+}
