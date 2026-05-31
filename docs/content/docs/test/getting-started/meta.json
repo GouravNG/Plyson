@@ -2,6 +2,7 @@
   "title": "Getting Started",
   "pages": [
     "installation",
+    "ai-skills",
     "project-structure",
     "writing-tests",
     "environments",
