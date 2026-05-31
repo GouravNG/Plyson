@@ -1,0 +1,52 @@
+---
+title: AI Skills
+description: Accelerate your test generation using any AI-powered assistant.
+---
+
+Plyson is built to be AI-native. Every new project includes a `skills` directory containing specialized "knowledge packs" that teach AI models how to write high-quality Plyson tests.
+
+## The General Principle
+
+Regardless of which AI tool you use (Gemini CLI, Copilot, Cursor, Claude Code, ChatGPT, etc.), the workflow is the same:
+
+1.  **Provide Context**: Feed the contents of the `SKILL.md` files in your `skills/` directory to the AI.
+2.  **Assign the Task**: Ask the AI to follow the instructions in those files to process your requirements.
+
+## How to use with your favorite tool
+
+### 1. File-Based Assistants (IDE & CLI)
+Tools that have access to your workspace (like **Cursor**, **GitHub Copilot**, **Claude Code**, or **Windsurf**) work best when you point them directly to the skill files.
+
+*   **Prompt Pattern**: "Using the logic in `skills/sdet-testcase-generator/SKILL.md`, generate test cases for..."
+*   **Context Tip**: Use `@file`, `#file`, or simply open the file in your editor so the AI can reference it.
+
+### 2. Specialized CLI Agents
+Tools like **Gemini CLI** often have dedicated folders for skills.
+
+*   **Setup**: Copy the skills to the tool's expected location (e.g., `.gemini/skills/`).
+*   **Prompt Pattern**: "Use the `sdet-json-generator` skill to..."
+
+### 3. Web Interfaces (ChatGPT / Claude.ai)
+If you are using a web-based chat, you can manually provide the context.
+
+*   **Step**: Copy the text from a `SKILL.md` file and paste it into the chat.
+*   **Prompt Pattern**: "I'm going to provide you with a 'Skill' definition. Please follow its instructions to convert these requirements into Plyson JSON: [Paste Skill Content] [Paste Requirements]"
+
+---
+
+## The Two-Step Workflow
+
+We recommend a two-step approach for maximum accuracy:
+
+### Step 1: Requirements to Markdown Scenarios
+Use the **sdet-testcase-generator** to transform raw user stories into structured markdown test cases. This step ensures the business logic is correct before writing any code.
+
+### Step 2: Scenarios to executable JSON
+Use the **sdet-json-generator** to transform those markdown scenarios into valid Plyson JSON suites. This step handles the technical implementation, schema compliance, and formatting.
+
+## Why it works
+
+By providing the `SKILL.md` files as context, you are:
+- **Standardizing Output**: Ensuring the AI uses the correct HTTP methods, operators, and JSON structure.
+- **Improving Coverage**: Forcing the AI to think about boundary cases and security as defined in the skill instructions.
+- **Reducing Hallucinations**: Giving the AI a grounded "source of truth" for how Plyson works.
