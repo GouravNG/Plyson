@@ -1,3 +1,4 @@
+import * as dotenv from 'dotenv'
 import * as fs from 'fs/promises'
 import { glob } from 'glob'
 import * as path from 'path'
@@ -73,29 +74,83 @@ export class ProjectLoader {
     }
 
     // 3. Environment
-    let environment: EnvironmentVariables = {} as EnvironmentVariables
-    const envFile = path.join(absoluteRootDir, 'environments', `${env}.env.json`)
+    let jsonVariables: Variables = {}
+    let dotEnvVariables: Variables = {}
+    let baseUrl: string | undefined
+
+    const envJsonFile = path.join(absoluteRootDir, 'environments', `${env}.env.json`)
+    const envDotFile = path.join(absoluteRootDir, 'environments', `${env}.env`)
+
+    let jsonLoaded = false
     try {
-      const content = await fs.readFile(envFile, 'utf-8')
+      const content = await fs.readFile(envJsonFile, 'utf-8')
       const parsed = JSON.parse(content)
-      const result = EnvironmentVariablesSchema.safeParse(parsed)
-      if (!result.success) {
-        throw new LoadError(
-          `Invalid environment file ${env}.env.json: ${result.error.message}`,
-          `environments/${env}.env.json`,
-        )
-      }
-      environment = result.data
-      this.logger.info(
-        `✓ Environment loaded: "${env}" with ${Object.keys(environment).length} variable(s)`,
-      )
+      baseUrl = parsed.baseUrl
+      jsonVariables = parsed.variables || {}
+      jsonLoaded = true
     } catch (e: any) {
-      if (e instanceof LoadError) throw e
+      // JSON is optional
+    }
+
+    let dotEnvLoaded = false
+    try {
+      const content = await fs.readFile(envDotFile, 'utf-8')
+      const parsed = dotenv.parse(content)
+      dotEnvVariables = parsed
+      
+      // .env overrides JSON baseUrl
+      if (parsed.BASE_URL) baseUrl = parsed.BASE_URL
+      if (parsed.baseUrl) baseUrl = parsed.baseUrl
+      
+      dotEnvLoaded = true
+    } catch (e: any) {
+      // .env is optional
+    }
+
+    if (!jsonLoaded && !dotEnvLoaded) {
       throw new LoadError(
-        `Environment file not found or unreadable: ${envFile}`,
+        `Environment file not found or unreadable. Tried: ${env}.env.json or ${env}.env`,
         `environments/${env}.env.json`,
       )
     }
+
+    // Assemble initial data
+    const environmentData = {
+      baseUrl,
+      variables: {
+        ...jsonVariables,
+        ...dotEnvVariables,
+      },
+    }
+
+    const envResult = EnvironmentVariablesSchema.safeParse(environmentData)
+    if (!envResult.success) {
+      throw new LoadError(
+        `Invalid environment configuration for "${env}": ${envResult.error.message}`,
+        jsonLoaded ? `environments/${env}.env.json` : `environments/${env}.env`,
+      )
+    }
+
+    const environment = envResult.data
+
+    // 4. CI/CD Overrides (Option C: System variables override declared variables)
+    if (environment.variables) {
+      for (const key of Object.keys(environment.variables)) {
+        if (process.env[key] !== undefined) {
+          environment.variables[key] = process.env[key] as string
+        }
+      }
+    }
+
+    // System override for baseUrl
+    if (process.env.BASE_URL) environment.baseUrl = process.env.BASE_URL
+    if (process.env.baseUrl) environment.baseUrl = process.env.baseUrl
+
+    this.logger.info(
+      `✓ Environment loaded: "${env}" (JSON: ${jsonLoaded}, .env: ${dotEnvLoaded}) with ${
+        Object.keys(environment.variables || {}).length
+      } variable(s)`,
+    )
 
     // 4. Schemas
     const schemas = new Map<string, any>()
