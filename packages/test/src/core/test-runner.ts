@@ -12,23 +12,6 @@ import { ProjectGraph } from './project-loader.js'
 import { Resolver, resolvePhase1, resolvePhase2 } from './resolver.js'
 import { VariableStore } from './variable-store.js'
 
-function logVariableDebug(logger: Logger, label: string, variables: Record<string, any>): void {
-  const keys = Object.keys(variables)
-  const systemMatches = keys.filter((key) => process.env[key] !== undefined)
-
-  logger.info(
-    `[Debug] ${label}: declaredKeys=${keys.length}, systemEnvMatches=${systemMatches.length}`,
-  )
-
-  if (keys.length > 0) {
-    logger.info(`[Debug] ${label}: declaredKeyNames=${keys.join(', ')}`)
-  }
-
-  if (systemMatches.length > 0) {
-    logger.info(`[Debug] ${label}: systemEnvMatchNames=${systemMatches.join(', ')}`)
-  }
-}
-
 /**
  * Registers all suites from the project graph as Playwright tests.
  */
@@ -45,25 +28,12 @@ export function registerSuites(
   AssertionEngine.setExpect(expect)
 
   test.beforeAll(async ({ request }: { request: APIRequestContext }) => {
-    const debugLogger = new ConsoleLogger('variable-debug')
-
     // Phase 1 resolution for global and environment variables
     store.push('global', {})
-    logVariableDebug(debugLogger, 'global variables.json', graph.variables ?? {})
     resolvePhase1(graph.variables ?? {}, store, 'global')
 
     store.push('environment', {})
-    logVariableDebug(debugLogger, 'environment variables', graph.environment.variables ?? {})
-    debugLogger.info(
-      `[Debug] baseUrl: configured=${graph.environment.baseUrl ? 'yes' : 'no'}, BASE_URL=${
-        process.env.BASE_URL !== undefined ? 'present' : 'missing'
-      }, baseUrl=${process.env.baseUrl !== undefined ? 'present' : 'missing'}`,
-    )
     resolvePhase1(graph.environment.variables ?? {}, store, 'environment')
-
-    debugLogger.info(
-      `[Debug] resolved variable snapshot keys=${Object.keys(store.snapshot()).join(', ')}`,
-    )
 
     AssertionEngine.registerSchemas(graph.schemas)
     if (graph.project.beforeAll) {
