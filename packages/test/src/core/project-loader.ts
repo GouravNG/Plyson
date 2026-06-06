@@ -4,6 +4,7 @@ import { glob } from 'glob'
 import * as path from 'path'
 import { LoadError } from '../errors/index.js'
 import {
+  ActionModule,
   EnvironmentVariables,
   EnvironmentVariablesSchema,
   HandlerModule,
@@ -25,6 +26,7 @@ export interface ProjectGraph {
   environment: EnvironmentVariables
   schemas: Map<string, any>
   handlers: Map<string, HandlerModule>
+  actions: Map<string, ActionModule>
   scripts: Map<string, Testcase>
   suites: TestSuite[]
 }
@@ -187,6 +189,26 @@ export class ProjectLoader {
     }
     this.logger.info(`✓ Handlers loaded: ${handlers.size} handler(s)`)
 
+    // 5.5 Actions
+    const actions = new Map<string, ActionModule>()
+    const actionFiles = await glob('actions/**/*.action.ts', { cwd: absoluteRootDir })
+    for (const file of actionFiles) {
+      const absoluteActionPath = path.join(absoluteRootDir, file)
+      try {
+        const fileUrl = new URL(`file://${absoluteActionPath.replace(/\\/g, '/')}`).href
+        const mod = await import(fileUrl)
+        const stem = path.basename(file, '.action.ts')
+        if (typeof mod.default !== 'function') {
+          this.logger.warn(file, `Action "${stem}" missing default export function`)
+        } else {
+          actions.set(stem, mod)
+        }
+      } catch (e: any) {
+        this.logger.warn(file, `Failed to load action: ${e.message}`)
+      }
+    }
+    this.logger.info(`✓ Actions loaded: ${actions.size} action(s)`)
+
     // 6. Scripts
     const scripts = new Map<string, Testcase>()
     const scriptFiles = await glob('scripts/**/*.script.json', { cwd: absoluteRootDir })
@@ -289,6 +311,7 @@ export class ProjectLoader {
       environment,
       schemas,
       handlers,
+      actions,
       scripts,
       suites,
     }

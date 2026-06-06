@@ -141,6 +141,16 @@ export type Res = z.infer<typeof ResSchema>
 // Test Step, Case & Suite Schemas & Types
 // =========================================================================================================
 
+export const ActionStepSchema = z.object({
+  title: z.string(),
+  description: z.string().optional(),
+  disabled: z.boolean().optional(),
+  wait: z.number().optional(),
+  action: z.string(),
+  args: z.record(z.string(), z.any()).optional(),
+})
+export type ActionStep = z.infer<typeof ActionStepSchema>
+
 export const CommonTestStepSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
@@ -159,7 +169,11 @@ export const ReferencedTestStepSchema = z.object({
 })
 export type ReferencedTestStep = z.infer<typeof ReferencedTestStepSchema>
 
-export const TestStepSchema = z.union([ReferencedTestStepSchema, CommonTestStepSchema])
+export const TestStepSchema = z.union([
+  ReferencedTestStepSchema,
+  ActionStepSchema,
+  CommonTestStepSchema,
+])
 export type TestStep = z.infer<typeof TestStepSchema>
 
 export const TestcaseSchema = z.object({
@@ -229,6 +243,22 @@ export type SoftError = {
 
 export type HandlerModule = {
   run: (ctx: HandlerContext) => Promise<void>
+}
+
+export interface ActionContext {
+  args: Record<string, any>
+  store: {
+    get: (name: string) => VariableValue | undefined
+    set: (name: string, value: VariableValue, scope: Scope) => void
+  }
+  log: (message: string) => void
+  warn: (title: string, message: any) => void
+  error: (message: any) => void
+  playwrightRequest: any // Avoid direct playwright dependency here if possible, or use 'any'
+}
+
+export type ActionModule = {
+  default: (ctx: ActionContext) => Promise<void>
 }
 
 export type ResolvedStep = Omit<CommonTestStep, 'request'> & {

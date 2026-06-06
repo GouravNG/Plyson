@@ -6,6 +6,7 @@ import { AssertionEngine } from './assertion-engine.js'
 import { ExtractionEngine } from './extraction-engine.js'
 import { HandlerContext, HandlerRunner } from './handler-runner.js'
 import { HttpExecutor, ResolvedRequest } from './http-executor.js'
+import { ActionRunner } from './action-runner.js'
 import { ConsoleLogger, Logger } from './logger.js'
 import { ProjectGraph } from './project-loader.js'
 import { Resolver, resolvePhase1, resolvePhase2 } from './resolver.js'
@@ -153,6 +154,12 @@ async function runSteps(
 
     await test.step(step.title, async () => {
       if (step.wait) await sleep(step.wait)
+
+      if ('action' in step) {
+        const actionRunner = new ActionRunner(request, store, graph.actions, logger)
+        await actionRunner.runAction(step)
+        return
+      }
 
       logger.info(`Executing step ${i + 1}: ${step.title}`)
 
