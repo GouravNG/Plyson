@@ -70,16 +70,19 @@ Runs once at startup before any test executes. Responsibilities:
 
 - Walks the project directory and collects all typed files:
 
-  | Pattern                   | Type                   |
-  | ------------------------- | ---------------------- |
-  | `project.json`            | `Project`              |
-  | `variables.json`          | `Variables`            |
-  | `environments/*.env.json` | `EnvironmentVariables` |
-  | `schemas/*.schema.json`   | JSON Schema            |
-  | `handlers/*.handler.ts`   | Handler functions      |
-  | `scripts/*.script.json`   | `Testcase`             |
-  | `suites/**/*.test.json`   | `TestSuite`            |
+  | Pattern                       | Type                   |
+  | ----------------------------- | ---------------------- |
+  | `project.json`                | `Project`              |
+  | `variables.json`              | `Variables`            |
+  | `environments/*.env.json`     | `EnvironmentVariables` |
+  | `environments/*.env`          | Dotenv overrides       |
+  | `schemas/*.schema.json`       | JSON Schema            |
+  | `handlers/*.handler.ts`       | Handler functions      |
+  | `actions/*.action.ts`        | Custom action functions |
+  | `scripts/*.script.json`       | `Testcase`             |
+  | `suites/**/*.test.json`       | `TestSuite`            |
 
+- Supports merging multiple environment files (JSON + Dotenv) and system environment variable overrides.
 - Validates all files against their types — load errors surface before any test runs
 - Resolves all `ref` values to their target `Testcase` — an unknown `ref` is a load error, not a runtime failure
 - Enforces `id` uniqueness across `scripts/` and `suites/` combined
@@ -254,6 +257,8 @@ plyson run --env staging
       ├─ Project Loader
       │     ├─ discovers all files
       │     ├─ validates types
+      │     ├─ merges environments/*.env.json + *.env
+      │     ├─ applies system environment variable overrides
       │     ├─ resolves all refs
       │     └─ produces Project Graph
       │
@@ -271,14 +276,18 @@ plyson run --env staging
       │     │     ├─ push case variables into store (Phase 1 resolution)
       │     │     │
       │     │     └─ For each TestStep
-      │     │           ├─ Phase 2 resolution (request object)
-      │     │           ├─ autoFill merge (if configured)
-      │     │           ├─ HTTP Executor → APIResponse
-      │     │           ├─ Status code check
-      │     │           ├─ Schema validation (if configured)
-      │     │           ├─ Assertion Engine
-      │     │           ├─ Extraction Engine → store write-back
-      │     │           └─ Handler Runner
+      │     │           ├─ wait (if configured)
+      │     │           ├─ IF ActionStep:
+      │     │           │    └─ Action Runner (executes custom logic)
+      │     │           ├─ ELSE IF HttpStep:
+      │     │           │    ├─ Phase 2 resolution (request object)
+      │     │           │    ├─ autoFill merge (if configured)
+      │     │           │    ├─ HTTP Executor → APIResponse
+      │     │           │    ├─ Status code check
+      │     │           │    ├─ Schema validation (if configured)
+      │     │           │    ├─ Assertion Engine
+      │     │           │    ├─ Extraction Engine → store write-back
+      │     │           │    └─ Handler Runner
       │     │
       │     └─ Suite afterAll steps
       │

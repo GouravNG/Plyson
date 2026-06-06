@@ -7,26 +7,58 @@ Plyson makes it easy to switch between different API environments without changi
 
 ## Environment Files
 
-Environment files are stored in the `environments/` directory and follow the `*.env.json` naming convention. For a detailed breakdown of all available fields, see the [Environments Reference](/docs/json-reference/environments).
+Environment files are stored in the `environments/` directory. Plyson supports two formats:
 
-- `environments/dev.env.json` -> selected via `--env dev`
-- `environments/staging.env.json` -> selected via `--env staging`
+- **JSON (`*.env.json`)**: Structured configuration with schema support.
+- **Dotenv (`*.env`)**: Standard key-value pairs for environment variables.
+
+For a detailed breakdown of all available fields, see the [Environments Reference](/docs/json-reference/environments).
+
+- `environments/dev.env.json` and/or `environments/dev.env` -> selected via `--env dev`
+- `environments/staging.env.json` and/or `environments/staging.env` -> selected via `--env staging`
 
 ### Structure of an Environment File
 
+#### JSON Format (`dev.env.json`)
 ```json
 {
   "$schema": "../Project-schema/environment.schema.json",
-  "baseUrl": "https://api.staging.example.com",
+  "baseUrl": "https://api.dev.json",
   "variables": {
-    "API_KEY": "staging_secret_key_123",
-    "TIMEOUT": 5000
+    "API_KEY": "dev_secret_key_123"
   }
 }
 ```
 
-- **`baseUrl`**: **Required.** The root URL that will be prepended to all `endpoint` values in your test suites.
-- **`variables`**: Optional. Environment-specific variables that override global defaults found in `variables.json`.
+#### Dotenv Format (`dev.env`)
+```sh
+baseUrl=https://api.dev.env
+API_KEY=dev_override_key
+TIMEOUT=5000
+```
+
+## Merging & Priority
+
+If both a `.env.json` and a `.env` file exist for the same environment, Plyson merges them. **Dotenv files take precedence over JSON files.**
+
+Additionally, **System Environment Variables** (e.g., from your OS or CI/CD pipeline) have the highest priority and will override values from both file formats.
+
+### Resolution Priority (Highest to Lowest):
+1.  **System Environment Variables**
+2.  **`.env` File** (`dev.env`)
+3.  **`.env.json` File** (`dev.env.json`)
+
+## CI/CD & System Overrides
+
+You can override any environment variable or the `baseUrl` using system environment variables. This is particularly useful for passing secrets in CI/CD pipelines without committing them to your repository.
+
+- `BASE_URL` or `baseUrl`: Overrides the environment's base URL.
+- `VARIABLE_NAME`: Overrides a variable defined in the environment's `variables` block.
+
+```bash
+# Example: Override baseUrl and a specific variable via command line
+BASE_URL=https://api.test.com DB_PASSWORD=secret npx plyson run --env dev
+```
 
 ## Switching Environments
 

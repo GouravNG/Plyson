@@ -63,3 +63,20 @@ export const getSuiteTemplate = (name: string) => ({
     },
   ],
 })
+
+export const getActionTemplate = (name: string) => `import { ActionContext } from '@plyson/test';
+
+/**
+ * Custom action: ${name}
+ * Actions are exported as default functions and receive a rich context.
+ */
+export default async function ${name.replace(/[^a-zA-Z0-9]/g, '')}Action({ args, log, store, playwrightRequest }: ActionContext) {
+  // Access arguments, store, and Playwright request context
+  // Example: const { userId } = args;
+  
+  log('Running custom action: ${name}');
+  
+  // Example: Set a variable for subsequent steps
+  // store.set('lastAction', '${name}', 'case');
+}
+`

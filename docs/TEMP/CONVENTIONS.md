@@ -6,6 +6,7 @@ my-api-tests/
   data/                           # External test data (future scope)
   environments/                   # Environment config files
   handlers/                       # Custom validation / extraction handlers
+  actions/                        # Custom standalone test actions
   schemas/                        # API schemas (managed by plyson sync-schemas)
   scripts/                        # Reusable standalone test cases
   suites/                         # Test suites
@@ -82,17 +83,27 @@ export default defineConfig({
 
 ## `environments/`
 
-**Convention: `*.env.json`**
-**Example: `dev.env.json`, `staging.env.json`, `prod.env.json`**
+**Convention: `*.env.json` and/or `*.env`**
+**Example: `dev.env.json`, `dev.env`, `staging.env.json`**
 
-One file per environment. Selected at runtime via the `--env` flag:
+One or more files per environment. Selected at runtime via the `--env` flag:
 
 ```bash
 plyson run --env staging
 ```
 
-The filename stem (e.g. `staging` from `staging.env.json`) is the environment
-name passed to `--env`.
+The filename stem (e.g. `staging` from `staging.env.json` or `staging.env`) is the environment name passed to `--env`.
+
+### Merging and Priority
+
+Variables and configuration are merged from multiple sources in this order (highest priority wins):
+
+1.  **System Environment Variables** (CI/CD overrides)
+2.  **Dotenv File** (`*.env`)
+3.  **JSON File** (`*.env.json`)
+4.  **Global Variables** (`variables.json`)
+
+### JSON Format (`*.env.json`)
 
 ```json
 {
@@ -107,9 +118,25 @@ name passed to `--env`.
 
 Maps to the `EnvironmentVariables` type.
 
-- `baseUrl` — required. The base URL prepended to all request endpoints.
-- `specUrl` — optional. OpenAPI/Swagger spec URL used by `plyson sync-schemas`.
-- `variables` — optional. Environment-specific variables that override global `variables.json`.
+### Dotenv Format (`*.env`)
+
+```sh
+baseUrl=https://api.staging.env
+CLIENT_ID=staging-env-override
+DB_PASS=secret
+```
+
+- `baseUrl` or `BASE_URL` — overrides the base URL.
+- `specUrl` or `SPEC_URL` — overrides the spec URL.
+- Other keys become environment variables.
+
+### System Overrides
+
+Any variable or `baseUrl` can be overridden by system environment variables:
+
+```bash
+BASE_URL=https://ci.test.com DB_PASS=ci-secret npx plyson run --env dev
+```
 
 ---
 
@@ -373,6 +400,7 @@ at the specified `scope`:
 | `environments/*.env.json` | `EnvironmentVariables` | `*.env.json` pattern              |
 | `schemas/*.schema.json`   | JSON Schema            | `*.schema.json` pattern           |
 | `handlers/*.handler.ts`   | handler function       | `*.handler.ts` pattern            |
+| `actions/*.action.ts`     | custom action          | `*.action.ts` pattern             |
 | `scripts/*.script.json`   | `Testcase`             | `*.script.json` pattern           |
 | `suites/**/*.test.json`   | `TestSuite`            | `*.test.json` pattern (recursive) |
 | `data/`                   | anything               | future scope                      |
