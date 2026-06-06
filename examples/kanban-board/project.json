@@ -1,0 +1,7 @@
+{
+  "$schema": "./Project-schema/project.schema.json",
+  "title": "kanban-board",
+  "description": "Showcasing the usage of the actions type testcase",
+  "version": "1.0.0",
+  "defaultEnv": "prod"
+}

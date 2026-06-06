@@ -1,0 +1,80 @@
+{
+  "$schema": "../Project-schema/testsuite.schema.json",
+  "title": "Create a board",
+  "description": "Create a board and verify it was created successfully.",
+  "tags": ["smoke"],
+  "variables": {
+    "userEmail": {
+      "$gen": "email",
+      "provider": "plyson.com"
+    },
+    "userPassword": "Plyson@112233"
+  },
+  "beforeAll": [
+    {
+      "title": "Create a new user for suite",
+      "action": "clerk-signup",
+      "args": {
+        "email": "{{userEmail}}",
+        "password": "{{userPassword}}"
+      }
+    }
+  ],
+  "afterAll": [
+    {
+      "title": "Delete the user once the tests are over",
+      "action": "clerk-delete"
+    }
+  ],
+  "testCases": [
+    {
+      "id": "FUNC_CREATE_BOARD_001",
+      "title": "Create a new board",
+      "tags": ["p1"],
+      "steps": [
+        {
+          "title": "Create new board with valid data",
+          "request": {
+            "method": "POST",
+            "endpoint": "v1/boards",
+            "headers": {
+              "Prefer": "return=representation",
+              "Authorization": "Bearer {{API_KEY}}",
+              "apikey": "{{SUPABASE_ANON_KEY}}"
+            },
+            "payload": {
+              "title": "Automated Board {{$timestamp}}",
+              "description": "Created by Plyson test suite",
+              "color": "#4F46E5",
+              "user_id": "{{USER_ID}}"
+            }
+          },
+          "response": {
+            "schema": {
+              "name": "boards"
+            },
+            "validations": {
+              "statusCode": 201,
+              "assertions": [
+                {
+                  "title": "Verify board title",
+                  "from": "body",
+                  "path": "$[0].title",
+                  "operator": "contains",
+                  "value": "Automated Board"
+                },
+                {
+                  "title": "Verify user id",
+                  "from": "body",
+                  "path": "$[0].user_id",
+                  "operator": "equals",
+                  "value": "{{USER_ID}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

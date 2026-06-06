@@ -1,0 +1,47 @@
+{
+  "required": [
+    "id",
+    "created_at",
+    "board_id",
+    "title",
+    "sort_order",
+    "user_id",
+    "updated_at"
+  ],
+  "properties": {
+    "id": {
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "bigint",
+      "type": "integer"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "board_id": {
+      "description": "Note:\nThis is a Foreign Key to `boards.id`.<fk table='boards' column='id'/>",
+      "format": "bigint",
+      "type": "integer"
+    },
+    "title": {
+      "format": "text",
+      "type": "string"
+    },
+    "sort_order": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "user_id": {
+      "format": "text",
+      "type": "string"
+    },
+    "updated_at": {
+      "default": "now()",
+      "format": "timestamp without time zone",
+      "type": "string"
+    }
+  },
+  "type": "object"
+}
