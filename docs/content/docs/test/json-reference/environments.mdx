@@ -35,6 +35,33 @@ If multiple sources define the same variable or `baseUrl`, Plyson uses the follo
 3.  **JSON File** (`*.env.json`)
 4.  **Global Variables** (`variables.json`)
 
+### CI/CD & System Environment Variables
+
+For security and predictability, Plyson follows a **"Declared Variables Only"** rule when picking up variables from your system environment (like GitHub Actions secrets or terminal exports):
+
+> **Rule:** System environment variables will only override variables that already exist (even if empty) in your `variables.json` or environment files.
+
+#### Why?
+This prevents Plyson from polluting your test store with hundreds of unrelated system variables (like `PATH`, `USER`, or `HOME`) and ensures only intended variables are exposed to your tests.
+
+#### Example for CI/CD
+To use a secret like `API_KEY` in your pipeline without a `.env` file, you must first declare it as a placeholder in your `variables.json`:
+
+```json
+// variables.json
+{
+  "API_KEY": "" 
+}
+```
+
+Then, in your CI environment (e.g., GitHub Actions):
+```yaml
+env:
+  API_KEY: ${{ secrets.MY_SECRET_KEY }}
+```
+
+Plyson will see the declared `API_KEY`, check the system environment, and use the value from your secret.
+
 ---
 
 ## Example: Merging Files
