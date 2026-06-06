@@ -1,0 +1,84 @@
+---
+title: Custom Actions
+description: Learn how to execute custom TypeScript logic as test steps using Custom Actions.
+---
+
+Custom Actions allow you to wrap complex logic, SDK calls, or database operations into a single declarative step in your JSON tests. Unlike [Handlers](/docs/test/json-reference/handlers) which run *after* an HTTP request, Actions are standalone steps that execute arbitrary TypeScript code.
+
+## File Convention
+
+Actions are stored in the `actions/` directory and must follow the `*.action.ts` naming pattern. The CLI automatically discovers them.
+
+## Action Structure
+
+Every action must be exported as a **default function** that receives an `ActionContext`.
+
+```typescript
+import { ActionContext } from '@plyson/test';
+
+export default async function myCustomAction({ args, log, store, playwrightRequest }: ActionContext) {
+  // Your custom logic here
+  const { userId } = args;
+  
+  log(`Processing user: ${userId}`);
+  
+  // Example: Interact with a database or SDK
+  // const user = await db.users.find(userId);
+  
+  // Example: Set a variable for subsequent steps
+  store.set('userEmail', 'test@example.com', 'case');
+}
+```
+
+### Action Context (`ctx`)
+The context provides everything you need to perform complex tasks:
+
+- **`args`**: The arguments passed to the action from the JSON test step (already resolved).
+- **`store`**: Interface to interact with the variable store.
+  - `get(name)`: Retrieve a variable.
+  - `set(name, value, scope)`: Save a new variable.
+- **`log(msg)`**: Log a message to the test output (appears in Playwright reports).
+- **`warn(title, msg)`**: Record a soft warning without failing the test.
+- **`error(msg)`**: Throw an error to fail the current test step.
+- **`playwrightRequest`**: The Playwright `APIRequestContext` instance, allowing you to make raw HTTP calls if needed.
+
+---
+
+## Using an Action in JSON
+
+To invoke a custom action, create a step with the `action` property matching the filename (without `.action.ts`).
+
+```json
+{
+  "title": "Perform complex setup",
+  "action": "setup-user",
+  "args": {
+    "role": "admin",
+    "permissions": ["read", "write"]
+  }
+}
+```
+
+### Autocomplete Support
+When you run `plyson sync-project-schemas`, the CLI scans your `actions/` directory and updates the project's JSON Schema. This gives you **full autocomplete** for your action names in VS Code.
+
+---
+
+## CLI Command
+
+You can generate a new action boilerplate using the CLI:
+
+```bash
+npx plyson generate action <name>
+```
+
+---
+
+## Actions vs Handlers
+
+| Feature | Custom Actions | Custom Handlers |
+| :--- | :--- | :--- |
+| **Execution** | Runs as a standalone step. | Runs *after* an HTTP request step. |
+| **Primary Use** | SDK calls, DB setup, complex logic. | Response post-processing, custom assertions. |
+| **Arguments** | Supports custom `args` object. | No direct arguments (uses response context). |
+| **Context** | `args`, `store`, `log`, `playwrightRequest`. | `request`, `response`, `body`, `status`, `store`, `log`. |

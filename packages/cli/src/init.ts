@@ -44,7 +44,7 @@ export const initCommand = new Command('init')
     const rootDir = path.resolve(projectName)
     console.log(`Initializing plyson project in ${rootDir}...`)
 
-    const dirs = ['environments', 'schemas', 'handlers', 'scripts', 'suites']
+    const dirs = ['environments', 'schemas', 'handlers', 'actions', 'scripts', 'suites']
 
     if (!fs.existsSync(rootDir)) {
       fs.mkdirSync(rootDir, { recursive: true })

@@ -1,0 +1,43 @@
+{
+  "required": [
+    "id",
+    "created_at",
+    "updated_at",
+    "title",
+    "user_id"
+  ],
+  "properties": {
+    "id": {
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "bigint",
+      "type": "integer"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "updated_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "title": {
+      "format": "text",
+      "type": "string"
+    },
+    "description": {
+      "format": "text",
+      "type": "string"
+    },
+    "color": {
+      "format": "text",
+      "type": "string"
+    },
+    "user_id": {
+      "format": "text",
+      "type": "string"
+    }
+  },
+  "type": "array"
+}

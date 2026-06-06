@@ -2,11 +2,16 @@ import { Command } from 'commander'
 import { randomUUID } from 'crypto'
 import fs from 'fs'
 import path from 'path'
-import { getHandlerTemplate, getScriptTemplate, getSuiteTemplate } from './templates/index.js'
+import {
+  getActionTemplate,
+  getHandlerTemplate,
+  getScriptTemplate,
+  getSuiteTemplate,
+} from './templates/index.js'
 
 export const generateCommand = new Command('generate')
   .alias('g')
-  .description('Generate resources like variables, handlers, scripts, and suites')
+  .description('Generate resources like variables, handlers, actions, scripts, and suites')
 
 generateCommand
   .command('var <key> [value]')
@@ -64,6 +69,24 @@ generateCommand
       console.log(`Created handler: ${filePath}`)
     } else {
       console.error(`Handler ${name} already exists.`)
+    }
+  })
+
+generateCommand
+  .command('action <name>')
+  .description('Create a new custom action boilerplate')
+  .action((name) => {
+    const dirPath = path.resolve('actions')
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true })
+    }
+    const filePath = path.join(dirPath, `${name}.action.ts`)
+    const content = getActionTemplate(name)
+    if (!fs.existsSync(filePath)) {
+      fs.writeFileSync(filePath, content)
+      console.log(`Created action: ${filePath}`)
+    } else {
+      console.error(`Action ${name} already exists.`)
     }
   })
 

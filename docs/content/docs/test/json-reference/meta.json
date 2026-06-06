@@ -12,6 +12,7 @@
     "variables-interpolation",
     "data-generators",
     "scripts",
-    "handlers"
+    "handlers",
+    "actions"
   ]
 }

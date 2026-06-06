@@ -17,6 +17,7 @@ plyson g <subcommand> [options]
 - `var <key> [value]`
 - `env-var <key> <value>`
 - `handler <name>`
+- `action <name>`
 - `script <name>`
 - `suite <name>`
 
@@ -94,6 +95,28 @@ plyson generate handler <name>
 
 ```bash
 plyson generate handler create-user
+```
+
+## `generate action`
+
+Create a TypeScript custom action boilerplate in `actions/`.
+
+### Syntax
+
+```bash
+plyson generate action <name>
+```
+
+### Behavior
+
+- Creates the `actions` directory if needed.
+- Writes `<name>.action.ts`.
+- Refuses to overwrite an existing file.
+
+### Example
+
+```bash
+plyson generate action setup-db
 ```
 
 ## `generate script`

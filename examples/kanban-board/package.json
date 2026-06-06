@@ -1,0 +1,17 @@
+{
+  "name": "@plyson/example-kanban-board",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "plyson run"
+  },
+  "dependencies": {
+    "@clerk/backend": "^3.5.0",
+    "@plyson/cli": "workspace:*",
+    "@plyson/test": "workspace:*"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}

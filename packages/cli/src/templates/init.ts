@@ -27,6 +27,20 @@ export const getInitTemplates = ({ projectName, packageJsonName }: InitTemplates
         adminEmail: 'admin@example.com',
       },
     },
+    'actions/hello.action.ts': `import { ActionContext } from '@plyson/test';
+
+/**
+ * Sample custom action.
+ * Actions are exported as default functions and receive a rich context.
+ */
+export default async function helloAction({ args, log, store }: ActionContext) {
+  const name = args.name || 'World';
+  log(\`Hello, \${name}!\`);
+  
+  // Example: Set a variable that can be used by subsequent steps
+  store.set('lastAction', 'hello', 'case');
+}
+`,
     'suites/sample.test.json': {
       $schema: '../Project-schema/testsuite.schema.json',
       title: 'Sample Suite',

@@ -60,7 +60,24 @@ Referenced steps allow you to reuse common logic defined in a separate [Script](
 - **`ref`** (**Required**): The unique `id` of a script defined in the `scripts/` directory.
 - **Note:** When using `ref`, you cannot provide a `request` block. The step will execute the logic defined in the referenced script.
 
-For more details on creating and managing these fragments, see the [Reusable Scripts](/docs/json-reference/scripts) guide.
+### 3. Action Steps (`action`)
+Action steps allow you to execute [Custom Actions](/docs/test/json-reference/actions) written in TypeScript.
+
+- **`action`** (**Required**): The name of the action file in the `actions/` directory (e.g., `setup-db` for `actions/setup-db.action.ts`).
+- **`args`** (Optional): A JSON object of arguments passed to the action. These are resolved (interpolated) before being passed.
+
+```json
+{
+  "title": "Setup test environment",
+  "action": "setup-env",
+  "args": {
+    "clean": true,
+    "seed": "{{MOCK_SEED}}"
+  }
+}
+```
+
+For more details on creating and managing these fragments, see the [Custom Actions](/docs/test/json-reference/actions) guide.
 
 ---
 

@@ -1,16 +1,69 @@
 ---
 title: Environments
-description: Reference for environment files (*.env.json) used to manage stage-specific data.
+description: Reference for environment files (*.env.json and *.env) used to manage stage-specific data.
 ---
 
-Environment files (stored in `environments/`) allow you to define configuration that changes between stages like Dev, Staging, and Production.
+Environment files (stored in `environments/`) allow you to define configuration that changes between stages like Dev, Staging, and Production. Plyson supports both JSON and standard Dotenv formats.
 
-## Fields
+## JSON Format (`*.env.json`)
+
+JSON environment files provide a structured way to define environment variables and base URLs.
+
+### Fields
 
 - **`$schema`** (Optional): Points to the environment schema for **Intellisense**.
 - **`baseUrl`** (**Required**): The root URL for all API requests in this environment.
 - **`specUrl`** (Optional): The URL to your OpenAPI/Swagger specification, used by the CLI for schema synchronization.
 - **`variables`** (Optional): Environment-specific overrides for your global variables.
+
+## Dotenv Format (`*.env`)
+
+Standard Dotenv files are also supported and are ideal for quick overrides or local development.
+
+### Reserved Keys
+
+- **`baseUrl`** or **`BASE_URL`**: Overrides the environment's base URL.
+- **`specUrl`** or **`SPEC_URL`**: Overrides the OpenAPI spec URL.
+- **`ANY_OTHER_KEY`**: Becomes an environment-specific variable.
+
+## Resolution Priority
+
+If multiple sources define the same variable or `baseUrl`, Plyson uses the following priority order (highest to lowest):
+
+1.  **System Environment Variables** (CI/CD overrides)
+2.  **Dotenv File** (`*.env`)
+3.  **JSON File** (`*.env.json`)
+4.  **Global Variables** (`variables.json`)
+
+---
+
+## Example: Merging Files
+
+### `dev.env.json`
+```json
+{
+  "baseUrl": "https://api.dev.json",
+  "variables": {
+    "DEBUG": true,
+    "RETRIES": 3
+  }
+}
+```
+
+### `dev.env`
+```sh
+baseUrl=https://api.dev.env
+DEBUG=false
+API_KEY=secret_123
+```
+
+**Resulting Environment:**
+- `baseUrl`: `https://api.dev.env` (from `.env`)
+- `DEBUG`: `false` (from `.env`)
+- `RETRIES`: `3` (from `.json`)
+- `API_KEY`: `secret_123` (from `.env`)
+
+---
 
 ## CLI Command
 
