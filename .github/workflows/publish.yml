@@ -9,6 +9,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     env:
+      BASE_URL: ${{ secrets.BASE_URL }}
       CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
       SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
     steps:
