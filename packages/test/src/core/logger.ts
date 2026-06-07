@@ -1,4 +1,5 @@
 import pc from 'picocolors'
+import { formatError } from '../utils/error-formatter.js'
 
 export type LogLevel = 'info' | 'warn' | 'error' | 'off'
 
@@ -33,29 +34,15 @@ export class ConsoleLogger implements Logger {
 
   warn(title: string, message: any): void {
     if (this.level <= LOG_LEVELS.warn) {
-      const formatted = this.formatError(message)
+      const formatted = formatError(message, true)
       console.warn(`${pc.yellow('WARN')}  [${this.id}] -> ${title}: ${formatted}`)
     }
   }
 
   error(message: any): void {
     if (this.level <= LOG_LEVELS.error) {
-      const formatted = this.formatError(message)
+      const formatted = formatError(message)
       console.error(`${pc.red('ERROR')} [${this.id}] -> ${formatted}`)
     }
-  }
-
-  private formatError(err: any): string {
-    if (err instanceof Error) {
-      return err.stack || err.message
-    }
-    if (typeof err === 'object') {
-      try {
-        return JSON.stringify(err, null, 2)
-      } catch {
-        return String(err)
-      }
-    }
-    return String(err)
   }
 }

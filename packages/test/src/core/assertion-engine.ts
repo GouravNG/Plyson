@@ -1,9 +1,11 @@
 import type { APIResponse, expect as playwrightExpect } from '@playwright/test'
 import Ajv from 'ajv'
 import addFormats from 'ajv-formats'
+import pc from 'picocolors'
 import { AssertionError, LoadError, SchemaValidationError } from '../errors/index.js'
 import { pathEngine } from '../path/index.js'
 import { AssertionOperators, Assertions, SoftError } from '../types/index.js'
+import { Logger } from './logger.js'
 
 const ajv = new Ajv({ allErrors: true, strict: false })
 addFormats(ajv)
@@ -31,9 +33,23 @@ export class AssertionEngine {
   /**
    * Checks the status code against expected value(s).
    */
-  static checkStatusCode(actual: number, expected: number | number[]): void {
+  static checkStatusCode(actual: number, expected: number | number[], logger?: Logger): void {
     const acceptable = Array.isArray(expected) ? expected : [expected]
-    if (!acceptable.includes(actual)) {
+    const passed = acceptable.includes(actual)
+
+    if (logger) {
+      this.logAssertionResult(
+        logger,
+        'Status Code Check',
+        acceptable.join(' or '),
+        actual,
+        'includes',
+        passed,
+        'status',
+      )
+    }
+
+    if (!passed) {
       throw new AssertionError(
         'status code',
         `Expected ${acceptable.join(' or ')}, received ${actual}`,
@@ -49,6 +65,7 @@ export class AssertionEngine {
     config: { name: string; validation?: boolean | 'warn' },
     schemas: Map<string, any>,
     softErrors: SoftError[],
+    logger?: Logger,
   ): Promise<void> {
     if (config.validation === false) return
 
@@ -58,6 +75,19 @@ export class AssertionEngine {
     }
 
     const valid = ajv.validate(schema, body)
+
+    if (logger) {
+      this.logAssertionResult(
+        logger,
+        `Schema Validation: ${config.name}`,
+        config.name,
+        body,
+        'matches schema',
+        valid,
+        'body',
+      )
+    }
+
     if (!valid) {
       const errors = ajv.errors ?? []
       if (config.validation === 'warn') {
@@ -76,21 +106,73 @@ export class AssertionEngine {
     body: unknown,
     response: APIResponse,
     softErrors: SoftError[],
+    logger?: Logger,
   ): Promise<void> {
     const actual =
       assertion.from === 'header'
         ? pathEngine.extractHeader(response, assertion.path)
         : pathEngine.extract(body, assertion.path)
 
+    let passed = true
+    let error: any = null
+
     try {
       this.applyOperator(actual, assertion.operator, assertion.value)
     } catch (err) {
+      passed = false
+      error = err
+    }
+
+    if (logger) {
+      this.logAssertionResult(
+        logger,
+        assertion.title,
+        assertion.value,
+        actual,
+        assertion.operator,
+        passed,
+        assertion.path,
+      )
+    }
+
+    if (!passed) {
       if (assertion.validation === 'warn') {
-        softErrors.push({ title: assertion.title, error: err })
+        softErrors.push({ title: assertion.title, error })
       } else {
-        throw new AssertionError(assertion.title, err)
+        throw new AssertionError(assertion.title, error)
       }
     }
+  }
+
+  private static logAssertionResult(
+    logger: Logger,
+    title: string,
+    expected: any,
+    actual: any,
+    operator: string,
+    passed: boolean,
+    path?: string,
+  ): void {
+    const status = passed ? pc.green('PASS') : pc.red('FAIL')
+
+    const formatValue = (val: any) => {
+      if (val === undefined) return pc.dim('undefined')
+      const str = JSON.stringify(val)
+      return str.length > 200 ? `${str.substring(0, 200)}...` : str
+    }
+
+    const displayExpected = expected === undefined ? pc.dim('N/A') : formatValue(expected)
+    const displayActual = pc.green(formatValue(actual))
+
+    const logLines = [
+      pc.bold('assertion:'),
+      `    ${pc.cyan(title)}`,
+      `    ${pc.bold('Path:')}     ${pc.cyan(path ?? 'N/A')}`,
+      `    ${pc.bold('Expected:')} ${displayExpected} [${pc.yellow(operator)}]`,
+      `    ${pc.bold('Actual:')}   ${displayActual}`,
+      `    ${pc.bold('Status:')}   ${status}`,
+    ]
+    logger.info(logLines.join('\n'))
   }
 
   private static applyOperator(

@@ -12,6 +12,8 @@ import { ProjectGraph } from './project-loader.js'
 import { Resolver, resolvePhase1, resolvePhase2 } from './resolver.js'
 import { VariableStore } from './variable-store.js'
 
+import { formatError } from '../utils/error-formatter.js'
+
 /**
  * Registers all suites from the project graph as Playwright tests.
  */
@@ -175,11 +177,11 @@ async function runSteps(
       const softErrors: SoftError[] = []
 
       // 1. Status code check
-      AssertionEngine.checkStatusCode(response.status(), step.response.validations.statusCode)
+      AssertionEngine.checkStatusCode(response.status(), step.response.validations.statusCode, logger)
 
       // 2. Schema validation
       if (step.response.schema) {
-        await AssertionEngine.validateSchema(body, step.response.schema, graph.schemas, softErrors)
+        await AssertionEngine.validateSchema(body, step.response.schema, graph.schemas, softErrors, logger)
       }
 
       // 3. Inline assertions
@@ -189,12 +191,12 @@ async function runSteps(
           ...assertion,
           value: assertion.value !== undefined ? resolver.resolve(assertion.value) : undefined,
         }
-        await AssertionEngine.runAssertion(resolvedAssertion, body, response, softErrors)
+        await AssertionEngine.runAssertion(resolvedAssertion, body, response, softErrors, logger)
       }
 
       // 4. Extraction Engine
       for (const extraction of step.response.extract ?? []) {
-        ExtractionEngine.runExtraction(extraction, body, response, store)
+        ExtractionEngine.runExtraction(extraction, body, response, store, logger)
       }
 
       // 5. Handler Runner
@@ -223,15 +225,7 @@ async function runSteps(
 
       // Record soft errors as Playwright annotations
       for (const soft of softErrors) {
-        let description = ''
-        if (soft.error instanceof Error) {
-          description = soft.error.message
-        } else if (Array.isArray(soft.error)) {
-          // likely AJV errors
-          description = JSON.stringify(soft.error, null, 2)
-        } else {
-          description = String(soft.error)
-        }
+        const description = formatError(soft.error, true)
 
         logger.warn(soft.title, soft.error)
 

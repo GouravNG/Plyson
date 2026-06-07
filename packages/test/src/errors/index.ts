@@ -1,3 +1,5 @@
+import { formatAjvErrors } from '../utils/error-formatter.js'
+
 export abstract class plysonError extends Error {
   abstract readonly code: string
   constructor(message: string) {
@@ -57,6 +59,6 @@ export class SchemaValidationError extends plysonError {
     public schemaName: string,
     public validationErrors: any[],
   ) {
-    super(`Schema validation failed for "${schemaName}": ${JSON.stringify(validationErrors)}`)
+    super(`Schema validation failed for "${schemaName}":\n${formatAjvErrors(validationErrors)}`)
   }
 }
