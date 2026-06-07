@@ -93,6 +93,9 @@ export const syncSchemasCommand = new Command('sync-schemas')
       }
 
       console.log('\nSchema sync complete.')
+      console.log(
+        '\n💡 Note: Schema validation will work as expected if "required" node present with valid keys and additionalProperties is true.',
+      )
     } catch (error: any) {
       console.error(`Error syncing schemas: ${error.message}`)
     }
