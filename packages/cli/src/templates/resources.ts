@@ -17,9 +17,11 @@ export const run = async (ctx: HandlerContext) => {
 `
 
 export const getScriptTemplate = (name: string, id: string) => ({
+  $schema: '../Project-schema/testcase.schema.json',
   id: id,
   title: name,
   description: `Reusable script: ${name}`,
+  tags: ['reusable'],
   steps: [
     {
       title: 'Example step',
@@ -37,6 +39,7 @@ export const getScriptTemplate = (name: string, id: string) => ({
 })
 
 export const getSuiteTemplate = (name: string) => ({
+  $schema: '../Project-schema/testsuite.schema.json',
   title: name,
   description: `Test suite: ${name}`,
   tags: ['automated'],

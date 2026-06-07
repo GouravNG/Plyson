@@ -19,11 +19,21 @@ generateCommand
   .action((key, value) => {
     const filePath = path.resolve('variables.json')
     let variables: Record<string, any> = {}
+    
     if (fs.existsSync(filePath)) {
-      variables = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+      const { $schema: _, ...rest } = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+      variables = rest
     }
+    
     variables[key] = value || ''
-    fs.writeFileSync(filePath, JSON.stringify(variables, null, 2))
+
+    // Always enforce/add $schema at the top
+    const finalData = {
+      $schema: './Project-schema/variables.schema.json',
+      ...variables,
+    }
+    
+    fs.writeFileSync(filePath, JSON.stringify(finalData, null, 2))
     console.log(`Added variable "${key}" to variables.json`)
   })
 
@@ -43,12 +53,19 @@ generateCommand
     for (const file of files) {
       const filePath = path.join(dirPath, file)
       const envName = path.basename(file, '.env.json')
-      const envData = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+      const { $schema: _, ...rest } = JSON.parse(fs.readFileSync(filePath, 'utf8'))
 
+      const envData = rest
       envData.variables = envData.variables || {}
       envData.variables[key] = envName === options.env ? value : ''
 
-      fs.writeFileSync(filePath, JSON.stringify(envData, null, 2))
+      // Always enforce/add $schema at the top
+      const finalData = {
+        $schema: '../Project-schema/environment.schema.json',
+        ...envData,
+      }
+
+      fs.writeFileSync(filePath, JSON.stringify(finalData, null, 2))
       console.log(`Updated ${file}`)
     }
     console.log(`\nAdded variable "${key}" to all environment files.`)
@@ -94,13 +111,22 @@ generateCommand
   .command('script <name>')
   .description('Create a new script boilerplate')
   .action((name) => {
-    const dirPath = path.resolve('scripts')
-    if (!fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath, { recursive: true })
+    const scriptsDir = path.resolve('scripts')
+    const filePath = path.join(scriptsDir, `${name}.script.json`)
+    const fileDir = path.dirname(filePath)
+
+    if (!fs.existsSync(fileDir)) {
+      fs.mkdirSync(fileDir, { recursive: true })
     }
-    const filePath = path.join(dirPath, `${name}.script.json`)
+
     const id = randomUUID()
     const content = getScriptTemplate(name, id)
+
+    // Adjust $schema path based on depth
+    const relativePathToRoot = path.relative(fileDir, path.resolve('.'))
+    const schemaPath = path.join(relativePathToRoot, 'Project-schema', 'testcase.schema.json')
+    content.$schema = schemaPath.replace(/\\/g, '/')
+
     if (!fs.existsSync(filePath)) {
       fs.writeFileSync(filePath, JSON.stringify(content, null, 2))
       console.log(`Created script: ${filePath} (id: ${id})`)
@@ -113,12 +139,21 @@ generateCommand
   .command('suite <name>')
   .description('Create a new suite boilerplate')
   .action((name) => {
-    const dirPath = path.resolve('suites')
-    if (!fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath, { recursive: true })
+    const suitesDir = path.resolve('suites')
+    const filePath = path.join(suitesDir, `${name}.test.json`)
+    const fileDir = path.dirname(filePath)
+
+    if (!fs.existsSync(fileDir)) {
+      fs.mkdirSync(fileDir, { recursive: true })
     }
-    const filePath = path.join(dirPath, `${name}.test.json`)
+
     const content = getSuiteTemplate(name)
+
+    // Adjust $schema path based on depth
+    const relativePathToRoot = path.relative(fileDir, path.resolve('.'))
+    const schemaPath = path.join(relativePathToRoot, 'Project-schema', 'testsuite.schema.json')
+    content.$schema = schemaPath.replace(/\\/g, '/')
+
     if (!fs.existsSync(filePath)) {
       fs.writeFileSync(filePath, JSON.stringify(content, null, 2))
       console.log(`Created suite: ${filePath}`)
