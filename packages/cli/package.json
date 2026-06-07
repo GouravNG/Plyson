@@ -1,6 +1,6 @@
 {
   "name": "@plyson/cli",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Command-line interface for the plyson declarative API testing framework",
   "type": "module",
   "main": "dist/index.js",

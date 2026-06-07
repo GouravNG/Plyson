@@ -6,7 +6,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="py-24 px-6 text-center max-w-5xl mx-auto flex flex-col items-center">
         <div className="mb-4 px-3 py-1 rounded-full border border-fd-primary/20 bg-fd-primary/5 text-fd-primary text-sm font-medium">
-          Now in Beta — v0.1.6
+          Now in Beta — v0.1.7
         </div>
         <h1 className="text-5xl md:text-8xl font-black tracking-tight mb-6 bg-gradient-to-b from-fd-foreground to-fd-foreground/70 bg-clip-text text-transparent">
           API Testing <br /> <span className="text-fd-primary">Simplified.</span>
