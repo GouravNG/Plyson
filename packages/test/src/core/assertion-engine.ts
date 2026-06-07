@@ -140,6 +140,7 @@ export class AssertionEngine {
         softErrors.push({ title: assertion.title, error })
       } else {
         throw new AssertionError(assertion.title, error)
+        throw new AssertionError(assertion.title, error)
       }
     }
   }
