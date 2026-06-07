@@ -20,6 +20,9 @@ Top-level folders and files are used to organize your test suites, environments,
   <Folder name="handlers">
     <File name="auth.handler.ts" />
   </Folder>
+  <Folder name="actions">
+    <File name="setup-db.action.ts" />
+  </Folder>
   <Folder name="scripts">
     <File name="login.script.json" />
   </Folder>
@@ -51,7 +54,11 @@ Top-level folders and files are used to organize your test suites, environments,
   </div>
   <div className="flex flex-col gap-2 py-4 sm:grid sm:grid-cols-[160px_1fr] sm:gap-4 sm:items-center">
     <code className="text-sky-500 bg-sky-500/10 border border-sky-500/20 px-1.5 py-0.5 rounded-md text-xs font-mono w-fit">handlers</code>
-    <p className="text-sm text-fd-muted-foreground">Optional. TypeScript "escape hatches" (`*.handler.ts`) for complex custom logic.</p>
+    <p className="text-sm text-fd-muted-foreground">Optional. TypeScript "escape hatches" (`*.handler.ts`) for custom logic *after* a request.</p>
+  </div>
+  <div className="flex flex-col gap-2 py-4 sm:grid sm:grid-cols-[160px_1fr] sm:gap-4 sm:items-center">
+    <code className="text-sky-500 bg-sky-500/10 border border-sky-500/20 px-1.5 py-0.5 rounded-md text-xs font-mono w-fit">actions</code>
+    <p className="text-sm text-fd-muted-foreground">Optional. TypeScript "actions" (`*.action.ts`) for custom logic as standalone test steps.</p>
   </div>
 </div>
 

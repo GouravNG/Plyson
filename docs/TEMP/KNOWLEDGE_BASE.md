@@ -14,6 +14,7 @@ my-api-tests/
   ├── data/                  # External test data (CSV/JSON - Future Scope)
   ├── environments/          # *.env.json: Environment-specific configurations
   ├── handlers/              # *.handler.ts: Custom validation/extraction logic
+  ├── actions/               # *.action.ts: Custom standalone test actions
   ├── schemas/               # *.schema.json: Managed API schemas for auto-fill
   ├── scripts/               # *.script.json: Reusable standalone test cases
   ├── suites/                # *.test.json: Organized test suites (recursive)
@@ -49,14 +50,24 @@ Extends `plyson/playwright.config.base`. Users should only override specific Pla
 
 ## 3. Environment Management (`environments/`)
 
-**Convention**: `environments/*.env.json`
-Selected via `--env <name>` flag (e.g., `--env dev` loads `dev.env.json`).
+**Convention**: `environments/*.env.json` and/or `environments/*.env`
+Selected via `--env <name>` flag (e.g., `--env dev` loads `dev.env.json` and `dev.env`).
 
-- **Type**: `EnvironmentVariables`
-- **Properties**:
+- **Resolution Priority**:
+  1.  System Environment Variables (CI/CD)
+  2.  Dotenv File (`*.env`)
+  3.  JSON File (`*.env.json`)
+  4.  Global Variables (`variables.json`)
+
+- **JSON Properties**:
   - `baseUrl`: Required. Base URL for all requests.
   - `specUrl`: Optional. OpenAPI/Swagger URL for schema syncing.
   - `variables`: Environment-specific overrides.
+
+- **Dotenv Keys**:
+  - `baseUrl` / `BASE_URL`: Overrides base URL.
+  - `specUrl` / `SPEC_URL`: Overrides spec URL.
+  - `ANY_KEY`: Environment-specific variable.
 
 ---
 
@@ -86,7 +97,19 @@ TypeScript files exporting a `run` function for complex logic.
 
 ---
 
-## 6. Reusable Scripts (`scripts/`)
+## 6. Custom Actions (`actions/`)
+
+**Convention**: `actions/*.action.ts`
+TypeScript files exporting a default function for arbitrary logic.
+
+- **Reference**: Used in `TestStep.action` by filename stem.
+- **Arguments**: Receives custom `args` defined in the test step.
+- **Context**: Receives `args`, `log`, `store`, and `playwrightRequest`.
+- **Execution**: Runs as a standalone test step.
+
+---
+
+## 7. Reusable Scripts (`scripts/`)
 
 **Convention**: `scripts/*.script.json`
 Standalone `Testcase` objects that can be referenced via `ref`.
@@ -96,7 +119,7 @@ Standalone `Testcase` objects that can be referenced via `ref`.
 
 ---
 
-## 7. Test Suites (`suites/`)
+## 8. Test Suites (`suites/`)
 
 **Convention**: `suites/**/*.test.json` (Recursive discovery)
 A `TestSuite` contains multiple `Testcase` objects.
@@ -106,7 +129,7 @@ A `TestSuite` contains multiple `Testcase` objects.
 
 ---
 
-## 8. Variables & Scoping
+## 9. Variables & Scoping
 
 ### Resolution Order (Highest to Lowest)
 
@@ -125,7 +148,7 @@ Extracted values from responses can be stored at three levels:
 
 ---
 
-## 9. Technical Reference (Type Definitions)
+## 10. Technical Reference (Type Definitions)
 
 ### Network & Assertions
 

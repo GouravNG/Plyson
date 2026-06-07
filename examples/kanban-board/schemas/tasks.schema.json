@@ -1,0 +1,52 @@
+{
+  "required": [
+    "id",
+    "created_at",
+    "title",
+    "sort_order",
+    "column_id"
+  ],
+  "properties": {
+    "id": {
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "bigint",
+      "type": "integer"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "title": {
+      "format": "text",
+      "type": "string"
+    },
+    "description": {
+      "format": "text",
+      "type": "string"
+    },
+    "assignee": {
+      "format": "text",
+      "type": "string"
+    },
+    "due_date": {
+      "format": "date",
+      "type": "string"
+    },
+    "priority": {
+      "format": "text",
+      "type": "string"
+    },
+    "sort_order": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "column_id": {
+      "description": "Note:\nThis is a Foreign Key to `columns.id`.<fk table='columns' column='id'/>",
+      "format": "bigint",
+      "type": "integer"
+    }
+  },
+  "type": "object"
+}

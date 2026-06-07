@@ -17,9 +17,11 @@ export const run = async (ctx: HandlerContext) => {
 `
 
 export const getScriptTemplate = (name: string, id: string) => ({
+  $schema: '../Project-schema/testcase.schema.json',
   id: id,
   title: name,
   description: `Reusable script: ${name}`,
+  tags: ['reusable'],
   steps: [
     {
       title: 'Example step',
@@ -37,6 +39,7 @@ export const getScriptTemplate = (name: string, id: string) => ({
 })
 
 export const getSuiteTemplate = (name: string) => ({
+  $schema: '../Project-schema/testsuite.schema.json',
   title: name,
   description: `Test suite: ${name}`,
   tags: ['automated'],
@@ -63,3 +66,20 @@ export const getSuiteTemplate = (name: string) => ({
     },
   ],
 })
+
+export const getActionTemplate = (name: string) => `import { ActionContext } from '@plyson/test';
+
+/**
+ * Custom action: ${name}
+ * Actions are exported as default functions and receive a rich context.
+ */
+export default async function ${name.replace(/[^a-zA-Z0-9]/g, '')}Action({ args, log, store, playwrightRequest }: ActionContext) {
+  // Access arguments, store, and Playwright request context
+  // Example: const { userId } = args;
+  
+  log('Running custom action: ${name}');
+  
+  // Example: Set a variable for subsequent steps
+  // store.set('lastAction', '${name}', 'case');
+}
+`

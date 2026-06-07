@@ -1,7 +1,7 @@
 {
   "name": "@plyson/test",
   "description": "Core engine for plyson declarative API testing",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -29,6 +29,7 @@
     "@faker-js/faker": "^10.4.0",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
+    "dotenv": "^16.4.7",
     "glob": "^13.0.6",
     "jmespath": "^0.16.0",
     "jsonpath-plus": "^10.4.0",

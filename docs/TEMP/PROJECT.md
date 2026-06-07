@@ -10,14 +10,15 @@ Users write files like:
 - environments/dev.env.json: base URL and env-specific
   variables
 - schemas/\*.schema.json: request/response JSON schemas
-- scripts/\*.script.json: reusable test cases
-- suites/\*_/_.test.json: actual API test suites
-- handlers/\*.handler.ts: custom TypeScript escape hatches
+- scripts/*.script.json: reusable test cases
+- suites/*_/_ .test.json: actual API test suites
+- handlers/*.handler.ts: custom TypeScript escape hatches
+- actions/*.action.ts: custom TypeScript test actions
 
 The framework loads those files, resolves variables like
 {{token}}, sends HTTP requests with Playwright, checks
 assertions, extracts response values, and optionally runs
-custom handlers.
+custom handlers or actions.
 
 Main Runtime Flow
 
@@ -26,8 +27,9 @@ The core flow is:
 1. src/core/project-loader.ts
    Discovers and validates all project files. It loads project
    config, variables, environment files, schemas, handlers,
-   scripts, and suites. It also expands ref steps by replacing
-   them with reusable script steps.
+   actions, scripts, and suites. It also expands ref steps by
+   replacing them with reusable script steps.
+
 2. src/core/variable-store.ts
    Stores variables in scoped layers:
 

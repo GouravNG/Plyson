@@ -1,0 +1,743 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project Schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "beforeAll": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "ref": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "ref"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "wait": {
+                "type": "number"
+              },
+              "action": {
+                "type": "string"
+              },
+              "args": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "title",
+              "action"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "wait": {
+                "type": "number"
+              },
+              "flags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "handlers": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "request": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "GET",
+                      "POST",
+                      "PUT",
+                      "DELETE",
+                      "PATCH",
+                      "HEAD",
+                      "OPTIONS"
+                    ]
+                  },
+                  "endpoint": {
+                    "type": "string"
+                  },
+                  "queryParams": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "pathParams": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "headers": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "autoFill": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "schemaName": {
+                            "type": "string"
+                          },
+                          "includeFields": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [
+                          "schemaName",
+                          "includeFields"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "schemaName": {
+                            "type": "string"
+                          },
+                          "excludeFields": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [
+                          "schemaName",
+                          "excludeFields"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "schemaName": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "schemaName"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "payload": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "method",
+                  "endpoint"
+                ],
+                "additionalProperties": false
+              },
+              "response": {
+                "type": "object",
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "validation": {
+                        "anyOf": [
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "const": "warn"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "validations": {
+                    "type": "object",
+                    "properties": {
+                      "statusCode": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "number"
+                            }
+                          }
+                        ]
+                      },
+                      "assertions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "title": {
+                              "type": "string"
+                            },
+                            "from": {
+                              "type": "string",
+                              "enum": [
+                                "body",
+                                "header"
+                              ]
+                            },
+                            "path": {
+                              "type": "string"
+                            },
+                            "operator": {
+                              "type": "string",
+                              "enum": [
+                                "equals",
+                                "equalsIgnoreCase",
+                                "notEquals",
+                                "exists",
+                                "notExists",
+                                "isNull",
+                                "isNotNull",
+                                "isGreaterThan",
+                                "isLessThan",
+                                "isGreaterThanOrEquals",
+                                "isLessThanOrEquals",
+                                "contains",
+                                "notContains",
+                                "matches",
+                                "notMatches",
+                                "hasLength",
+                                "hasMinLength",
+                                "hasMaxLength",
+                                "includes",
+                                "notIncludes",
+                                "isEmpty",
+                                "isNotEmpty",
+                                "containsSubset",
+                                "notContainsSubset",
+                                "isString",
+                                "isNumber",
+                                "isBoolean",
+                                "isArray",
+                                "isObject"
+                              ]
+                            },
+                            "value": {},
+                            "validation": {
+                              "default": "error",
+                              "type": "string",
+                              "enum": [
+                                "warn",
+                                "error"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "title",
+                            "from",
+                            "path",
+                            "operator"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "statusCode"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "extract": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "from": {
+                          "type": "string",
+                          "enum": [
+                            "body",
+                            "header"
+                          ]
+                        },
+                        "path": {
+                          "type": "string"
+                        },
+                        "scope": {
+                          "type": "string",
+                          "enum": [
+                            "global",
+                            "environment",
+                            "suite",
+                            "case"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "from",
+                        "path",
+                        "scope"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "validations"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "title",
+              "request",
+              "response"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "afterAll": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "ref": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "ref"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "wait": {
+                "type": "number"
+              },
+              "action": {
+                "type": "string"
+              },
+              "args": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "title",
+              "action"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "disabled": {
+                "type": "boolean"
+              },
+              "wait": {
+                "type": "number"
+              },
+              "flags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "handlers": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "request": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "GET",
+                      "POST",
+                      "PUT",
+                      "DELETE",
+                      "PATCH",
+                      "HEAD",
+                      "OPTIONS"
+                    ]
+                  },
+                  "endpoint": {
+                    "type": "string"
+                  },
+                  "queryParams": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "pathParams": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "headers": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "autoFill": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "schemaName": {
+                            "type": "string"
+                          },
+                          "includeFields": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [
+                          "schemaName",
+                          "includeFields"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "schemaName": {
+                            "type": "string"
+                          },
+                          "excludeFields": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [
+                          "schemaName",
+                          "excludeFields"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "schemaName": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "schemaName"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "payload": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "method",
+                  "endpoint"
+                ],
+                "additionalProperties": false
+              },
+              "response": {
+                "type": "object",
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "validation": {
+                        "anyOf": [
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "const": "warn"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "validations": {
+                    "type": "object",
+                    "properties": {
+                      "statusCode": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "number"
+                            }
+                          }
+                        ]
+                      },
+                      "assertions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "title": {
+                              "type": "string"
+                            },
+                            "from": {
+                              "type": "string",
+                              "enum": [
+                                "body",
+                                "header"
+                              ]
+                            },
+                            "path": {
+                              "type": "string"
+                            },
+                            "operator": {
+                              "type": "string",
+                              "enum": [
+                                "equals",
+                                "equalsIgnoreCase",
+                                "notEquals",
+                                "exists",
+                                "notExists",
+                                "isNull",
+                                "isNotNull",
+                                "isGreaterThan",
+                                "isLessThan",
+                                "isGreaterThanOrEquals",
+                                "isLessThanOrEquals",
+                                "contains",
+                                "notContains",
+                                "matches",
+                                "notMatches",
+                                "hasLength",
+                                "hasMinLength",
+                                "hasMaxLength",
+                                "includes",
+                                "notIncludes",
+                                "isEmpty",
+                                "isNotEmpty",
+                                "containsSubset",
+                                "notContainsSubset",
+                                "isString",
+                                "isNumber",
+                                "isBoolean",
+                                "isArray",
+                                "isObject"
+                              ]
+                            },
+                            "value": {},
+                            "validation": {
+                              "default": "error",
+                              "type": "string",
+                              "enum": [
+                                "warn",
+                                "error"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "title",
+                            "from",
+                            "path",
+                            "operator"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "statusCode"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "extract": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "from": {
+                          "type": "string",
+                          "enum": [
+                            "body",
+                            "header"
+                          ]
+                        },
+                        "path": {
+                          "type": "string"
+                        },
+                        "scope": {
+                          "type": "string",
+                          "enum": [
+                            "global",
+                            "environment",
+                            "suite",
+                            "case"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "from",
+                        "path",
+                        "scope"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "validations"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "title",
+              "request",
+              "response"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "defaultEnv": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "version"
+  ],
+  "additionalProperties": false
+}

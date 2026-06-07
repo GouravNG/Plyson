@@ -1,8 +1,10 @@
+import * as dotenv from 'dotenv'
 import * as fs from 'fs/promises'
 import { glob } from 'glob'
 import * as path from 'path'
 import { LoadError } from '../errors/index.js'
 import {
+  ActionModule,
   EnvironmentVariables,
   EnvironmentVariablesSchema,
   HandlerModule,
@@ -24,6 +26,7 @@ export interface ProjectGraph {
   environment: EnvironmentVariables
   schemas: Map<string, any>
   handlers: Map<string, HandlerModule>
+  actions: Map<string, ActionModule>
   scripts: Map<string, Testcase>
   suites: TestSuite[]
 }
@@ -73,29 +76,83 @@ export class ProjectLoader {
     }
 
     // 3. Environment
-    let environment: EnvironmentVariables = {} as EnvironmentVariables
-    const envFile = path.join(absoluteRootDir, 'environments', `${env}.env.json`)
+    let jsonVariables: Variables = {}
+    let dotEnvVariables: Variables = {}
+    let baseUrl: string | undefined
+
+    const envJsonFile = path.join(absoluteRootDir, 'environments', `${env}.env.json`)
+    const envDotFile = path.join(absoluteRootDir, 'environments', `${env}.env`)
+
+    let jsonLoaded = false
     try {
-      const content = await fs.readFile(envFile, 'utf-8')
+      const content = await fs.readFile(envJsonFile, 'utf-8')
       const parsed = JSON.parse(content)
-      const result = EnvironmentVariablesSchema.safeParse(parsed)
-      if (!result.success) {
-        throw new LoadError(
-          `Invalid environment file ${env}.env.json: ${result.error.message}`,
-          `environments/${env}.env.json`,
-        )
-      }
-      environment = result.data
-      this.logger.info(
-        `✓ Environment loaded: "${env}" with ${Object.keys(environment).length} variable(s)`,
-      )
+      baseUrl = parsed.baseUrl
+      jsonVariables = parsed.variables || {}
+      jsonLoaded = true
     } catch (e: any) {
-      if (e instanceof LoadError) throw e
+      // JSON is optional
+    }
+
+    let dotEnvLoaded = false
+    try {
+      const content = await fs.readFile(envDotFile, 'utf-8')
+      const parsed = dotenv.parse(content)
+      dotEnvVariables = parsed
+      
+      // .env overrides JSON baseUrl
+      if (parsed.BASE_URL) baseUrl = parsed.BASE_URL
+      if (parsed.baseUrl) baseUrl = parsed.baseUrl
+      
+      dotEnvLoaded = true
+    } catch (e: any) {
+      // .env is optional
+    }
+
+    if (!jsonLoaded && !dotEnvLoaded) {
       throw new LoadError(
-        `Environment file not found or unreadable: ${envFile}`,
+        `Environment file not found or unreadable. Tried: ${env}.env.json or ${env}.env`,
         `environments/${env}.env.json`,
       )
     }
+
+    // Assemble initial data
+    const environmentData = {
+      baseUrl,
+      variables: {
+        ...jsonVariables,
+        ...dotEnvVariables,
+      },
+    }
+
+    const envResult = EnvironmentVariablesSchema.safeParse(environmentData)
+    if (!envResult.success) {
+      throw new LoadError(
+        `Invalid environment configuration for "${env}": ${envResult.error.message}`,
+        jsonLoaded ? `environments/${env}.env.json` : `environments/${env}.env`,
+      )
+    }
+
+    const environment = envResult.data
+
+    // 4. CI/CD Overrides (Option C: System variables override declared variables)
+    if (environment.variables) {
+      for (const key of Object.keys(environment.variables)) {
+        if (process.env[key] !== undefined) {
+          environment.variables[key] = process.env[key] as string
+        }
+      }
+    }
+
+    // System override for baseUrl
+    if (process.env.BASE_URL) environment.baseUrl = process.env.BASE_URL
+    if (process.env.baseUrl) environment.baseUrl = process.env.baseUrl
+
+    this.logger.info(
+      `✓ Environment loaded: "${env}" (JSON: ${jsonLoaded}, .env: ${dotEnvLoaded}) with ${
+        Object.keys(environment.variables || {}).length
+      } variable(s)`,
+    )
 
     // 4. Schemas
     const schemas = new Map<string, any>()
@@ -131,6 +188,26 @@ export class ProjectLoader {
       }
     }
     this.logger.info(`✓ Handlers loaded: ${handlers.size} handler(s)`)
+
+    // 5.5 Actions
+    const actions = new Map<string, ActionModule>()
+    const actionFiles = await glob('actions/**/*.action.ts', { cwd: absoluteRootDir })
+    for (const file of actionFiles) {
+      const absoluteActionPath = path.join(absoluteRootDir, file)
+      try {
+        const fileUrl = new URL(`file://${absoluteActionPath.replace(/\\/g, '/')}`).href
+        const mod = await import(fileUrl)
+        const stem = path.basename(file, '.action.ts')
+        if (typeof mod.default !== 'function') {
+          this.logger.warn(file, `Action "${stem}" missing default export function`)
+        } else {
+          actions.set(stem, mod)
+        }
+      } catch (e: any) {
+        this.logger.warn(file, `Failed to load action: ${e.message}`)
+      }
+    }
+    this.logger.info(`✓ Actions loaded: ${actions.size} action(s)`)
 
     // 6. Scripts
     const scripts = new Map<string, Testcase>()
@@ -234,6 +311,7 @@ export class ProjectLoader {
       environment,
       schemas,
       handlers,
+      actions,
       scripts,
       suites,
     }
