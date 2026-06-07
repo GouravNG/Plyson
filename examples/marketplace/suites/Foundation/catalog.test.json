@@ -1,0 +1,1598 @@
+{
+  "$schema": "../../Project-schema/testsuite.schema.json",
+  "title": "Foundation - Catalog Management",
+  "description": "Comprehensive tests for the /foundation/catalog endpoint",
+  "tags": ["automated", "foundation", "catalog"],
+  "beforeAll": [
+    {
+      "title": "Create a test business for catalog fixtures",
+      "request": {
+        "method": "POST",
+        "endpoint": "/foundation/business",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        },
+        "payload": {
+          "name": "Catalog Suite Business"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "activeBizId",
+            "from": "body",
+            "path": "$.business.id",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Create the primary active store for catalog fixtures",
+      "request": {
+        "method": "POST",
+        "endpoint": "/foundation/store",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        },
+        "payload": {
+          "name": "Catalog Suite Store",
+          "businessId": "{{activeBizId}}"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "activeStoreId",
+            "from": "body",
+            "path": "$.store.id",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Create the secondary active store for reassignment tests",
+      "request": {
+        "method": "POST",
+        "endpoint": "/foundation/store",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        },
+        "payload": {
+          "name": "Catalog Suite Secondary Store",
+          "businessId": "{{activeBizId}}"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "secondaryStoreId",
+            "from": "body",
+            "path": "$.store.id",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Create and delete a store for inactive-store validation",
+      "request": {
+        "method": "POST",
+        "endpoint": "/foundation/store",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        },
+        "payload": {
+          "name": "Catalog Suite Deleted Store",
+          "businessId": "{{activeBizId}}"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "deletedStoreId",
+            "from": "body",
+            "path": "$.store.id",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Soft delete the inactive store fixture",
+      "request": {
+        "method": "DELETE",
+        "endpoint": "/foundation/store/{{deletedStoreId}}",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 200
+        }
+      }
+    },
+    {
+      "title": "Create an active catalog fixture",
+      "request": {
+        "method": "POST",
+        "endpoint": "/foundation/catalog",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        },
+        "payload": {
+          "name": "Catalog Suite Active",
+          "storeId": "{{activeStoreId}}"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "activeCatalogId",
+            "from": "body",
+            "path": "$.catalog.id",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Create and delete a catalog fixture for soft-delete validation",
+      "request": {
+        "method": "POST",
+        "endpoint": "/foundation/catalog",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        },
+        "payload": {
+          "name": "Catalog Suite Deleted",
+          "storeId": "{{activeStoreId}}"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 201
+        },
+        "extract": [
+          {
+            "name": "deletedCatalogId",
+            "from": "body",
+            "path": "$.catalog.id",
+            "scope": "suite"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Soft delete the deleted-catalog fixture",
+      "request": {
+        "method": "DELETE",
+        "endpoint": "/foundation/catalog/{{deletedCatalogId}}",
+        "headers": {
+          "Authorization": "Bearer {{adminToken}}"
+        }
+      },
+      "response": {
+        "validations": {
+          "statusCode": 200
+        }
+      }
+    }
+  ],
+  "testCases": [
+    {
+      "id": "TC_FOUND11_001",
+      "title": "List catalogs as Admin when requesting the active collection -> 200 OK",
+      "testType": "positive",
+      "tags": ["positive", "get", "foundation", "p0", "smoke"],
+      "steps": [
+        {
+          "title": "List catalogs with pagination",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/catalog",
+            "queryParams": {
+              "page": 1,
+              "limit": 100
+            },
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Catalogs array is present",
+                  "from": "body",
+                  "path": "$.catalogs",
+                  "operator": "exists"
+                },
+                {
+                  "title": "Pagination metadata is present",
+                  "from": "body",
+                  "path": "$.meta",
+                  "operator": "exists"
+                },
+                {
+                  "title": "Deleted catalog records are excluded from the list",
+                  "from": "body",
+                  "path": "$.catalogs[?(@.deletedAt != null)]",
+                  "operator": "notExists"
+                },
+                {
+                  "title": "Requested page is reflected in metadata",
+                  "from": "body",
+                  "path": "$.meta.page",
+                  "operator": "equals",
+                  "value": 1
+                },
+                {
+                  "title": "Requested limit is reflected in metadata",
+                  "from": "body",
+                  "path": "$.meta.limit",
+                  "operator": "equals",
+                  "value": 100
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND11_002",
+      "title": "Reject list catalogs when caller is not Admin -> 403 Forbidden",
+      "testType": "negative",
+      "tags": ["negative", "security", "foundation", "p0"],
+      "steps": [
+        {
+          "title": "Attempt to list catalogs as a standard user",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{userToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 403
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND11_003",
+      "title": "Reject list catalogs when unauthenticated -> 401 Unauthorized",
+      "testType": "negative",
+      "tags": ["negative", "security", "foundation", "p0"],
+      "steps": [
+        {
+          "title": "Attempt to list catalogs without a bearer token",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/catalog"
+          },
+          "response": {
+            "validations": {
+              "statusCode": 401
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND12_001",
+      "title": "Create a catalog with the minimum valid name length when store is active -> 201 Created",
+      "testType": "edge",
+      "tags": ["boundary", "positive", "post", "foundation", "p1"],
+      "variables": {
+        "catalogNameMin": {
+          "$gen": "alpha",
+          "length": 1
+        }
+      },
+      "steps": [
+        {
+          "title": "Create catalog using a 1-character name",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "{{catalogNameMin}}",
+              "storeId": "{{activeStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201,
+              "assertions": [
+                {
+                  "title": "Returned catalog name matches the request",
+                  "from": "body",
+                  "path": "$.catalog.name",
+                  "operator": "equals",
+                  "value": "{{catalogNameMin}}"
+                },
+                {
+                  "title": "Returned catalog is linked to the requested store",
+                  "from": "body",
+                  "path": "$.catalog.storeId",
+                  "operator": "equals",
+                  "value": "{{activeStoreId}}"
+                },
+                {
+                  "title": "Catalog ID is generated",
+                  "from": "body",
+                  "path": "$.catalog.id",
+                  "operator": "exists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND12_002",
+      "title": "Create a catalog with the maximum valid name length when store is active -> 201 Created",
+      "testType": "edge",
+      "tags": ["boundary", "positive", "post", "foundation", "p1"],
+      "variables": {
+        "catalogNameMax": {
+          "$gen": "alpha",
+          "length": 120
+        }
+      },
+      "steps": [
+        {
+          "title": "Create catalog using a 120-character name",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "{{catalogNameMax}}",
+              "storeId": "{{activeStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201,
+              "assertions": [
+                {
+                  "title": "Returned catalog name matches the 120-character payload",
+                  "from": "body",
+                  "path": "$.catalog.name",
+                  "operator": "equals",
+                  "value": "{{catalogNameMax}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND12_003",
+      "title": "Reject catalog creation when name is missing -> 422 Unprocessable Entity",
+      "testType": "negative",
+      "tags": ["negative", "post", "foundation", "validation", "p1"],
+      "steps": [
+        {
+          "title": "Attempt to create catalog without a name",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "storeId": "{{activeStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 422,
+              "assertions": [
+                {
+                  "title": "Errors include missing name message",
+                  "from": "body",
+                  "path": "$.errors",
+                  "operator": "includes",
+                  "value": "'name' is required"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND12_004",
+      "title": "Reject catalog creation when name is empty -> 422 Unprocessable Entity",
+      "testType": "edge",
+      "tags": ["boundary", "negative", "post", "foundation", "validation", "p1"],
+      "steps": [
+        {
+          "title": "Attempt to create catalog with an empty name",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "",
+              "storeId": "{{activeStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 422,
+              "assertions": [
+                {
+                  "title": "Empty name is rejected as required field failure",
+                  "from": "body",
+                  "path": "$.errors",
+                  "operator": "includes",
+                  "value": "'name' is required"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND12_005",
+      "title": "Reject catalog creation when name exceeds 120 characters -> 422 Unprocessable Entity",
+      "testType": "edge",
+      "tags": ["boundary", "negative", "post", "foundation", "validation", "p1"],
+      "variables": {
+        "catalogNameTooLong": {
+          "$gen": "alpha",
+          "length": 121
+        }
+      },
+      "steps": [
+        {
+          "title": "Attempt to create catalog using a 121-character name",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "{{catalogNameTooLong}}",
+              "storeId": "{{activeStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 422,
+              "assertions": [
+                {
+                  "title": "Max-length validation message is returned",
+                  "from": "body",
+                  "path": "$.errors",
+                  "operator": "includes",
+                  "value": "'name' must be at most 120 characters"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND12_006",
+      "title": "Reject catalog creation when storeId is missing -> 422 Unprocessable Entity",
+      "testType": "negative",
+      "tags": ["negative", "post", "foundation", "validation", "p1"],
+      "steps": [
+        {
+          "title": "Attempt to create catalog without storeId",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Catalog Missing Store"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 422,
+              "assertions": [
+                {
+                  "title": "Errors include missing storeId message",
+                  "from": "body",
+                  "path": "$.errors",
+                  "operator": "includes",
+                  "value": "'storeId' is required"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND12_007",
+      "title": "Reject catalog creation when store does not exist -> 404 Not Found",
+      "testType": "negative",
+      "tags": ["negative", "post", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Attempt to create catalog with an unknown storeId",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Catalog Invalid Store",
+              "storeId": "non-existent-store-id"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404,
+              "assertions": [
+                {
+                  "title": "Missing store message is returned",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "equals",
+                  "value": "Store 'non-existent-store-id' not found"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND12_008",
+      "title": "Reject catalog creation when store is soft-deleted -> 404 Not Found",
+      "testType": "negative",
+      "tags": ["negative", "post", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Attempt to create catalog against a deleted store",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Catalog Deleted Store",
+              "storeId": "{{deletedStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404,
+              "assertions": [
+                {
+                  "title": "Deleted store message is returned",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "equals",
+                  "value": "Store '{{deletedStoreId}}' not found"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND12_009",
+      "title": "Reject catalog creation when caller is not Admin -> 403 Forbidden",
+      "testType": "negative",
+      "tags": ["negative", "security", "foundation", "p0"],
+      "steps": [
+        {
+          "title": "Attempt to create a catalog as a standard user",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{userToken}}"
+            },
+            "payload": {
+              "name": "User Catalog",
+              "storeId": "{{activeStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 403
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND12_010",
+      "title": "Reject catalog creation when unauthenticated -> 401 Unauthorized",
+      "testType": "negative",
+      "tags": ["negative", "security", "foundation", "p0"],
+      "steps": [
+        {
+          "title": "Attempt to create a catalog without a bearer token",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "payload": {
+              "name": "Anonymous Catalog",
+              "storeId": "{{activeStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 401
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND13_001",
+      "title": "Get a catalog as Admin when the catalog is active -> 200 OK",
+      "testType": "positive",
+      "tags": ["positive", "get", "foundation", "p0", "smoke"],
+      "steps": [
+        {
+          "title": "Fetch the active catalog fixture",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/catalog/{{activeCatalogId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Catalog ID matches the requested resource",
+                  "from": "body",
+                  "path": "$.catalog.id",
+                  "operator": "equals",
+                  "value": "{{activeCatalogId}}"
+                },
+                {
+                  "title": "Catalog is linked to the active store fixture",
+                  "from": "body",
+                  "path": "$.catalog.storeId",
+                  "operator": "equals",
+                  "value": "{{activeStoreId}}"
+                },
+                {
+                  "title": "Catalog is not soft-deleted",
+                  "from": "body",
+                  "path": "$.catalog.deletedAt",
+                  "operator": "isNull"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND13_002",
+      "title": "Reject catalog lookup when the catalog does not exist -> 404 Not Found",
+      "testType": "negative",
+      "tags": ["negative", "get", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Fetch an unknown catalog ID",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/catalog/non-existent-catalog-id",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404,
+              "assertions": [
+                {
+                  "title": "Not found message is returned",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "equals",
+                  "value": "Catalog not found"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND13_003",
+      "title": "Reject catalog lookup when the catalog is soft-deleted -> 404 Not Found",
+      "testType": "negative",
+      "tags": ["negative", "get", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Fetch the deleted catalog fixture",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/catalog/{{deletedCatalogId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND13_004",
+      "title": "Reject catalog lookup when caller is not Admin -> 403 Forbidden",
+      "testType": "negative",
+      "tags": ["negative", "security", "foundation", "p0"],
+      "steps": [
+        {
+          "title": "Attempt to fetch a catalog as a standard user",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/catalog/{{activeCatalogId}}",
+            "headers": {
+              "Authorization": "Bearer {{userToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 403
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND13_005",
+      "title": "Reject catalog lookup when unauthenticated -> 401 Unauthorized",
+      "testType": "negative",
+      "tags": ["negative", "security", "foundation", "p0"],
+      "steps": [
+        {
+          "title": "Attempt to fetch a catalog without a bearer token",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/catalog/{{activeCatalogId}}"
+          },
+          "response": {
+            "validations": {
+              "statusCode": 401
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND14_001",
+      "title": "Update a catalog name when only name is provided -> 200 OK",
+      "testType": "positive",
+      "tags": ["positive", "patch", "foundation", "p0", "smoke"],
+      "variables": {
+        "updateNameCatalog": {
+          "$gen": "alpha",
+          "length": 12
+        },
+        "updatedCatalogName": {
+          "$gen": "alpha",
+          "length": 14
+        }
+      },
+      "steps": [
+        {
+          "title": "Create a temporary catalog to update",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "{{updateNameCatalog}}",
+              "storeId": "{{activeStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201
+            },
+            "extract": [
+              {
+                "name": "updateNameCatalogId",
+                "from": "body",
+                "path": "$.catalog.id",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Update only the catalog name",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/catalog/{{updateNameCatalogId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "{{updatedCatalogName}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Name is updated",
+                  "from": "body",
+                  "path": "$.catalog.name",
+                  "operator": "equals",
+                  "value": "{{updatedCatalogName}}"
+                },
+                {
+                  "title": "Store association remains unchanged",
+                  "from": "body",
+                  "path": "$.catalog.storeId",
+                  "operator": "equals",
+                  "value": "{{activeStoreId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND14_002",
+      "title": "Update a catalog store association when a new active store is provided -> 200 OK",
+      "testType": "positive",
+      "tags": ["positive", "patch", "foundation", "p1"],
+      "variables": {
+        "updateStoreCatalog": {
+          "$gen": "alpha",
+          "length": 12
+        }
+      },
+      "steps": [
+        {
+          "title": "Create a temporary catalog to reassign",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "{{updateStoreCatalog}}",
+              "storeId": "{{activeStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201
+            },
+            "extract": [
+              {
+                "name": "updateStoreCatalogId",
+                "from": "body",
+                "path": "$.catalog.id",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Reassign the catalog to a different active store",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/catalog/{{updateStoreCatalogId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "storeId": "{{secondaryStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Store association is updated",
+                  "from": "body",
+                  "path": "$.catalog.storeId",
+                  "operator": "equals",
+                  "value": "{{secondaryStoreId}}"
+                },
+                {
+                  "title": "Catalog name remains unchanged",
+                  "from": "body",
+                  "path": "$.catalog.name",
+                  "operator": "equals",
+                  "value": "{{updateStoreCatalog}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND14_003",
+      "title": "Reject catalog update when the new store does not exist -> 404 Not Found",
+      "testType": "negative",
+      "tags": ["negative", "patch", "foundation", "p1"],
+      "variables": {
+        "invalidUpdateCatalogName": {
+          "$gen": "alpha",
+          "length": 12
+        }
+      },
+      "steps": [
+        {
+          "title": "Create a temporary catalog for invalid-store update",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "{{invalidUpdateCatalogName}}",
+              "storeId": "{{activeStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201
+            },
+            "extract": [
+              {
+                "name": "invalidUpdateCatalogId",
+                "from": "body",
+                "path": "$.catalog.id",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Attempt to reassign the catalog to a missing store",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/catalog/{{invalidUpdateCatalogId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "storeId": "non-existent-store-id"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404,
+              "assertions": [
+                {
+                  "title": "Missing store message is returned",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "equals",
+                  "value": "Store 'non-existent-store-id' not found"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND14_004",
+      "title": "Reject catalog update when the new store is soft-deleted -> 404 Not Found",
+      "testType": "negative",
+      "tags": ["negative", "patch", "foundation", "p1"],
+      "variables": {
+        "deletedStoreUpdateCatalogName": {
+          "$gen": "alpha",
+          "length": 12
+        }
+      },
+      "steps": [
+        {
+          "title": "Create a temporary catalog for deleted-store update",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "{{deletedStoreUpdateCatalogName}}",
+              "storeId": "{{activeStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201
+            },
+            "extract": [
+              {
+                "name": "deletedStoreUpdateCatalogId",
+                "from": "body",
+                "path": "$.catalog.id",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Attempt to reassign the catalog to the deleted store fixture",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/catalog/{{deletedStoreUpdateCatalogId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "storeId": "{{deletedStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404,
+              "assertions": [
+                {
+                  "title": "Deleted store rejection is returned",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "equals",
+                  "value": "Store '{{deletedStoreId}}' not found"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND14_005",
+      "title": "Reject catalog update when the catalog does not exist -> 404 Not Found",
+      "testType": "negative",
+      "tags": ["negative", "patch", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Attempt to update an unknown catalog ID",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/catalog/non-existent-catalog-id",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Updated Name"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404,
+              "assertions": [
+                {
+                  "title": "Not found message is returned",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "equals",
+                  "value": "Catalog not found"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND14_006",
+      "title": "Reject catalog update when the catalog is soft-deleted -> 404 Not Found",
+      "testType": "negative",
+      "tags": ["negative", "patch", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Attempt to update the deleted catalog fixture",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/catalog/{{deletedCatalogId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "Should Not Update"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND14_007",
+      "title": "Reject catalog update when caller is not Admin -> 403 Forbidden",
+      "testType": "negative",
+      "tags": ["negative", "security", "foundation", "p0"],
+      "variables": {
+        "userUpdateCatalogName": {
+          "$gen": "alpha",
+          "length": 12
+        }
+      },
+      "steps": [
+        {
+          "title": "Create a catalog to exercise security enforcement",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "{{userUpdateCatalogName}}",
+              "storeId": "{{activeStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201
+            },
+            "extract": [
+              {
+                "name": "userUpdateCatalogId",
+                "from": "body",
+                "path": "$.catalog.id",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Attempt to update the catalog as a standard user",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/catalog/{{userUpdateCatalogId}}",
+            "headers": {
+              "Authorization": "Bearer {{userToken}}"
+            },
+            "payload": {
+              "name": "Forbidden Update"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 403
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND14_008",
+      "title": "Reject catalog update when unauthenticated -> 401 Unauthorized",
+      "testType": "negative",
+      "tags": ["negative", "security", "foundation", "p0"],
+      "steps": [
+        {
+          "title": "Attempt to update a catalog without a bearer token",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/catalog/{{activeCatalogId}}",
+            "payload": {
+              "name": "Anonymous Update"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 401
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND14_009",
+      "title": "Repeat the same catalog update twice when payload is unchanged -> 200 OK on both calls",
+      "testType": "positive",
+      "tags": ["positive", "patch", "foundation", "p2"],
+      "variables": {
+        "idempotentUpdateCatalogName": {
+          "$gen": "alpha",
+          "length": 12
+        },
+        "idempotentUpdateName": {
+          "$gen": "alpha",
+          "length": 15
+        }
+      },
+      "steps": [
+        {
+          "title": "Create a catalog for idempotent update verification",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "{{idempotentUpdateCatalogName}}",
+              "storeId": "{{activeStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201
+            },
+            "extract": [
+              {
+                "name": "idempotentUpdateCatalogId",
+                "from": "body",
+                "path": "$.catalog.id",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Apply the same update payload once",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/catalog/{{idempotentUpdateCatalogId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "{{idempotentUpdateName}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200
+            }
+          }
+        },
+        {
+          "title": "Apply the same update payload a second time",
+          "request": {
+            "method": "PATCH",
+            "endpoint": "/foundation/catalog/{{idempotentUpdateCatalogId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "{{idempotentUpdateName}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Catalog name remains the same after the repeated update",
+                  "from": "body",
+                  "path": "$.catalog.name",
+                  "operator": "equals",
+                  "value": "{{idempotentUpdateName}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND15_001",
+      "title": "Soft-delete a catalog when the target is active -> 200 OK",
+      "testType": "positive",
+      "tags": ["positive", "delete", "foundation", "p0", "smoke"],
+      "variables": {
+        "deleteCatalogName": {
+          "$gen": "alpha",
+          "length": 12
+        }
+      },
+      "steps": [
+        {
+          "title": "Create a catalog to delete",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "{{deleteCatalogName}}",
+              "storeId": "{{activeStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201
+            },
+            "extract": [
+              {
+                "name": "tempDeleteCatalogId",
+                "from": "body",
+                "path": "$.catalog.id",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Soft-delete the catalog",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/foundation/catalog/{{tempDeleteCatalogId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Catalog is marked deleted",
+                  "from": "body",
+                  "path": "$.catalog.deletedAt",
+                  "operator": "isNotNull"
+                },
+                {
+                  "title": "Delete message is returned",
+                  "from": "body",
+                  "path": "$.message",
+                  "operator": "equals",
+                  "value": "Catalog deleted"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Verify the deleted catalog is no longer retrievable",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/catalog/{{tempDeleteCatalogId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        },
+        {
+          "title": "Verify the deleted catalog is excluded from the active list",
+          "request": {
+            "method": "GET",
+            "endpoint": "/foundation/catalog",
+            "queryParams": {
+              "page": 1,
+              "limit": 100
+            },
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200,
+              "assertions": [
+                {
+                  "title": "Deleted catalog ID does not appear in the returned collection",
+                  "from": "body",
+                  "path": "$.catalogs[?(@.id == '{{tempDeleteCatalogId}}')]",
+                  "operator": "notExists"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND15_002",
+      "title": "Reject catalog deletion when the catalog does not exist -> 404 Not Found",
+      "testType": "negative",
+      "tags": ["negative", "delete", "foundation", "p1"],
+      "steps": [
+        {
+          "title": "Attempt to delete an unknown catalog ID",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/foundation/catalog/non-existent-catalog-id",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404,
+              "assertions": [
+                {
+                  "title": "Not found message is returned",
+                  "from": "body",
+                  "path": "$.error",
+                  "operator": "equals",
+                  "value": "Catalog not found"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND15_003",
+      "title": "Repeat catalog deletion when the same active record is deleted twice -> 404 on second call",
+      "testType": "edge",
+      "tags": ["boundary", "negative", "delete", "foundation", "p2"],
+      "variables": {
+        "idempotentDeleteCatalogName": {
+          "$gen": "alpha",
+          "length": 12
+        }
+      },
+      "steps": [
+        {
+          "title": "Create a catalog for duplicate-delete verification",
+          "request": {
+            "method": "POST",
+            "endpoint": "/foundation/catalog",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            },
+            "payload": {
+              "name": "{{idempotentDeleteCatalogName}}",
+              "storeId": "{{activeStoreId}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 201
+            },
+            "extract": [
+              {
+                "name": "idempotentDeleteCatalogId",
+                "from": "body",
+                "path": "$.catalog.id",
+                "scope": "case"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Delete the catalog once",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/foundation/catalog/{{idempotentDeleteCatalogId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 200
+            }
+          }
+        },
+        {
+          "title": "Delete the same catalog a second time",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/foundation/catalog/{{idempotentDeleteCatalogId}}",
+            "headers": {
+              "Authorization": "Bearer {{adminToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 404
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND15_004",
+      "title": "Reject catalog deletion when caller is not Admin -> 403 Forbidden",
+      "testType": "negative",
+      "tags": ["negative", "security", "foundation", "p0"],
+      "steps": [
+        {
+          "title": "Attempt to delete a catalog as a standard user",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/foundation/catalog/{{activeCatalogId}}",
+            "headers": {
+              "Authorization": "Bearer {{userToken}}"
+            }
+          },
+          "response": {
+            "validations": {
+              "statusCode": 403
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC_FOUND15_005",
+      "title": "Reject catalog deletion when unauthenticated -> 401 Unauthorized",
+      "testType": "negative",
+      "tags": ["negative", "security", "foundation", "p0"],
+      "steps": [
+        {
+          "title": "Attempt to delete a catalog without a bearer token",
+          "request": {
+            "method": "DELETE",
+            "endpoint": "/foundation/catalog/{{activeCatalogId}}"
+          },
+          "response": {
+            "validations": {
+              "statusCode": 401
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
