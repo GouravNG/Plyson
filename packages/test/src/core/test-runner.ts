@@ -15,6 +15,17 @@ import { VariableStore } from './variable-store.js'
 import { formatError } from '../utils/error-formatter.js'
 
 /**
+ * Options for suite registration.
+ */
+export interface RegisterOptions {
+  /**
+   * If true, the project-level beforeAll and afterAll hooks from project.json will be skipped.
+   * Useful when these hooks are handled by a Playwright Setup Project.
+   */
+  skipProjectHooks?: boolean
+}
+
+/**
  * Registers all suites from the project graph as Playwright tests.
  */
 export function registerSuites(
@@ -22,6 +33,7 @@ export function registerSuites(
   store: VariableStore,
   test: TestType<any, any>,
   expect: Expect,
+  options: RegisterOptions = {},
 ): void {
   if (!test || !expect) {
     throw new Error('registerSuites requires the active Playwright test and expect instances.')
@@ -38,7 +50,8 @@ export function registerSuites(
     resolvePhase1(graph.environment.variables ?? {}, store, 'environment')
 
     AssertionEngine.registerSchemas(graph.schemas)
-    if (graph.project.beforeAll) {
+
+    if (!options.skipProjectHooks && graph.project.beforeAll) {
       await runSteps(
         graph.project.beforeAll,
         request,
@@ -51,7 +64,7 @@ export function registerSuites(
   })
 
   test.afterAll(async ({ request }: { request: APIRequestContext }) => {
-    if (graph.project.afterAll) {
+    if (!options.skipProjectHooks && graph.project.afterAll) {
       await runSteps(
         graph.project.afterAll,
         request,
@@ -138,7 +151,7 @@ export function registerSuites(
 /**
  * Executes a list of test steps.
  */
-async function runSteps(
+export async function runSteps(
   steps: TestStep[],
   request: APIRequestContext,
   store: VariableStore,
