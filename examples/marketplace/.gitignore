@@ -6,3 +6,4 @@ playwright/.cache/
 .env
 skills/
 *.md
+.plyson/
