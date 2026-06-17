@@ -21,6 +21,14 @@
         "type": "string"
       }
     },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "parallel",
+        "sequential"
+      ],
+      "default": "sequential"
+    },
     "variables": {
       "type": "object",
       "propertyNames": {

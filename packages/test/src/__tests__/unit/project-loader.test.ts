@@ -22,12 +22,16 @@ describe('ProjectLoader', () => {
     const graph = await loader.load(fixtureDir, 'dev')
 
     expect(graph.project.title).toBe('Valid Project')
+    expect(graph.project.mode).toBe('parallel') // Default value
     expect(graph.variables.globalVar).toBe('globalValue')
     expect(graph.environment.baseUrl).toBe('https://api.dev.com')
     expect(graph.schemas.has('user')).toBe(true)
     expect(graph.handlers.has('debug')).toBe(true)
     expect(graph.scripts.has('login-script')).toBe(true)
     expect(graph.suites.length).toBe(1)
+
+    // Check default suite mode
+    expect(graph.suites[0].mode).toBe('sequential')
 
     // Check ref resolution
     const suite = graph.suites[0]

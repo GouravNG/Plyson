@@ -41,13 +41,16 @@ export function registerSuites(
 
   AssertionEngine.setExpect(expect)
 
-  test.beforeAll(async ({ request }: { request: APIRequestContext }) => {
-    // Phase 1 resolution for global and environment variables
-    store.push('global', {})
-    resolvePhase1(graph.variables ?? {}, store, 'global')
+  const mode = graph.project.mode === 'sequential' ? 'default' : 'parallel'
+  test.describe.configure({ mode })
 
-    store.push('environment', {})
-    resolvePhase1(graph.environment.variables ?? {}, store, 'environment')
+  test.beforeAll(async ({ request }: { request: APIRequestContext }) => {
+    if (!options.skipProjectHooks) {
+      store.push('global', {})
+      store.push('environment', {})
+      resolvePhase1(graph.variables ?? {}, store, 'global')
+      resolvePhase1(graph.environment.variables ?? {}, store, 'environment')
+    }
 
     AssertionEngine.registerSchemas(graph.schemas)
 
@@ -80,6 +83,9 @@ export function registerSuites(
     const describeFn = suite.disabled ? test.describe.skip : test.describe
 
     describeFn(suite.title, () => {
+      const suiteMode = suite.mode === 'sequential' ? 'default' : 'parallel'
+      test.describe.configure({ mode: suiteMode })
+
       test.beforeAll(async ({ request }: { request: APIRequestContext }) => {
         store.push('suite', {})
         resolvePhase1(suite.variables ?? {}, store, 'suite')
