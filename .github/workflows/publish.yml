@@ -11,6 +11,7 @@ jobs:
     env:
       CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
       SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      RATE_LIMIT_ENABLED: 'false'
     steps:
       - uses: actions/checkout@v4
 
