@@ -40,4 +40,6 @@ This report includes:
 - **Response Details**: The status code, headers, and body received.
 - **Error Messages**: Detailed breakdowns of failed assertions.
 
-> **Note:** For more advanced configuration of workers, retries, and timeouts, you can modify the `playwright.config.ts` file in your project root.
+> ⚠️ **Experimental:** You can pass Playwright flags directly to the CLI (for example `--workers 2` or `--retries 2`). For more persistent settings, modify the `playwright.config.ts` file in your project root. Worker execution is still experimental and may not behave as expected in every setup.
+
+You can also control whether suites run in parallel or sequentially through the `mode` field in [project.json](/docs/test/json-reference/project) or a [suite file](/docs/test/json-reference/test-suites). `parallel` is the default for project-level execution, while `sequential` is useful for stateful flows.

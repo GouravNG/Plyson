@@ -23,7 +23,7 @@ plyson init [project-name]
   - `handlers`
   - `scripts`
   - `suites`
-- Writes starter files from the CLI templates.
+- Writes starter files from the CLI templates, including Playwright entrypoints for test execution and project-level setup/teardown.
 - Copies bundled skill templates into `skills/` (see [AI Skills](/docs/test/getting-started/ai-skills) for usage).
 - Skips files that already exist instead of overwriting them.
 - Uses the current directory name for `package.json.name` when the argument is `.`.
@@ -39,6 +39,9 @@ The exact starter files come from the CLI templates, but the generated project i
 - `.gitignore`
 - `environments/dev.env.json`
 - `suites/sample.test.json`
+- `suites/plyson.spec.ts`
+- `suites/plyson.setup.ts`
+- `suites/plyson.teardown.ts`
 
 ## Examples
 
@@ -61,7 +64,7 @@ The command prints a suggested setup flow after scaffolding:
 1. Install dependencies.
 2. Run `plyson sync-project-schemas`.
 3. Edit `project.json` and `environments/dev.env.json`.
-4. Add or update suite files.
+4. Add or update suite files and adjust the generated setup/teardown entrypoints when needed.
 5. Run `plyson run --env dev`.
 
 ## Notes
