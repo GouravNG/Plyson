@@ -32,7 +32,7 @@ export const runCommand = new Command('run')
       process.exit(1)
     }
 
-    const envVars = {
+    const envVars: Record<string, string | undefined> = {
       ...process.env,
       plyson_ROOT: rootDir,
       plyson_ENV: env,
@@ -44,15 +44,23 @@ export const runCommand = new Command('run')
     // Construct the playwright test command arguments
     const playwrightArgs = ['test']
 
-    // Add all arguments passed to this command, excluding --env/-e and its value
+    // Add all arguments passed to this command, excluding --env/-e and its value, and the specific test paths
     const rawArgs = process.argv.slice(process.argv.indexOf('run') + 1)
+    const paths = _paths || []
     for (let i = 0; i < rawArgs.length; i++) {
       const arg = rawArgs[i]
       if (arg === '--env' || arg === '-e') {
         i++ // skip value
         continue
       }
+      if (paths.includes(arg)) {
+        continue
+      }
       playwrightArgs.push(arg)
+    }
+
+    if (paths.length > 0) {
+      envVars.plyson_TEST_FILES = JSON.stringify(paths)
     }
 
     console.log(`Running plyson tests in "${env}" environment...`)
