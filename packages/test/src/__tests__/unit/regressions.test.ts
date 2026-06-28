@@ -61,6 +61,7 @@ describe('Bug Regressions (Issue #7, #5, #6)', () => {
       const playwrightTest = vi.fn() as any
       playwrightTest.describe = vi.fn((title, cb) => cb())
       playwrightTest.describe.skip = vi.fn()
+      playwrightTest.describe.configure = vi.fn()
       playwrightTest.beforeAll = vi.fn()
       playwrightTest.afterAll = vi.fn()
 
@@ -95,6 +96,49 @@ describe('Bug Regressions (Issue #7, #5, #6)', () => {
         }),
         expect.any(Function),
       )
+    })
+  })
+
+  describe('Suite-Level Execution Mode', () => {
+    it('should apply mode: "default" for sequential suites and mode: "parallel" for parallel suites', () => {
+      const playwrightTest = vi.fn() as any
+      playwrightTest.describe = vi.fn((title, cb) => cb())
+      playwrightTest.describe.skip = vi.fn()
+      playwrightTest.describe.configure = vi.fn()
+      playwrightTest.beforeAll = vi.fn()
+      playwrightTest.afterAll = vi.fn()
+
+      const graph: any = {
+        project: { mode: 'parallel', beforeAll: [], afterAll: [] },
+        variables: {},
+        environment: { variables: {} },
+        suites: [
+          {
+            title: 'Sequential Suite',
+            mode: 'sequential',
+            tags: [],
+            testCases: [{ id: 'tc1', title: 'T1', tags: [], steps: [] }],
+          },
+          {
+            title: 'Parallel Suite',
+            mode: 'parallel',
+            tags: [],
+            testCases: [{ id: 'tc2', title: 'T2', tags: [], steps: [] }],
+          },
+        ],
+      }
+      const store = new VariableStore()
+
+      registerSuites(graph, store, playwrightTest, expect)
+
+      // First call is for the project-level mode
+      expect(playwrightTest.describe.configure).toHaveBeenNthCalledWith(1, { mode: 'parallel' })
+
+      // Second call is for the first suite (sequential -> default)
+      expect(playwrightTest.describe.configure).toHaveBeenNthCalledWith(2, { mode: 'default' })
+
+      // Third call is for the second suite (parallel -> parallel)
+      expect(playwrightTest.describe.configure).toHaveBeenNthCalledWith(3, { mode: 'parallel' })
     })
   })
 })

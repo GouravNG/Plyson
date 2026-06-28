@@ -22,12 +22,16 @@ describe('ProjectLoader', () => {
     const graph = await loader.load(fixtureDir, 'dev')
 
     expect(graph.project.title).toBe('Valid Project')
+    expect(graph.project.mode).toBe('parallel') // Default value
     expect(graph.variables.globalVar).toBe('globalValue')
     expect(graph.environment.baseUrl).toBe('https://api.dev.com')
     expect(graph.schemas.has('user')).toBe(true)
     expect(graph.handlers.has('debug')).toBe(true)
     expect(graph.scripts.has('login-script')).toBe(true)
     expect(graph.suites.length).toBe(1)
+
+    // Check default suite mode
+    expect(graph.suites[0].mode).toBe('sequential')
 
     // Check ref resolution
     const suite = graph.suites[0]
@@ -87,5 +91,25 @@ describe('ProjectLoader', () => {
     // For simplicity, let's just use a non-existent project directory for a basic check
     const loader = new ProjectLoader()
     await expect(loader.load('non-existent', 'dev')).rejects.toThrow()
+  })
+
+  it('should filter suites based on plyson_TEST_FILES env variable', async () => {
+    const loader = new ProjectLoader()
+
+    // 1. Filter matches existing suite
+    process.env.plyson_TEST_FILES = JSON.stringify(['user.test.json'])
+    const graph1 = await loader.load(fixtureDir, 'dev')
+    expect(graph1.suites.length).toBe(1)
+    expect(graph1.suites[0].title).toBe('User Suite')
+
+    // 2. Filter matches absolute/relative path
+    process.env.plyson_TEST_FILES = JSON.stringify(['suites/user.test.json'])
+    const graph2 = await loader.load(fixtureDir, 'dev')
+    expect(graph2.suites.length).toBe(1)
+
+    // 3. Filter does not match
+    process.env.plyson_TEST_FILES = JSON.stringify(['other.test.json'])
+    const graph3 = await loader.load(fixtureDir, 'dev')
+    expect(graph3.suites.length).toBe(0)
   })
 })

@@ -31,10 +31,11 @@
  *  node server.js
  *
  *  Env vars:
- *    PORT           (default 3000)
- *    TOKEN_TTL_MS   (default 7200000 = 2h)
- *    RATE_LIMIT     (default 60 req/min per IP)
- *    HASH_SALT      (default "mock_salt_change_in_prod")
+ *    PORT                (default 3000)
+ *    TOKEN_TTL_MS        (default 7200000 = 2h)
+ *    RATE_LIMIT          (default 240 req/min per IP)
+ *    RATE_LIMIT_ENABLED  (default true, set to 'false' to disable)
+ *    HASH_SALT           (default "mock_salt_change_in_prod")
  */
 
 'use strict'
@@ -50,6 +51,7 @@ const CONFIG = {
   PORT: Number(process.env.PORT) || 3000,
   TOKEN_TTL_MS: Number(process.env.TOKEN_TTL_MS) || 2 * 60 * 60 * 1000,
   RATE_LIMIT: Number(process.env.RATE_LIMIT) || 240,
+  RATE_LIMIT_ENABLED: process.env.RATE_LIMIT_ENABLED !== 'false',
   RATE_WINDOW_MS: 60_000,
   HASH_SALT: process.env.HASH_SALT || 'mock_salt_change_in_prod',
   VERSION: '3.0.0',
@@ -138,6 +140,7 @@ function logReq(method, url, status, ms, reqId) {
 
 const _rateMap = new Map()
 function isRateLimited(ip) {
+  if (!CONFIG.RATE_LIMIT_ENABLED) return false
   const now = Date.now(),
     cutoff = now - CONFIG.RATE_WINDOW_MS
   const hits = (_rateMap.get(ip) || []).filter((t) => t > cutoff)
@@ -1321,7 +1324,7 @@ route('GET', '/health', async (req, res, { reqId }) => {
       config: {
         port: CONFIG.PORT,
         tokenTtl: `${CONFIG.TOKEN_TTL_MS / 3_600_000}h`,
-        rateLimit: `${CONFIG.RATE_LIMIT} req/min per IP`,
+        rateLimit: CONFIG.RATE_LIMIT_ENABLED ? `${CONFIG.RATE_LIMIT} req/min per IP` : 'DISABLED',
       },
       db: {
         users: DB.users.filter(isAlive).length,
@@ -1577,9 +1580,9 @@ ${C.cyan}${C.bold}  ╔═══════════════════
   ${C.magenta}◉${C.reset}  Spec    →  http://localhost:${C.bold}${CONFIG.PORT}/openapi.json${C.reset}
 
   ${C.yellow}⏱${C.reset}  Token TTL  ${C.bold}${CONFIG.TOKEN_TTL_MS / 3_600_000}h${C.reset}
-  ${C.magenta}🛡${C.reset}  Rate limit ${C.bold}${CONFIG.RATE_LIMIT} req/min per IP${C.reset}
+  ${C.magenta}🛡${C.reset}  Rate limit ${C.bold}${CONFIG.RATE_LIMIT_ENABLED ? `${CONFIG.RATE_LIMIT} req/min per IP` : 'DISABLED'}${C.reset}
 
   ${C.dim}Controllers: AUTH · USER · FOUNDATION · CART · ORDER · REVIEW · NOTIFICATION · UTILITY${C.reset}
-  ${C.dim}Env: PORT  TOKEN_TTL_MS  RATE_LIMIT  HASH_SALT${C.reset}
+  ${C.dim}Env: PORT  TOKEN_TTL_MS  RATE_LIMIT  RATE_LIMIT_ENABLED  HASH_SALT${C.reset}
 `)
 })

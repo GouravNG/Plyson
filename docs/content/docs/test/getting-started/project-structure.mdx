@@ -13,6 +13,9 @@ Top-level folders and files are used to organize your test suites, environments,
   </Folder>
   <Folder name="suites" defaultOpen>
     <File name="sample.test.json" />
+    <File name="plyson.spec.ts" />
+    <File name="plyson.setup.ts" />
+    <File name="plyson.teardown.ts" />
   </Folder>
   <Folder name="schemas">
     <File name="User.schema.json" />
@@ -42,7 +45,7 @@ Top-level folders and files are used to organize your test suites, environments,
   </div>
   <div className="flex flex-col gap-2 py-4 sm:grid sm:grid-cols-[160px_1fr] sm:gap-4 sm:items-center">
     <code className="text-sky-500 bg-sky-500/10 border border-sky-500/20 px-1.5 py-0.5 rounded-md text-xs font-mono w-fit">suites</code>
-    <p className="text-sm text-fd-muted-foreground">**Required.** Where your declarative API test suites live (`*.test.json`).</p>
+    <p className="text-sm text-fd-muted-foreground">**Required.** Where your declarative API test suites live (`*.test.json`) and where the generated Playwright entrypoints (`plyson.spec.ts`, `plyson.setup.ts`, `plyson.teardown.ts`) are stored.</p>
   </div>
   <div className="flex flex-col gap-2 py-4 sm:grid sm:grid-cols-[160px_1fr] sm:gap-4 sm:items-center">
     <code className="text-sky-500 bg-sky-500/10 border border-sky-500/20 px-1.5 py-0.5 rounded-md text-xs font-mono w-fit">schemas</code>
@@ -82,6 +85,8 @@ Top-level files are used to configure your project, manage global variables, and
 </div>
 
 ---
+
+The generated starter project also includes a small Playwright harness that bootstraps your suites and runs global setup/teardown hooks from your project configuration.
 
 ## Next Steps
 

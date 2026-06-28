@@ -15,6 +15,17 @@ import { VariableStore } from './variable-store.js'
 import { formatError } from '../utils/error-formatter.js'
 
 /**
+ * Options for suite registration.
+ */
+export interface RegisterOptions {
+  /**
+   * If true, the project-level beforeAll and afterAll hooks from project.json will be skipped.
+   * Useful when these hooks are handled by a Playwright Setup Project.
+   */
+  skipProjectHooks?: boolean
+}
+
+/**
  * Registers all suites from the project graph as Playwright tests.
  */
 export function registerSuites(
@@ -22,6 +33,7 @@ export function registerSuites(
   store: VariableStore,
   test: TestType<any, any>,
   expect: Expect,
+  options: RegisterOptions = {},
 ): void {
   if (!test || !expect) {
     throw new Error('registerSuites requires the active Playwright test and expect instances.')
@@ -29,16 +41,20 @@ export function registerSuites(
 
   AssertionEngine.setExpect(expect)
 
-  test.beforeAll(async ({ request }: { request: APIRequestContext }) => {
-    // Phase 1 resolution for global and environment variables
-    store.push('global', {})
-    resolvePhase1(graph.variables ?? {}, store, 'global')
+  const mode = graph.project.mode === 'sequential' ? 'default' : 'parallel'
+  test.describe.configure({ mode })
 
-    store.push('environment', {})
-    resolvePhase1(graph.environment.variables ?? {}, store, 'environment')
+  test.beforeAll(async ({ request }: { request: APIRequestContext }) => {
+    if (!options.skipProjectHooks) {
+      store.push('global', {})
+      store.push('environment', {})
+      resolvePhase1(graph.variables ?? {}, store, 'global')
+      resolvePhase1(graph.environment.variables ?? {}, store, 'environment')
+    }
 
     AssertionEngine.registerSchemas(graph.schemas)
-    if (graph.project.beforeAll) {
+
+    if (!options.skipProjectHooks && graph.project.beforeAll) {
       await runSteps(
         graph.project.beforeAll,
         request,
@@ -51,7 +67,7 @@ export function registerSuites(
   })
 
   test.afterAll(async ({ request }: { request: APIRequestContext }) => {
-    if (graph.project.afterAll) {
+    if (!options.skipProjectHooks && graph.project.afterAll) {
       await runSteps(
         graph.project.afterAll,
         request,
@@ -67,6 +83,9 @@ export function registerSuites(
     const describeFn = suite.disabled ? test.describe.skip : test.describe
 
     describeFn(suite.title, () => {
+      const suiteMode = suite.mode === 'sequential' ? 'default' : 'parallel'
+      test.describe.configure({ mode: suiteMode })
+
       test.beforeAll(async ({ request }: { request: APIRequestContext }) => {
         store.push('suite', {})
         resolvePhase1(suite.variables ?? {}, store, 'suite')
@@ -138,7 +157,7 @@ export function registerSuites(
 /**
  * Executes a list of test steps.
  */
-async function runSteps(
+export async function runSteps(
   steps: TestStep[],
   request: APIRequestContext,
   store: VariableStore,

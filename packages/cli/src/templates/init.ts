@@ -77,6 +77,24 @@ import { bootstrap } from '@plyson/test';
  */
 await bootstrap(test, expect);
 `,
+    'suites/plyson.setup.ts': `import { test as setup, expect } from '@playwright/test';
+import { bootstrapSetup } from '@plyson/test';
+
+/**
+ * This is the entry point for plyson global setup.
+ * It runs project.json beforeAll hooks and persists state.
+ */
+await bootstrapSetup(setup, expect);
+`,
+    'suites/plyson.teardown.ts': `import { test as teardown, expect } from '@playwright/test';
+import { bootstrapTeardown } from '@plyson/test';
+
+/**
+ * This is the entry point for plyson global teardown.
+ * It runs project.json afterAll hooks.
+ */
+await bootstrapTeardown(teardown, expect);
+`,
     'package.json': {
       name: packageJsonName,
       version: '1.0.0',
@@ -88,11 +106,11 @@ await bootstrap(test, expect);
         '@plyson/test': 'latest',
       },
       devDependencies: {
-        '@playwright/test': '^1.59.1',
+        '@playwright/test': '^1.60.0',
         '@plyson/cli': 'latest',
       },
     },
-    'playwright.config.ts': `import { defineConfig } from '@playwright/test';
+    'playwright.config.ts': `import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   timeout: 30000,
@@ -102,6 +120,23 @@ export default defineConfig({
   use: {
     trace: 'on-first-retry',
   },
+  projects: [
+    {
+      name: 'setup',
+      testMatch: /plyson\\.setup\\.ts/,
+      teardown: 'teardown',
+    },
+    {
+      name: 'teardown',
+      testMatch: /plyson\\.teardown\\.ts/,
+    },
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
+      testMatch: /plyson\\.spec\\.ts/,
+    },
+  ],
 });
 `,
     '.gitignore': `node_modules/
@@ -110,6 +145,7 @@ playwright-report/
 blob-report/
 playwright/.cache/
 .env
+.plyson/
 `,
   }
 }

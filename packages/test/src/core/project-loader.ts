@@ -237,9 +237,40 @@ export class ProjectLoader {
     const suites: TestSuite[] = []
     const suiteIds = new Set<string>()
     const suiteFiles = await glob('suites/**/*.test.json', { cwd: absoluteRootDir })
-    for (const file of suiteFiles) {
+
+    const testFilesEnv = process.env.plyson_TEST_FILES
+    let filterPaths: string[] = []
+    if (testFilesEnv) {
       try {
-        const content = await fs.readFile(path.join(absoluteRootDir, file), 'utf-8')
+        filterPaths = JSON.parse(testFilesEnv)
+      } catch {
+        filterPaths = testFilesEnv.split(',').map((s) => s.trim())
+      }
+    }
+
+    for (const file of suiteFiles) {
+      const absoluteSuitePath = path.resolve(absoluteRootDir, file)
+
+      if (filterPaths.length > 0) {
+        const matchesFilter = filterPaths.some((filterPath) => {
+          const absoluteFilterPath = path.resolve(absoluteRootDir, filterPath)
+          const normalizedFile = file.replace(/\\/g, '/')
+          const normalizedFilter = filterPath.replace(/\\/g, '/')
+          return (
+            absoluteSuitePath === absoluteFilterPath ||
+            path.basename(absoluteSuitePath) === filterPath ||
+            normalizedFile === normalizedFilter ||
+            normalizedFile.endsWith(normalizedFilter)
+          )
+        })
+
+        if (!matchesFilter) {
+          continue
+        }
+      }
+
+      try {
+        const content = await fs.readFile(absoluteSuitePath, 'utf-8')
         const parsed = JSON.parse(content)
         const result = TestSuiteSchema.safeParse(parsed)
         if (!result.success) {

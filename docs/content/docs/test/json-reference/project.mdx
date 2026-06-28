@@ -12,8 +12,9 @@ The `project.json` file is the brain of your testing project. It defines metadat
 - **`version`** (**Required**): The version of your test suite.
 - **`description`** (Optional): A brief summary of the project's purpose.
 - **`defaultEnv`** (Optional): The name of the environment file to use if the `--env` flag is omitted in the CLI.
-- **`beforeAll`** (Optional): An array of [test steps](/docs/json-reference/test-cases-steps#test-step-fields) or [script references](/docs/json-reference/scripts) that run exactly once before any test suites.
-- **`afterAll`** (Optional): An array of [test steps](/docs/json-reference/test-cases-steps#test-step-fields) or [script references](/docs/json-reference/scripts) that run exactly once after all test suites have finished.
+- **`mode`** (Optional): Controls how suites execute. Use `parallel` for concurrency or `sequential` for stateful flows. Defaults to `parallel`.
+- **`beforeAll`** (Optional): An array of [test steps](/docs/test/json-reference/test-cases-steps#test-step-fields) or [script references](/docs/test/json-reference/scripts) that run exactly once before any test suites.
+- **`afterAll`** (Optional): An array of [test steps](/docs/test/json-reference/test-cases-steps#test-step-fields) or [script references](/docs/test/json-reference/scripts) that run exactly once after all test suites have finished.
 
 ## CLI Command
 
@@ -33,6 +34,7 @@ npx plyson init <project-name>
   "title": "Marketplace API Validation",
   "version": "1.0.0",
   "defaultEnv": "dev",
+  "mode": "parallel",
   "beforeAll": [
     { "ref": "GLOBAL_SETUP" }
   ]

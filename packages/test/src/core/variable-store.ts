@@ -23,6 +23,14 @@ export class VariableStore {
   }
 
   /**
+   * Load a snapshot of variables into the global layer.
+   * Useful for restoring state from a setup project.
+   */
+  hydrate(vars: Variables): void {
+    this.layers.global = { ...this.layers.global, ...vars }
+  }
+
+  /**
    * Reset the scope to an empty object.
    */
   pop(scope: Scope): void {

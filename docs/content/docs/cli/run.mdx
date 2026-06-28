@@ -5,6 +5,8 @@ description: Execute Plyson tests through Playwright and pass through Playwright
 
 The `run` command executes Plyson tests by spawning `npx playwright test` with the current project root and environment exposed through environment variables.
 
+It also supports selecting one or more suite files directly, which is useful when you want to run a specific JSON suite without executing the entire project.
+
 ## Syntax
 
 ```bash
@@ -25,6 +27,7 @@ plyson run [paths...] [--env <name>] [playwright options...]
 - Requires an environment either from `--env` or `project.json.defaultEnv`.
 - Sets `plyson_ROOT` to the current working directory.
 - Sets `plyson_ENV` to the resolved environment name.
+- Passes any selected suite paths through `plyson_TEST_FILES`, so Plyson only loads the matching `*.test.json` files.
 - Forwards unknown flags to Playwright because the command uses `allowUnknownOption()`.
 - Removes `--env` and `-e` before invoking Playwright.
 
@@ -42,11 +45,19 @@ Run a specific suite:
 plyson run suites/auth.test.json --env qa
 ```
 
+Run multiple selected suites:
+
+```bash
+plyson run suites/auth.test.json suites/billing.test.json --env qa
+```
+
 Pass Playwright flags through the CLI:
 
 ```bash
-plyson run --env dev --grep login --reporter=list
+plyson run --env dev --grep login --reporter=list --workers 2
 ```
+
+> ⚠️ **Experimental:** Worker execution is currently experimental and may not behave as expected in all scenarios.
 
 Use `project.json.defaultEnv` and omit `--env`:
 
