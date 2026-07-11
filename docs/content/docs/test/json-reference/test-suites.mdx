@@ -13,6 +13,7 @@ A test suite is the primary container for your API tests. It groups related test
 - **`description`** (Optional): A summary of what this suite covers.
 - **`disabled`** (Optional): Set to `true` to skip all test cases in this suite.
 - **`variables`** (Optional): Suite-level variables that override global and environment scopes.
+- **`annotations`** (Optional): Playwright-compatible annotations for the suite. Use a string shorthand (`"skip"`, `"fixme"`), an object with `type` and optional `description`, or an array of either form. Suite-level `skip` and `fixme` annotations affect the suite container, and custom annotation types are propagated to each child test case in the report. For more details, see [Playwright annotations](https://playwright.dev/docs/test-annotations).
 - **`mode`** (Optional): Overrides the project default for this suite. Use `parallel` or `sequential`.
 - **`beforeAll`** (Optional): An array of [test steps](/docs/test/json-reference/test-cases-steps#test-step-fields) or [script references](/docs/test/json-reference/scripts) that run once before any test cases in this suite.
 - **`afterAll`** (Optional): An array of [test steps](/docs/test/json-reference/test-cases-steps#test-step-fields) or [script references](/docs/test/json-reference/scripts) that run once after all test cases in this suite.
@@ -35,6 +36,10 @@ npx plyson generate suite <name>
   "$schema": "../Project-schema/testsuite.schema.json",
   "title": "Auth API",
   "tags": ["smoke"],
+  "annotations": [
+    { "type": "fixme", "description": "Pending contract update" },
+    { "type": "team", "description": "payments" }
+  ],
   "mode": "sequential",
   "variables": {
     "BASE_AUTH_PATH": "/auth"
