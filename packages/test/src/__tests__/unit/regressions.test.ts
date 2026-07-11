@@ -176,10 +176,7 @@ describe('Bug Regressions (Issue #7, #5, #6)', () => {
                 id: 'tc1',
                 title: 'Test 1',
                 tags: [],
-                annotations: [
-                  'slow',
-                  { type: 'issue', description: 'https://issue-link' }
-                ],
+                annotations: ['slow', { type: 'issue', description: 'https://issue-link' }],
                 steps: [],
               },
             ],

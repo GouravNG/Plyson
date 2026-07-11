@@ -38,7 +38,11 @@ export class ProjectLoader {
     this.logger = logger || new ConsoleLogger('project-loader')
   }
 
-  async load(rootDir: string, env: string, options?: { skipModules?: boolean }): Promise<ProjectGraph> {
+  async load(
+    rootDir: string,
+    env: string,
+    options?: { skipModules?: boolean },
+  ): Promise<ProjectGraph> {
     const absoluteRootDir = path.resolve(rootDir)
 
     // 1. Project
@@ -99,11 +103,11 @@ export class ProjectLoader {
       const content = await fs.readFile(envDotFile, 'utf-8')
       const parsed = dotenv.parse(content)
       dotEnvVariables = parsed
-      
+
       // .env overrides JSON baseUrl
       if (parsed.BASE_URL) baseUrl = parsed.BASE_URL
       if (parsed.baseUrl) baseUrl = parsed.baseUrl
-      
+
       dotEnvLoaded = true
     } catch (e: any) {
       // .env is optional
@@ -169,10 +173,14 @@ export class ProjectLoader {
     this.logger.info(`✓ Schemas loaded: ${schemas.size} schema(s)`)
 
     // 5. Handlers
-    const handlers = options?.skipModules ? new Map<string, HandlerModule>() : await this.loadHandlers(absoluteRootDir)
+    const handlers = options?.skipModules
+      ? new Map<string, HandlerModule>()
+      : await this.loadHandlers(absoluteRootDir)
 
     // 5.5 Actions
-    const actions = options?.skipModules ? new Map<string, ActionModule>() : await this.loadActions(absoluteRootDir)
+    const actions = options?.skipModules
+      ? new Map<string, ActionModule>()
+      : await this.loadActions(absoluteRootDir)
 
     // 6. Scripts
     const scripts = new Map<string, Testcase>()
@@ -433,4 +441,3 @@ export interface SerializedProjectGraph {
   scripts: Record<string, Testcase>
   suites: TestSuite[]
 }
-

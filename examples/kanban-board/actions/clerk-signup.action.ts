@@ -37,7 +37,9 @@ export default async function signUp({ args, log, store }: ActionContext) {
   log('Requesting Supabase JWT from Clerk session.')
   const { jwt } = await clerk.sessions.getToken(session.id, 'supabase')
   if (!jwt) {
-    throw new Error('Clerk did not return a Supabase JWT. Check the Clerk JWT template named "supabase".')
+    throw new Error(
+      'Clerk did not return a Supabase JWT. Check the Clerk JWT template named "supabase".',
+    )
   }
 
   // store the require variables.

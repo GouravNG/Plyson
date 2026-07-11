@@ -8,15 +8,15 @@ This guide maps common markdown assertion patterns to their JSON equivalents in 
 
 Operators are grouped by type and use case:
 
-| Category | Operators | Use Case |
-|----------|-----------|----------|
-| **Equality** | `equals`, `equalsIgnoreCase`, `notEquals` | Exact value matching |
-| **Existence** | `exists`, `notExists`, `isNull`, `isNotNull` | Presence/absence checks |
-| **Comparison** | `isGreaterThan`, `isLessThan`, `isGreaterThanOrEquals`, `isLessThanOrEquals` | Numeric comparisons |
-| **String** | `contains`, `notContains`, `matches`, `notMatches`, `isEmpty`, `isNotEmpty` | String patterns |
-| **Length** | `hasLength`, `hasMinLength`, `hasMaxLength` | Field length validation |
-| **Arrays** | `includes`, `notIncludes`, `containsSubset`, `notContainsSubset` | Array membership |
-| **Type** | `isString`, `isNumber`, `isBoolean`, `isArray`, `isObject` | Type validation |
+| Category       | Operators                                                                    | Use Case                |
+| -------------- | ---------------------------------------------------------------------------- | ----------------------- |
+| **Equality**   | `equals`, `equalsIgnoreCase`, `notEquals`                                    | Exact value matching    |
+| **Existence**  | `exists`, `notExists`, `isNull`, `isNotNull`                                 | Presence/absence checks |
+| **Comparison** | `isGreaterThan`, `isLessThan`, `isGreaterThanOrEquals`, `isLessThanOrEquals` | Numeric comparisons     |
+| **String**     | `contains`, `notContains`, `matches`, `notMatches`, `isEmpty`, `isNotEmpty`  | String patterns         |
+| **Length**     | `hasLength`, `hasMinLength`, `hasMaxLength`                                  | Field length validation |
+| **Arrays**     | `includes`, `notIncludes`, `containsSubset`, `notContainsSubset`             | Array membership        |
+| **Type**       | `isString`, `isNumber`, `isBoolean`, `isArray`, `isObject`                   | Type validation         |
 
 ---
 
@@ -27,6 +27,7 @@ Operators are grouped by type and use case:
 #### Pattern: Exact value match
 
 **Markdown:**
+
 ```
 Assertion: response.status == 200
 Assertion: response.body.role == "USER"
@@ -34,6 +35,7 @@ Assertion: response.body.active == true
 ```
 
 **JSON:**
+
 ```json
 {
   "assertions": [
@@ -65,12 +67,14 @@ Assertion: response.body.active == true
 #### Pattern: Case-insensitive match
 
 **Markdown:**
+
 ```
 Assertion: response.status.toLowerCase() == "success"
 Assertion: response.body.email (case-insensitive) matches user@example.com
 ```
 
 **JSON:**
+
 ```json
 {
   "operator": "equalsIgnoreCase",
@@ -81,12 +85,14 @@ Assertion: response.body.email (case-insensitive) matches user@example.com
 #### Pattern: Not equal
 
 **Markdown:**
+
 ```
 Assertion: response.statusCode != 500
 Assertion: response.body.userId != null
 ```
 
 **JSON:**
+
 ```json
 {
   "operator": "notEquals",
@@ -101,12 +107,14 @@ Assertion: response.body.userId != null
 #### Pattern: Field exists
 
 **Markdown:**
+
 ```
 Assertion: response.body.contains userId field
 Assertion: response.headers["X-Request-ID"] exists
 ```
 
 **JSON:**
+
 ```json
 {
   "title": "Response contains userId",
@@ -119,11 +127,13 @@ Assertion: response.headers["X-Request-ID"] exists
 #### Pattern: Field does not exist
 
 **Markdown:**
+
 ```
 Assertion: response.body does NOT contain password field
 ```
 
 **JSON:**
+
 ```json
 {
   "operator": "notExists",
@@ -134,12 +144,14 @@ Assertion: response.body does NOT contain password field
 #### Pattern: Is null / is not null
 
 **Markdown:**
+
 ```
 Assertion: response.body.deletedAt is null (not deleted)
 Assertion: response.body.updatedAt is not null
 ```
 
 **JSON:**
+
 ```json
 {
   "operator": "isNull",
@@ -158,6 +170,7 @@ Assertion: response.body.updatedAt is not null
 #### Pattern: Greater than / Less than
 
 **Markdown:**
+
 ```
 Assertion: response.body.itemCount > 0
 Assertion: response.body.price < 1000
@@ -166,6 +179,7 @@ Assertion: response.body.stockLevel <= 100
 ```
 
 **JSON:**
+
 ```json
 {
   "operator": "isGreaterThan",
@@ -192,12 +206,14 @@ Assertion: response.body.stockLevel <= 100
 #### Pattern: Contains substring
 
 **Markdown:**
+
 ```
 Assertion: error message contains "validation"
 Assertion: response.body.message includes "Invalid email"
 ```
 
 **JSON:**
+
 ```json
 {
   "title": "Error message contains validation error",
@@ -211,12 +227,14 @@ Assertion: response.body.message includes "Invalid email"
 #### Pattern: Does not contain
 
 **Markdown:**
+
 ```
 Assertion: response does NOT contain sensitive data (password, token)
 Assertion: error message does not include "password"
 ```
 
 **JSON:**
+
 ```json
 {
   "operator": "notContains",
@@ -227,12 +245,14 @@ Assertion: error message does not include "password"
 #### Pattern: Regex match
 
 **Markdown:**
+
 ```
 Assertion: email matches pattern /^[a-z]+@[a-z]+\.[a-z]+$/
 Assertion: ISO date matches /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/
 ```
 
 **JSON:**
+
 ```json
 {
   "title": "Email format is valid",
@@ -246,12 +266,14 @@ Assertion: ISO date matches /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/
 #### Pattern: Empty / Not empty
 
 **Markdown:**
+
 ```
 Assertion: response.body.errors is empty
 Assertion: response.body.message is not empty
 ```
 
 **JSON:**
+
 ```json
 {
   "operator": "isEmpty"
@@ -268,12 +290,14 @@ Assertion: response.body.message is not empty
 #### Pattern: Exact length
 
 **Markdown:**
+
 ```
 Assertion: password has length 12
 Assertion: zip code has exactly 5 characters
 ```
 
 **JSON:**
+
 ```json
 {
   "operator": "hasLength",
@@ -284,12 +308,14 @@ Assertion: zip code has exactly 5 characters
 #### Pattern: Min/Max length
 
 **Markdown:**
+
 ```
 Assertion: password has minimum length 8
 Assertion: name has maximum length 100
 ```
 
 **JSON:**
+
 ```json
 {
   "operator": "hasMinLength",
@@ -308,12 +334,14 @@ Assertion: name has maximum length 100
 #### Pattern: Array includes value
 
 **Markdown:**
+
 ```
 Assertion: roles array includes "ADMIN"
 Assertion: response.body.tags contains "premium"
 ```
 
 **JSON:**
+
 ```json
 {
   "title": "User has ADMIN role",
@@ -327,11 +355,13 @@ Assertion: response.body.tags contains "premium"
 #### Pattern: Array does not include value
 
 **Markdown:**
+
 ```
 Assertion: permissions array does NOT include "delete_users"
 ```
 
 **JSON:**
+
 ```json
 {
   "operator": "notIncludes",
@@ -342,12 +372,14 @@ Assertion: permissions array does NOT include "delete_users"
 #### Pattern: Array contains subset
 
 **Markdown:**
+
 ```
 Assertion: response.body.roles contains all of ["ADMIN", "USER"]
 Assertion: cart items include products with IDs [101, 102, 103]
 ```
 
 **JSON:**
+
 ```json
 {
   "title": "User has all required roles",
@@ -361,11 +393,13 @@ Assertion: cart items include products with IDs [101, 102, 103]
 #### Pattern: Array does not contain subset
 
 **Markdown:**
+
 ```
 Assertion: banned roles do NOT include "SUPERADMIN"
 ```
 
 **JSON:**
+
 ```json
 {
   "operator": "notContainsSubset",
@@ -380,6 +414,7 @@ Assertion: banned roles do NOT include "SUPERADMIN"
 #### Pattern: Type checking
 
 **Markdown:**
+
 ```
 Assertion: response.body.email is string
 Assertion: response.body.price is number
@@ -389,6 +424,7 @@ Assertion: response.body.metadata is object
 ```
 
 **JSON:**
+
 ```json
 {
   "operator": "isString"
@@ -414,6 +450,7 @@ Assertion: response.body.metadata is object
 All operators work on response headers. Use `"from": "header"` and header name as path:
 
 **Markdown:**
+
 ```
 Assertion: response header "Content-Type" equals "application/json"
 Assertion: response header "X-Request-ID" exists
@@ -421,6 +458,7 @@ Assertion: response header "Cache-Control" contains "no-cache"
 ```
 
 **JSON:**
+
 ```json
 {
   "title": "Content-Type is JSON",
@@ -450,18 +488,19 @@ Assertion: response header "Cache-Control" contains "no-cache"
 
 Use JSONPath expressions in the `path` field to target nested properties:
 
-| Path Expression | Target | Example |
-|---|---|---|
-| `$.field` | Root level field | `$.email` |
-| `$.nested.field` | Nested property | `$.user.profile.email` |
-| `$.array[0]` | First array element | `$.errors[0]` |
-| `$.array[*]` | All array elements | `$.roles[*]` |
-| `$.array[*].field` | Field in all array items | `$.errors[*].field` |
-| `$.["field-name"]` | Field with special chars | `$.["content-type"]` |
+| Path Expression    | Target                   | Example                |
+| ------------------ | ------------------------ | ---------------------- |
+| `$.field`          | Root level field         | `$.email`              |
+| `$.nested.field`   | Nested property          | `$.user.profile.email` |
+| `$.array[0]`       | First array element      | `$.errors[0]`          |
+| `$.array[*]`       | All array elements       | `$.roles[*]`           |
+| `$.array[*].field` | Field in all array items | `$.errors[*].field`    |
+| `$.["field-name"]` | Field with special chars | `$.["content-type"]`   |
 
 ### Examples
 
 **Markdown:**
+
 ```
 Assertion: errors array first item has field "email"
 Assertion: all cart items have price > 0
@@ -469,6 +508,7 @@ Assertion: user profile contains email
 ```
 
 **JSON:**
+
 ```json
 {
   "path": "$.errors[0].field",
@@ -493,11 +533,13 @@ Assertion: user profile contains email
 When markdown has multiple assertions in one step:
 
 **Markdown:**
+
 ```
 Assertion: response.status == 200 AND response.body.role == "USER" AND response.body.email == user@example.com
 ```
 
 **JSON:**
+
 ```json
 {
   "validations": {
@@ -529,12 +571,14 @@ Assertion: response.status == 200 AND response.body.role == "USER" AND response.
 Each assertion can have a `validation` field to control severity:
 
 **Markdown:**
+
 ```
 Assertion (WARN): response time < 1000ms (performance check)
 Assertion (ERROR): status code is 200 (must pass)
 ```
 
 **JSON:**
+
 ```json
 {
   "title": "Response time is acceptable",
@@ -559,6 +603,7 @@ Assertion (ERROR): status code is 200 (must pass)
 ## Complete Example: Multi-step Assertions
 
 **Markdown:**
+
 ```
 ### TC_PRODUCT_001: Create product and verify response
 
@@ -584,6 +629,7 @@ Assertion (ERROR): status code is 200 (must pass)
 ```
 
 **JSON:**
+
 ```json
 {
   "validations": {
@@ -644,26 +690,26 @@ Assertion (ERROR): status code is 200 (must pass)
 
 ## Quick Reference Table
 
-| Markdown Pattern | JSON Operator | Example Value |
-|---|---|---|
-| `== value` | `equals` | `"USER"` |
-| `!= value` | `notEquals` | `500` |
-| `field exists` | `exists` | (no value) |
-| `field missing` | `notExists` | (no value) |
-| `is null` | `isNull` | (no value) |
-| `is not null` | `isNotNull` | (no value) |
-| `> N` | `isGreaterThan` | `0` |
-| `< N` | `isLessThan` | `1000` |
-| `>= N` | `isGreaterThanOrEquals` | `10` |
-| `<= N` | `isLessThanOrEquals` | `100` |
-| `contains "x"` | `contains` | `"substring"` |
-| `not contains "x"` | `notContains` | `"password"` |
-| `matches /regex/` | `matches` | `"^[a-z]+$"` |
-| `array includes "x"` | `includes` | `"ADMIN"` |
-| `is type string` | `isString` | (no value) |
-| `is type number` | `isNumber` | (no value) |
-| `length == N` | `hasLength` | `5` |
-| `min length N` | `hasMinLength` | `8` |
-| `max length N` | `hasMaxLength` | `100` |
-| `is empty` | `isEmpty` | (no value) |
-| `is not empty` | `isNotEmpty` | (no value) |
+| Markdown Pattern     | JSON Operator           | Example Value |
+| -------------------- | ----------------------- | ------------- |
+| `== value`           | `equals`                | `"USER"`      |
+| `!= value`           | `notEquals`             | `500`         |
+| `field exists`       | `exists`                | (no value)    |
+| `field missing`      | `notExists`             | (no value)    |
+| `is null`            | `isNull`                | (no value)    |
+| `is not null`        | `isNotNull`             | (no value)    |
+| `> N`                | `isGreaterThan`         | `0`           |
+| `< N`                | `isLessThan`            | `1000`        |
+| `>= N`               | `isGreaterThanOrEquals` | `10`          |
+| `<= N`               | `isLessThanOrEquals`    | `100`         |
+| `contains "x"`       | `contains`              | `"substring"` |
+| `not contains "x"`   | `notContains`           | `"password"`  |
+| `matches /regex/`    | `matches`               | `"^[a-z]+$"`  |
+| `array includes "x"` | `includes`              | `"ADMIN"`     |
+| `is type string`     | `isString`              | (no value)    |
+| `is type number`     | `isNumber`              | (no value)    |
+| `length == N`        | `hasLength`             | `5`           |
+| `min length N`       | `hasMinLength`          | `8`           |
+| `max length N`       | `hasMaxLength`          | `100`         |
+| `is empty`           | `isEmpty`               | (no value)    |
+| `is not empty`       | `isNotEmpty`            | (no value)    |

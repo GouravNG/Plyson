@@ -1,7 +1,7 @@
 import { Command } from 'commander'
 import fs from 'fs'
-import path from 'path'
 import { glob } from 'glob'
+import path from 'path'
 import { loadTestPackage } from './utils/load-test-package.js'
 
 export const syncProjectSchemasCommand = new Command('sync-project-schemas')
@@ -75,7 +75,13 @@ function injectActionEnum(schema: any, actionNames: string[]): any {
 
   // Recurse into objects/arrays
   for (const key in schema) {
-    if (key === 'properties' || key === 'anyOf' || key === 'allOf' || key === 'oneOf' || key === 'items') {
+    if (
+      key === 'properties' ||
+      key === 'anyOf' ||
+      key === 'allOf' ||
+      key === 'oneOf' ||
+      key === 'items'
+    ) {
       if (Array.isArray(schema[key])) {
         schema[key].forEach((item: any) => injectActionEnum(item, actionNames))
       } else {

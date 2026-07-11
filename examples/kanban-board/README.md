@@ -5,6 +5,7 @@ This project demonstrates how to use **Custom Actions** in Plyson to handle comp
 ## Overview
 
 The Kanban Board example showcases:
+
 - **Custom Actions**: Using `@clerk/backend` to programmatically manage users during the test lifecycle.
 - **Lifecycle Hooks**: Using `beforeAll` and `afterAll` in test suites to setup and teardown test data.
 - **Variable Generation**: Using `$gen` to create unique test data (e.g., dynamic emails).
@@ -27,6 +28,7 @@ The Kanban Board example showcases:
 ## Setup
 
 1. **Install Dependencies**:
+
    ```bash
    pnpm install
    ```

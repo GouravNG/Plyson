@@ -73,9 +73,9 @@ describe('VariableStore', () => {
   it('should hydrate variables into the global layer', () => {
     const store = new VariableStore()
     store.push('global', { existing: 'old', conflict: 'old' })
-    
+
     store.hydrate({ conflict: 'new', added: 'value' })
-    
+
     expect(store.get('existing')).toBe('old')
     expect(store.get('conflict')).toBe('new')
     expect(store.get('added')).toBe('value')

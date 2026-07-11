@@ -19,12 +19,12 @@ generateCommand
   .action((key, value) => {
     const filePath = path.resolve('variables.json')
     let variables: Record<string, any> = {}
-    
+
     if (fs.existsSync(filePath)) {
       const { $schema: _, ...rest } = JSON.parse(fs.readFileSync(filePath, 'utf8'))
       variables = rest
     }
-    
+
     variables[key] = value || ''
 
     // Always enforce/add $schema at the top
@@ -32,7 +32,7 @@ generateCommand
       $schema: './Project-schema/variables.schema.json',
       ...variables,
     }
-    
+
     fs.writeFileSync(filePath, JSON.stringify(finalData, null, 2))
     console.log(`Added variable "${key}" to variables.json`)
   })
