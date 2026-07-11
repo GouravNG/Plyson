@@ -22,6 +22,8 @@
       "additionalProperties": {}
     }
   },
-  "required": ["baseUrl"],
+  "required": [
+    "baseUrl"
+  ],
   "additionalProperties": false
 }
