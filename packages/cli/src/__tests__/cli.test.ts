@@ -88,9 +88,9 @@ describe('CLI Commands', () => {
       expect(fs.existsSync(path.join(projectPath, 'skills/sdet-json-generator/SKILL.md'))).toBe(
         true,
       )
-      expect(
-        fs.existsSync(path.join(projectPath, 'skills/sdet-testcase-generator/SKILL.md')),
-      ).toBe(true)
+      expect(fs.existsSync(path.join(projectPath, 'skills/sdet-testcase-generator/SKILL.md'))).toBe(
+        true,
+      )
       expect(
         fs.existsSync(
           path.join(projectPath, 'skills/sdet-json-generator/references/assertion-operators.md'),

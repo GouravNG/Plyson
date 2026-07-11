@@ -388,7 +388,7 @@
       "id": "user-patch-pos-isolation-fail",
       "title": "Ensure profile update isolation between users",
       "testType": "positive",
-      "annotations":"fail",
+      "annotations": "fail",
       "tags": ["positive", "patch", "user", "security", "p1"],
       "variables": {
         "userA_Email": { "$gen": "email", "provider": "user-a.com" },
@@ -513,6 +513,5 @@
         }
       ]
     }
-
   ]
 }

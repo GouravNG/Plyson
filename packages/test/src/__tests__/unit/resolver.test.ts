@@ -78,49 +78,53 @@ describe('Resolver', () => {
       name: 'Alice',
       ref: 'prefix_{{base}}',
       combined: '{{name}} uses {{ref}}',
-      scoped: '{{name}} on {{base}}'
+      scoped: '{{name}} on {{base}}',
     }
 
     store.push('case', {})
     const resolved = resolvePhase1(variables, store, 'case')
-    
+
     expect(resolved).toEqual({
       name: 'Alice',
       ref: 'prefix_value',
       combined: 'Alice uses prefix_value',
-      scoped: 'Alice on value'
+      scoped: 'Alice on value',
     })
-    
+
     // Verify store was updated
     expect(store.get('combined')).toBe('Alice uses prefix_value')
   })
 
   it('should resolve variables across all scope levels sequentially', () => {
     const store = new VariableStore()
-    
+
     // 1. Global / Project level
     store.push('global', {})
     resolvePhase1({ projectName: 'Plyson', baseUrl: 'https://api.com' }, store, 'global')
-    
+
     // 2. Environment level (references global)
     store.push('environment', {})
     resolvePhase1({ apiUrl: '{{baseUrl}}/v1', env: 'prod' }, store, 'environment')
-    
+
     expect(store.get('apiUrl')).toBe('https://api.com/v1')
-    
+
     // 3. Suite level (references global & environment)
     store.push('suite', {})
     resolvePhase1({ suiteTitle: '{{projectName}} tests on {{env}}' }, store, 'suite')
-    
+
     expect(store.get('suiteTitle')).toBe('Plyson tests on prod')
-    
+
     // 4. Case level (references all above + intra-level)
     store.push('case', {})
-    resolvePhase1({ 
-      caseUser: 'user_{{env}}',
-      caseInfo: '{{suiteTitle}}: {{caseUser}}'
-    }, store, 'case')
-    
+    resolvePhase1(
+      {
+        caseUser: 'user_{{env}}',
+        caseInfo: '{{suiteTitle}}: {{caseUser}}',
+      },
+      store,
+      'case',
+    )
+
     expect(store.get('caseInfo')).toBe('Plyson tests on prod: user_prod')
   })
 
