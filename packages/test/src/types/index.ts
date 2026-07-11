@@ -176,6 +176,48 @@ export const TestStepSchema = z.union([
 ])
 export type TestStep = z.infer<typeof TestStepSchema>
 
+export const PlaywrightAnnotationTypeSchema = z.enum(['skip', 'fail', 'fixme', 'slow'])
+export type PlaywrightAnnotationType = z.infer<typeof PlaywrightAnnotationTypeSchema>
+
+export const CaseAnnotationObjectSchema = z.object({
+  type: z.union([PlaywrightAnnotationTypeSchema, z.string()]),
+  description: z.string().optional(),
+})
+export type CaseAnnotationObject = z.infer<typeof CaseAnnotationObjectSchema>
+
+export const CaseAnnotationItemSchema = z.union([
+  PlaywrightAnnotationTypeSchema,
+  CaseAnnotationObjectSchema,
+])
+export type CaseAnnotationItem = z.infer<typeof CaseAnnotationItemSchema>
+
+export const CaseAnnotationsSchema = z.union([
+  CaseAnnotationItemSchema,
+  z.array(CaseAnnotationItemSchema),
+])
+export type CaseAnnotations = z.infer<typeof CaseAnnotationsSchema>
+
+export const SuiteAnnotationTypeSchema = z.enum(['skip', 'fixme'])
+export type SuiteAnnotationType = z.infer<typeof SuiteAnnotationTypeSchema>
+
+export const SuiteAnnotationObjectSchema = z.object({
+  type: z.union([SuiteAnnotationTypeSchema, z.string()]),
+  description: z.string().optional(),
+})
+export type SuiteAnnotationObject = z.infer<typeof SuiteAnnotationObjectSchema>
+
+export const SuiteAnnotationItemSchema = z.union([
+  SuiteAnnotationTypeSchema,
+  SuiteAnnotationObjectSchema,
+])
+export type SuiteAnnotationItem = z.infer<typeof SuiteAnnotationItemSchema>
+
+export const SuiteAnnotationsSchema = z.union([
+  SuiteAnnotationItemSchema,
+  z.array(SuiteAnnotationItemSchema),
+])
+export type SuiteAnnotations = z.infer<typeof SuiteAnnotationsSchema>
+
 export const TestcaseSchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -184,6 +226,7 @@ export const TestcaseSchema = z.object({
   testType: z.enum(['positive', 'negative', 'edge']).optional(),
   variables: VariablesSchema.optional(),
   tags: z.array(z.string()),
+  annotations: CaseAnnotationsSchema.optional(),
   steps: z.array(TestStepSchema),
 })
 export type Testcase = z.infer<typeof TestcaseSchema>
@@ -195,6 +238,7 @@ export const TestSuiteSchema = z.object({
   tags: z.array(z.string()),
   mode: z.enum(['parallel', 'sequential']).default('sequential'),
   variables: VariablesSchema.optional(),
+  annotations: SuiteAnnotationsSchema.optional(),
   beforeAll: z.array(TestStepSchema).optional(),
   afterAll: z.array(TestStepSchema).optional(),
   testCases: z.array(TestcaseSchema),

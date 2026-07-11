@@ -38,7 +38,7 @@ export class ProjectLoader {
     this.logger = logger || new ConsoleLogger('project-loader')
   }
 
-  async load(rootDir: string, env: string): Promise<ProjectGraph> {
+  async load(rootDir: string, env: string, options?: { skipModules?: boolean }): Promise<ProjectGraph> {
     const absoluteRootDir = path.resolve(rootDir)
 
     // 1. Project
@@ -169,45 +169,10 @@ export class ProjectLoader {
     this.logger.info(`✓ Schemas loaded: ${schemas.size} schema(s)`)
 
     // 5. Handlers
-    const handlers = new Map<string, HandlerModule>()
-    const handlerFiles = await glob('handlers/**/*.handler.ts', { cwd: absoluteRootDir })
-    for (const file of handlerFiles) {
-      const absoluteHandlerPath = path.join(absoluteRootDir, file)
-      try {
-        // Use pathToFileURL for Windows compatibility with dynamic import
-        const fileUrl = new URL(`file://${absoluteHandlerPath.replace(/\\/g, '/')}`).href
-        const mod = await import(fileUrl)
-        const stem = path.basename(file, '.handler.ts')
-        if (typeof mod.run !== 'function') {
-          this.logger.warn(file, `Handler "${stem}" missing run export`)
-        } else {
-          handlers.set(stem, mod)
-        }
-      } catch (e: any) {
-        this.logger.warn(file, `Failed to load handler: ${e.message}`)
-      }
-    }
-    this.logger.info(`✓ Handlers loaded: ${handlers.size} handler(s)`)
+    const handlers = options?.skipModules ? new Map<string, HandlerModule>() : await this.loadHandlers(absoluteRootDir)
 
     // 5.5 Actions
-    const actions = new Map<string, ActionModule>()
-    const actionFiles = await glob('actions/**/*.action.ts', { cwd: absoluteRootDir })
-    for (const file of actionFiles) {
-      const absoluteActionPath = path.join(absoluteRootDir, file)
-      try {
-        const fileUrl = new URL(`file://${absoluteActionPath.replace(/\\/g, '/')}`).href
-        const mod = await import(fileUrl)
-        const stem = path.basename(file, '.action.ts')
-        if (typeof mod.default !== 'function') {
-          this.logger.warn(file, `Action "${stem}" missing default export function`)
-        } else {
-          actions.set(stem, mod)
-        }
-      } catch (e: any) {
-        this.logger.warn(file, `Failed to load action: ${e.message}`)
-      }
-    }
-    this.logger.info(`✓ Actions loaded: ${actions.size} action(s)`)
+    const actions = options?.skipModules ? new Map<string, ActionModule>() : await this.loadActions(absoluteRootDir)
 
     // 6. Scripts
     const scripts = new Map<string, Testcase>()
@@ -293,6 +258,7 @@ export class ProjectLoader {
             for (const tc of suite.testCases) {
               suiteIds.add(tc.id)
             }
+            ;(suite as any).filePath = file
             suites.push(suite)
           }
         }
@@ -347,4 +313,124 @@ export class ProjectLoader {
       suites,
     }
   }
+
+  async loadFromManifest(manifestPath: string, rootDir: string): Promise<ProjectGraph> {
+    const absoluteRootDir = path.resolve(rootDir)
+    const content = await fs.readFile(manifestPath, 'utf-8')
+    const parsed = JSON.parse(content) as SerializedProjectGraph
+
+    const schemas = new Map<string, any>(Object.entries(parsed.schemas || {}))
+    const scripts = new Map<string, Testcase>(Object.entries(parsed.scripts || {}))
+
+    const handlers = await this.loadHandlers(absoluteRootDir)
+    const actions = await this.loadActions(absoluteRootDir)
+
+    // Filter suites if filterPaths are provided
+    const testFilesEnv = process.env.plyson_TEST_FILES
+    let filterPaths: string[] = []
+    if (testFilesEnv) {
+      try {
+        filterPaths = JSON.parse(testFilesEnv)
+      } catch {
+        filterPaths = testFilesEnv.split(',').map((s) => s.trim())
+      }
+    }
+
+    let suites = parsed.suites
+    if (filterPaths.length > 0) {
+      suites = suites.filter((suite) => {
+        const file = (suite as any).filePath
+        if (!file) return true // fallback
+        const absoluteSuitePath = path.resolve(absoluteRootDir, file)
+        return filterPaths.some((filterPath) => {
+          const absoluteFilterPath = path.resolve(absoluteRootDir, filterPath)
+          const normalizedFile = file.replace(/\\/g, '/')
+          const normalizedFilter = filterPath.replace(/\\/g, '/')
+          return (
+            absoluteSuitePath === absoluteFilterPath ||
+            path.basename(absoluteSuitePath) === filterPath ||
+            normalizedFile === normalizedFilter ||
+            normalizedFile.endsWith(normalizedFilter)
+          )
+        })
+      })
+    }
+
+    return {
+      project: parsed.project,
+      variables: parsed.variables,
+      environment: parsed.environment,
+      schemas,
+      handlers,
+      actions,
+      scripts,
+      suites,
+    }
+  }
+
+  static serialize(graph: ProjectGraph): string {
+    const serialized: SerializedProjectGraph = {
+      project: graph.project,
+      variables: graph.variables,
+      environment: graph.environment,
+      schemas: Object.fromEntries(graph.schemas),
+      scripts: Object.fromEntries(graph.scripts),
+      suites: graph.suites,
+    }
+    return JSON.stringify(serialized, null, 2)
+  }
+
+  private async loadHandlers(absoluteRootDir: string): Promise<Map<string, HandlerModule>> {
+    const handlers = new Map<string, HandlerModule>()
+    const handlerFiles = await glob('handlers/**/*.handler.ts', { cwd: absoluteRootDir })
+    for (const file of handlerFiles) {
+      const absoluteHandlerPath = path.join(absoluteRootDir, file)
+      try {
+        const fileUrl = new URL(`file://${absoluteHandlerPath.replace(/\\/g, '/')}`).href
+        const mod = await import(fileUrl)
+        const stem = path.basename(file, '.handler.ts')
+        if (typeof mod.run !== 'function') {
+          this.logger.warn(file, `Handler "${stem}" missing run export`)
+        } else {
+          handlers.set(stem, mod)
+        }
+      } catch (e: any) {
+        this.logger.warn(file, `Failed to load handler: ${e.message}`)
+      }
+    }
+    this.logger.info(`✓ Handlers loaded: ${handlers.size} handler(s)`)
+    return handlers
+  }
+
+  private async loadActions(absoluteRootDir: string): Promise<Map<string, ActionModule>> {
+    const actions = new Map<string, ActionModule>()
+    const actionFiles = await glob('actions/**/*.action.ts', { cwd: absoluteRootDir })
+    for (const file of actionFiles) {
+      const absoluteActionPath = path.join(absoluteRootDir, file)
+      try {
+        const fileUrl = new URL(`file://${absoluteActionPath.replace(/\\/g, '/')}`).href
+        const mod = await import(fileUrl)
+        const stem = path.basename(file, '.action.ts')
+        if (typeof mod.default !== 'function') {
+          this.logger.warn(file, `Action "${stem}" missing default export function`)
+        } else {
+          actions.set(stem, mod)
+        }
+      } catch (e: any) {
+        this.logger.warn(file, `Failed to load action: ${e.message}`)
+      }
+    }
+    this.logger.info(`✓ Actions loaded: ${actions.size} action(s)`)
+    return actions
+  }
 }
+
+export interface SerializedProjectGraph {
+  project: Project
+  variables: Variables
+  environment: EnvironmentVariables
+  schemas: Record<string, any>
+  scripts: Record<string, Testcase>
+  suites: TestSuite[]
+}
+

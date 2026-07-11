@@ -141,4 +141,57 @@ describe('Bug Regressions (Issue #7, #5, #6)', () => {
       expect(playwrightTest.describe.configure).toHaveBeenNthCalledWith(3, { mode: 'parallel' })
     })
   })
+
+  describe('Playwright Annotations Support', () => {
+    it('should apply suite and testcase annotations correctly', () => {
+      const playwrightTest = vi.fn((title, options, cb) => {
+        const testInfo = { annotations: [] as any[] }
+        const callback = typeof options === 'function' ? options : cb
+        callback({ request: {} }, testInfo)
+      }) as any
+      playwrightTest.describe = vi.fn((title, cb) => cb())
+      playwrightTest.describe.skip = vi.fn((title, cb) => {
+        if (cb) cb()
+      })
+      playwrightTest.describe.fixme = vi.fn()
+      playwrightTest.describe.configure = vi.fn()
+      playwrightTest.beforeAll = vi.fn()
+      playwrightTest.afterAll = vi.fn()
+      playwrightTest.skip = vi.fn()
+      playwrightTest.fail = vi.fn()
+      playwrightTest.fixme = vi.fn()
+      playwrightTest.slow = vi.fn()
+
+      const graph: any = {
+        project: { beforeAll: [], afterAll: [] },
+        variables: {},
+        environment: { variables: {} },
+        suites: [
+          {
+            title: 'Suite 1',
+            tags: [],
+            annotations: ['skip', { type: 'custom-suite', description: 'suite-info' }],
+            testCases: [
+              {
+                id: 'tc1',
+                title: 'Test 1',
+                tags: [],
+                annotations: [
+                  'slow',
+                  { type: 'issue', description: 'https://issue-link' }
+                ],
+                steps: [],
+              },
+            ],
+          },
+        ],
+      }
+      const store = new VariableStore()
+
+      registerSuites(graph, store, playwrightTest, expect)
+
+      expect(playwrightTest.describe.skip).toHaveBeenCalled()
+      expect(playwrightTest.slow).toHaveBeenCalledWith(true, undefined)
+    })
+  })
 })

@@ -15,6 +15,7 @@ Test cases define individual scenarios, while steps define the atomic HTTP actio
 - **`description`** (Optional): A summary of what this case covers.
 - **`disabled`** (Optional): Set to `true` to skip this specific test case.
 - **`variables`** (Optional): Case-level variables (highest priority).
+- **`annotations`** (Optional): Playwright-compatible annotations for the case. You can use a string shorthand (`"skip"`, `"fail"`, `"fixme"`, `"slow"`), an object with `type` and optional `description`, or an array of either form. Built-in annotations map to Playwright test states, while custom annotation types are attached to the report metadata. For more details, see [Playwright annotations](https://playwright.dev/docs/test-annotations).
 
 ---
 
@@ -40,7 +41,7 @@ These fields are available on all types of steps:
   "response": { "validations": { "statusCode": 200 } }
 }
 ```
-- **`handlers`** (Optional): An array of [Custom Handlers](/docs/getting-started/project-structure#handlers) to run after the step completes.
+- **`handlers`** (Optional): An array of [Custom Handlers](/docs/test/getting-started/project-structure#handlers) to run after the step completes.
 
 ### 1. Inline Steps
 Inline steps define the complete HTTP request and its expected response.
@@ -88,6 +89,10 @@ For more details on creating and managing these fragments, see the [Custom Actio
   "id": "USER_CREATE_001",
   "title": "Should create a user",
   "tags": ["positive", "regression"],
+  "annotations": [
+    "slow",
+    { "type": "regression", "description": "Covers the signup regression" }
+  ],
   "steps": [
     {
       "title": "POST /users",

@@ -17,6 +17,23 @@ export * from './errors/index.js'
 const STATE_DIR = '.plyson'
 const STATE_FILE = 'state.json'
 
+async function loadProjectGraph(loader: ProjectLoader, rootDir: string, env: string) {
+  const useManifest = process.env.plyson_USE_MANIFEST === 'true'
+  const manifestPath = path.join(rootDir, STATE_DIR, 'manifest.json')
+  let manifestExists = false
+  try {
+    await fs.access(manifestPath)
+    manifestExists = true
+  } catch {
+    // Ignored
+  }
+
+  if (useManifest && manifestExists) {
+    return await loader.loadFromManifest(manifestPath, rootDir)
+  }
+  return await loader.load(rootDir, env)
+}
+
 /**
  * Bootstraps the plyson project and registers all suites as Playwright tests.
  * This should be called from a Playwright test file (e.g., suites/plyson.spec.ts).
@@ -36,7 +53,7 @@ export async function bootstrap(test: TestType<any, any>, expect: Expect) {
 
   try {
     // Load the project graph
-    const graph = await loader.load(rootDir, env)
+    const graph = await loadProjectGraph(loader, rootDir, env)
 
     // Check for persisted state
     const statePath = path.join(rootDir, STATE_DIR, STATE_FILE)
@@ -74,8 +91,8 @@ export async function bootstrapSetup(test: TestType<any, any>, expect: Expect) {
   const loader = new ProjectLoader()
   const store = new VariableStore()
 
-  test('Global Setup', async ({ request }: { request: APIRequestContext }) => {
-    const graph = await loader.load(rootDir, env)
+  test('Global Setup', async ({ request }: { request: APIRequestContext }, testInfo) => {
+    const graph = await loadProjectGraph(loader, rootDir, env)
 
     // Phase 1 resolution for global and environment variables
     store.push('global', {})
@@ -95,6 +112,7 @@ export async function bootstrapSetup(test: TestType<any, any>, expect: Expect) {
         graph,
         test,
         new ConsoleLogger('project-setup'),
+        testInfo,
       )
     }
 
@@ -120,8 +138,8 @@ export async function bootstrapTeardown(test: TestType<any, any>, expect: Expect
   const loader = new ProjectLoader()
   const store = new VariableStore()
 
-  test('Global Teardown', async ({ request }: { request: APIRequestContext }) => {
-    const graph = await loader.load(rootDir, env)
+  test('Global Teardown', async ({ request }: { request: APIRequestContext }, testInfo) => {
+    const graph = await loadProjectGraph(loader, rootDir, env)
 
     // Load persisted state
     try {
@@ -142,6 +160,7 @@ export async function bootstrapTeardown(test: TestType<any, any>, expect: Expect
         graph,
         test,
         new ConsoleLogger('project-teardown'),
+        testInfo,
       )
     }
 

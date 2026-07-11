@@ -9,3 +9,4 @@ playwright/.cache/
 .env
 .pnpm-debug.log
 *.env
+**/.plyson/*.json

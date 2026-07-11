@@ -36,6 +36,43 @@
       },
       "additionalProperties": {}
     },
+    "annotations": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": ["skip", "fail", "fixme", "slow"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string" },
+            "description": { "type": "string" }
+          },
+          "required": ["type"],
+          "additionalProperties": false
+        },
+        {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": ["skip", "fail", "fixme", "slow"]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string" },
+                  "description": { "type": "string" }
+                },
+                "required": ["type"],
+                "additionalProperties": false
+              }
+            ]
+          }
+        }
+      ]
+    },
     "beforeAll": {
       "type": "array",
       "items": {
