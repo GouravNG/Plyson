@@ -80,7 +80,22 @@ export function registerSuites(
   })
 
   for (const suite of graph.suites) {
-    const describeFn = suite.disabled ? test.describe.skip : test.describe
+    let describeFn = suite.disabled ? test.describe.skip : test.describe
+
+    // If suite contains skip or fixme in annotations, mark it accordingly
+    if (suite.annotations) {
+      const suiteAnnList = Array.isArray(suite.annotations)
+        ? suite.annotations
+        : [suite.annotations]
+      for (const ann of suiteAnnList) {
+        const type = typeof ann === 'string' ? ann : ann.type
+        if (type === 'skip') {
+          describeFn = test.describe.skip
+        } else if (type === 'fixme') {
+          describeFn = test.describe.fixme
+        }
+      }
+    }
 
     describeFn(suite.title, () => {
       const suiteMode = suite.mode === 'sequential' ? 'default' : 'parallel'
@@ -126,10 +141,53 @@ export function registerSuites(
         testFn(
           `[${testCase.id}] ${testCase.title}`,
           { tag: formattedTags },
-          async ({ request }: { request: APIRequestContext }) => {
-            test.info().annotations.push({ type: 'id', description: testCase.id })
+          async ({ request }: { request: APIRequestContext }, testInfo) => {
+            // Push TestCase id and type annotations first
+            testInfo.annotations.push({ type: 'id', description: testCase.id })
             if (testCase.testType) {
-              test.info().annotations.push({ type: 'testType', description: testCase.testType })
+              testInfo.annotations.push({ type: 'testType', description: testCase.testType })
+            }
+
+            // Propagate suite-level custom annotations into the testInfo of each test case
+            if (suite.annotations) {
+              const suiteAnnList = Array.isArray(suite.annotations)
+                ? suite.annotations
+                : [suite.annotations]
+              for (const ann of suiteAnnList) {
+                const type = typeof ann === 'string' ? ann : ann.type
+                const desc = typeof ann === 'string' ? undefined : ann.description
+                if (type !== 'skip' && type !== 'fixme') {
+                  testInfo.annotations.push({ type, description: desc })
+                }
+              }
+            }
+
+            // Apply testcase-level annotations
+            if (testCase.annotations) {
+              const caseAnnList = Array.isArray(testCase.annotations)
+                ? testCase.annotations
+                : [testCase.annotations]
+              for (const ann of caseAnnList) {
+                const type = typeof ann === 'string' ? ann : ann.type
+                const desc = typeof ann === 'string' ? undefined : ann.description
+
+                if (type === 'skip') {
+                  // test.skip() internally pushes {type:'skip', description} to testInfo.annotations
+                  test.skip(true, desc)
+                } else if (type === 'fail') {
+                  // test.fail() internally pushes {type:'fail', description} to testInfo.annotations
+                  test.fail(true, desc)
+                } else if (type === 'fixme') {
+                  // test.fixme() internally pushes {type:'fixme', description} to testInfo.annotations
+                  test.fixme(true, desc)
+                } else if (type === 'slow') {
+                  // test.slow() internally pushes {type:'slow', description} to testInfo.annotations
+                  test.slow(true, desc)
+                } else {
+                  // Custom annotation type — push manually since Playwright won't handle it
+                  testInfo.annotations.push({ type, description: desc ?? '' })
+                }
+              }
             }
 
             const logger = new ConsoleLogger(testCase.id)
@@ -140,7 +198,7 @@ export function registerSuites(
             resolvePhase1(testCase.variables ?? {}, store, 'case')
 
             try {
-              await runSteps(testCase.steps, request, store, graph, test, logger)
+              await runSteps(testCase.steps, request, store, graph, test, logger, testInfo)
             } catch (error) {
               logger.error(error)
               throw error
@@ -164,6 +222,7 @@ export async function runSteps(
   graph: ProjectGraph,
   test: TestType<any, any>,
   logger: Logger,
+  testInfo?: any,
 ): Promise<void> {
   const executor = new HttpExecutor(request, graph.environment.baseUrl, graph.schemas)
 
@@ -243,15 +302,17 @@ export async function runSteps(
       }
 
       // Record soft errors as Playwright annotations
-      for (const soft of softErrors) {
-        const description = formatError(soft.error, true)
+      if (testInfo) {
+        for (const soft of softErrors) {
+          const description = formatError(soft.error, true)
 
-        logger.warn(soft.title, soft.error)
+          logger.warn(soft.title, soft.error)
 
-        test.info().annotations.push({
-          type: 'warn',
-          description: `${soft.title}: ${description}`,
-        })
+          testInfo.annotations.push({
+            type: 'warn',
+            description: `${soft.title}: ${description}`,
+          })
+        }
       }
     })
   }

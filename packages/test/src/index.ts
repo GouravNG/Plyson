@@ -91,7 +91,7 @@ export async function bootstrapSetup(test: TestType<any, any>, expect: Expect) {
   const loader = new ProjectLoader()
   const store = new VariableStore()
 
-  test('Global Setup', async ({ request }: { request: APIRequestContext }) => {
+  test('Global Setup', async ({ request }: { request: APIRequestContext }, testInfo) => {
     const graph = await loadProjectGraph(loader, rootDir, env)
 
     // Phase 1 resolution for global and environment variables
@@ -112,6 +112,7 @@ export async function bootstrapSetup(test: TestType<any, any>, expect: Expect) {
         graph,
         test,
         new ConsoleLogger('project-setup'),
+        testInfo,
       )
     }
 
@@ -137,7 +138,7 @@ export async function bootstrapTeardown(test: TestType<any, any>, expect: Expect
   const loader = new ProjectLoader()
   const store = new VariableStore()
 
-  test('Global Teardown', async ({ request }: { request: APIRequestContext }) => {
+  test('Global Teardown', async ({ request }: { request: APIRequestContext }, testInfo) => {
     const graph = await loadProjectGraph(loader, rootDir, env)
 
     // Load persisted state
@@ -159,6 +160,7 @@ export async function bootstrapTeardown(test: TestType<any, any>, expect: Expect
         graph,
         test,
         new ConsoleLogger('project-teardown'),
+        testInfo,
       )
     }
 

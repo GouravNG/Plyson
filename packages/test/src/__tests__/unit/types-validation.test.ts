@@ -105,4 +105,40 @@ describe('Phase 1: Zod Schema Validation', () => {
       expect(result.data.validation).toBe('error')
     }
   })
+
+  it('should parse a TestSuite and TestCase with various annotation formats', () => {
+    const validTestSuite = {
+      title: 'Sample Suite with Annotations',
+      tags: ['smoke'],
+      annotations: 'skip',
+      testCases: [
+        {
+          id: 'case-1',
+          title: 'Sample Case',
+          tags: ['p0'],
+          annotations: [
+            'slow',
+            { type: 'issue', description: 'https://github.com/microsoft/playwright/issues/123' },
+          ],
+          steps: [
+            {
+              title: 'Step 1',
+              request: {
+                method: 'GET',
+                endpoint: '/users',
+              },
+              response: {
+                validations: {
+                  statusCode: 200,
+                },
+              },
+            },
+          ],
+        },
+      ],
+    }
+
+    const result = TestSuiteSchema.safeParse(validTestSuite)
+    expect(result.success).toBe(true)
+  })
 })
